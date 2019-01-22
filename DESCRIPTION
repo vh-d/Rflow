@@ -16,7 +16,8 @@ Imports:
     digest,
     crayon,
     stringr,
-    data.table
+    data.table,
+    RcppTOML
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
 Suggests: 

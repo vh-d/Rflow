@@ -1,0 +1,462 @@
+
+#' Initialize a new DAG
+#'
+#' @param path path to folder with nodes' definitions
+#'
+#' @return
+#' @export
+#'
+#' @examples
+new_rflow <- function(
+  path = NULL
+) {
+  result <- new.env()
+  class(result) <- c("rflow", class(result))
+
+  if (length(path)) {
+    result[[".def_path"]] <- path
+
+    .storage_path <- file.path(path, ".rflow", "state")
+    if (!dir.exists(.storage_path)) dir.create(.storage_path, recursive = TRUE)
+    result[[".storage_path"]] <- .storage_path
+
+    .cache_store_path <- file.path(path, ".rflow", "cache")
+    if (!dir.exists(.cache_store_path)) dir.create(.cache_store_path, recursive = TRUE)
+    result[[".cache_store_path"]] <- .cache_store_path
+  }
+
+  return(result)
+}
+
+
+#' Title
+#'
+#' @param rflow
+#'
+#' @return
+#' @export
+#'
+#' @examples
+clean_rflow <- function(rflow) {
+  remove(list = ls(envir = rflow, all.names = FALSE), envir = rflow)
+}
+
+
+#' Title
+#'
+#' @param x
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+clean_cache <- function(x, ...) {
+  UseMethod("clean_cache", x)
+}
+
+#' Clean cache folder
+#'
+#' @param rflow
+clean_cache.rflow <- function(rflow) {
+
+  # warn if not defined and return
+  if (!length(rflow$.cache_store_path)) {
+    warning("Cache dir not defined!")
+    return(TRUE)
+  }
+
+  # warn if nonexistet and return
+  if (dir.exists(rflow$.cache_store_path)) {
+    as.logical(
+      1-unlink(
+        file.path(rflow$.cache_store_path, "*"),
+        recursive = FALSE)
+    )
+  } else {
+    warning("Cache dir does not exists")
+    return(TRUE)
+  }
+}
+
+#' @export
+load_nodes <- function(x, ...) {
+  UseMethod("load_nodes", x)
+}
+
+#' batch load object definitions
+#'
+#' @param rflow
+#' @param conflict
+#' @param verbose
+#' @export
+load_nodes.rflow <- function(
+  x,
+  conflict = "update", # overwrite existing objects
+  verbose = TRUE
+) {
+
+  obj_defs <-
+    load_obj_definitions(
+      path = x$.def_path,
+      modified_since = x$.last_updated,
+      verbose = verbose)
+
+  if (length(obj_defs)) {
+    res <- add_objs(
+      objs        = obj_defs,
+      rflow         = x,
+      conflict    = conflict,
+      storage     = x$.storage_path,
+      cache_store = x$.cache_store_path,
+      verbose     = verbose
+    )
+  } else {
+    res <- NULL
+  }
+
+  x$.last_updated <- Sys.time()
+
+  return(invisible(res))
+}
+
+
+
+#' load DAG's objects' definition from TOML files
+#'
+#' @param path path to folder with node definitions
+#' @param modified_since
+#' @param verbose
+#' @export
+load_obj_definitions <- function(path, modified_since = NULL, verbose = TRUE) {
+
+  if (!requireNamespace("RcppTOML")) stop("Package RcppTOML not available!")
+
+  obj_yaml_files <-
+    list.files(path       = path,
+               pattern    = "*.toml",
+               full.names = TRUE)
+  nf <- length(obj_yaml_files)
+
+  if (length(modified_since)) {
+    # only modified-since-last-update YAML definitions are loaded
+    dtYAMLFILES <- rbindlist(lapply(obj_yaml_files, function(yf) c(file = yf, file.info(yf))))
+    obj_yaml_files <- dtYAMLFILES[mtime > as.POSIXct(modified_since), file]
+  }
+
+  if (!length(obj_yaml_files)) {
+    if (nf > 0) cat("All up to date...\n") else
+      warning("Nothing to be loaded.")
+
+    return(invisible(NULL))
+  }
+
+  obj_list <- vector(mode = "list", length = length(obj_yaml_files))
+
+  # loop over all files listed
+  for (i in 1:length(obj_list)) {
+    if (verbose) cat("Loading from ", obj_yaml_files[i], "\n", sep = "")
+    obj_list[[i]] <-
+      tryCatch(
+        RcppTOML::parseTOML(input = obj_yaml_files[i], escape = FALSE),
+        error = function(e) {
+          stop("File ", obj_yaml_files[i], " could not be loaded:\n    ", e)
+        }
+      )
+  }
+
+  return(obj_list)
+}
+
+
+#' loads object definition/state from a RDS file
+#'
+#' @param path
+#' @param ...
+#' @export
+load_obj_state <- function(path, ...) {
+  state_list <- readRDS(file = path, ...)
+
+  return(
+    c(
+      state_list$private,
+      state_list$self
+    )
+  )
+}
+
+#' batch loading objects' definition/state from RDS files
+#'
+#' @param path
+#' @param recursive
+#' @param ignore.case
+#' @param ...
+#' @export
+load_objs_state <- function(path, recursive = FALSE, ignore.case = TRUE, ...) {
+
+  # list all relevant files
+  obj_storage_files <-
+    list.files(path       = path,
+               pattern    = "*.rds",
+               full.names = TRUE,
+               recursive  = recursive,
+               ignore.case = ignore.case,
+               include.dirs = FALSE)
+
+  # load it into a list and return
+  obj_list <- lapply(obj_storage_files, load_obj_state, ...)
+
+  return(obj_list)
+}
+
+#' Title
+#'
+#' @param obj
+#' @param rflow
+#' @param ...
+#' @param conflict
+#' @param storage
+#' @param connect
+#' @param verbose
+#'
+#' @return
+#' @export
+#'
+#' @examples
+add_obj <- function(
+  obj,
+  rflow,
+  ...,
+  conflict= "update",
+  storage = NULL,   # path to saved state
+  connect = FALSE,
+  verbose = TRUE) {
+
+  # id   <- obj[["id"]]
+  # env  <- obj[["env"]]
+  # name <- obj[["name"]]
+  #
+  # # id is noc required (it can be env.name)
+  # if (!length(id)) id <- paste0(env, ".", name)
+
+
+  # extract object's id
+  id <- get_id(obj)
+
+  if (verbose) cat("Adding node ", crayon::red(id), "\n", sep = "")
+
+  # default behaviour
+  updated   <- FALSE # when object already exists and is only going to be updated
+  recovered <- FALSE # when object is being recovered from disk
+
+  # check whether the object exists already
+  if (id %in% names(rflow))
+    switch(conflict,
+           "update" = {
+             updated <- TRUE
+           },
+           "skip" = {
+             warning(id, " already exists! Skipping...")
+             return(FALSE)
+           },
+           "overwrite" = warning(id, " already exists! Overwriting!"),
+           NULL = stop(id, " already exists!")
+    )
+
+  # main
+
+  # non-existent objects need to be constructed/initialized first
+  # either completely new objects or objects being recovered
+  if (!updated) {
+
+    if (length(storage) && {fp <- file.path(storage, paste0(id, ".rds"));file.exists(fp)}) {
+      saved_state   <- load_obj_state(path = fp)
+      initiated_obj <- as_node(saved_state, storage = storage, ...)
+      recovered     <- TRUE
+    } else {
+      initiated_obj <- as_node(obj, storage = storage, ...)
+    }
+
+    # assign reference
+    assign(
+      x     = id,
+      value = initiated_obj,
+      pos   = rflow)
+
+    # link the two environments
+    parent.env(rflow[[id]]) <- rflow
+  }
+
+  if (recovered || updated) update_obj(obj = obj, rflow = rflow, verbose = verbose)
+
+  # connect to required objects
+  if (connect) rflow[[id]]$connect()
+
+  result <- setNames(TRUE, id)
+
+  return(result)
+}
+
+#' extract id from a object's definition (in a list)
+#'
+#' @param obj
+#' @export
+get_id <- function(obj) {
+  id <- if (length(obj$id)) obj$id else paste0(obj$env, ".", obj$name)
+  return(id)
+}
+
+#' batch init objects
+#'
+#' @param objs
+#' @param rflow
+#' @param connect
+#' @param ...
+#' @param verbose
+#' @export
+add_objs <- function(objs, rflow, connect = TRUE, ..., verbose = TRUE) {
+
+  result <-
+    lapply(
+      X       = objs,
+      FUN     = add_obj,
+      rflow   = rflow,
+      verbose = verbose,
+      ...)
+
+  # connect objects after all are initiated
+  if (connect) connect_nodes(rflow)
+
+  return(unlist(result))
+}
+
+#' update object (call whenever definition in config file could have potentially changed)
+#'
+#' @param obj
+#' @param rflow
+#' @param verbose
+#' @export
+update_obj <- function(
+  obj,
+  rflow,
+  verbose = FALSE
+) {
+
+  # extract object's id
+  id <- get_id(obj)
+
+  # find the node that is going to be updated
+  if (!(id %in% names(rflow))) stop("Object ", id, " not found!")
+
+  # update
+  do.call(rflow[[id]]$update_definition, args = c(obj, verbose = verbose))
+}
+
+
+#' Title
+#'
+#' @param objs
+#' @param rflow
+#' @param verbose
+#'
+#' @return
+#' @export
+#'
+#' @examples
+update_objs <- function(objs, rflow, verbose = FALSE) {
+
+  result <-
+    lapply(
+      X   = objs,
+      FUN = update_obj,
+      rflow = rflow,
+      verbose = verbose)
+
+  return(unlist(result))
+}
+
+
+#' @export
+connect_nodes <- function(x, ...) {
+  UseMethod("connect_nodes", x)
+}
+
+#' batch connect all objects
+#'
+#' @param rflow
+#' @export
+connect_nodes.rflow <- function(rflow) {
+  lapply(rflow, function(x) x$connect())
+}
+
+
+# evaluates/build a single node assuming requirements are ready
+#' Title
+#'
+#' @param id
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+eval_node <- function(id, ...) {
+  UseMethod("eval_node", id)
+}
+
+
+eval_node.character <- function(id, rflow) {
+  rflow[[id]]$eval()
+}
+
+
+# generic make function
+#' Title
+#'
+#' @param x
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' @export
+make <- function(x, ...){
+  UseMethod("make", x)
+}
+
+#' @export
+make.node <- function(x, verbose = TRUE, verbose_prefix = "") {
+  x$make(verbose = verbose, verbose_prefix = verbose_prefix)
+}
+
+# recurrent procedure
+#' @export
+make.character <- function(id, rflow, verbose = TRUE, verbose_prefix = "") {
+  make(rflow[[id]], verbose = verbose, verbose_prefix = verbose_prefix)
+}
+
+#' @export
+make.rflow <- function(rflow, verbose = TRUE) {
+  if (verbose) cat(rep("\u2500", 3), " Make ", rep("\u2500", 25), "\n\n", sep = "")
+  return(invisible(sapply(X = ls(rflow), FUN = make, rflow = rflow, verbose = verbose)))
+}
+
+#' @export
+get.rflow <- function(rflow, id) {
+  rflow[[id]]$get()
+}
+
+#' Title
+#'
+#' @param id
+#' @param rflow
+#'
+#' @return
+#' @export
+#'
+#' @examples
+get_value <- function(id, rflow) {
+  rflow[[id]]$get()
+}
+
