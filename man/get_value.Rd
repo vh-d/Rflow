@@ -2,13 +2,15 @@
 % Please edit documentation in R/rflow_dag.R
 \name{get_value}
 \alias{get_value}
-\title{Title}
+\title{Obtain value represented by a node}
 \usage{
 get_value(id, rflow)
 }
 \arguments{
-\item{rflow}{}
+\item{id}{node's id}
+
+\item{rflow}{rflow object}
 }
 \description{
-Title
+Obtain value represented by a node
 }

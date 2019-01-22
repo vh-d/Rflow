@@ -1,5 +1,7 @@
 # node --------------------------------------------------------------------
 
+#' basic building block of an rflow
+#' @details
 #' nodes can represent different type of data targets (R objects, files, database tables), or jobs...
 #' interconnected nodes together function as basic building elements of directed acyclic graph (DAG)
 #'

@@ -1,14 +1,32 @@
 
-# utilities ---------------------------------------------------------------
-
-
+#' %in% equivalent for R6 objects
+#'
+#' @param obj
+#' @param objs
+#'
+#' @return
+#'
+#' @examples
 in.R6 <- function(obj, objs) {
   any(sapply(objs, identical, y = obj))
 }
 
+
+#' companion to `isTRUE()``
+#' @rdname isNotTRUE
 isNotTRUE  <- function(x) (!length(x) || is.na(x) || x == FALSE)
+#' @rdname isNotTRUE
 isNotFALSE <- function(x) (!length(x) || is.na(x) || x == TRUE)
 
+#' Returns R expression from either R expression or parsed R code
+#'
+#' @param r_code character vector of R code; ignored when R expression is not NULL
+#' @param r_expr optional R expression
+#'
+#' @return
+#' @export
+#'
+#' @examples
 as_r_expr <- function(r_code = NULL, r_expr = NULL) {
   if (length(r_expr)) {
     return(r_expr)
@@ -22,6 +40,15 @@ as_r_expr <- function(r_code = NULL, r_expr = NULL) {
   }
 }
 
+
+#' Pretty printing of R expressions
+#'
+#' @param r_expr
+#' @param verbose_prefix
+#'
+#' @return
+#'
+#' @examples
 cat_r_expr <- function(r_expr, verbose_prefix = "") {
   eol <- paste0("\n", crayon::white(verbose_prefix))
 
@@ -42,6 +69,15 @@ cat_r_expr <- function(r_expr, verbose_prefix = "") {
   cat(verbose_prefix, crayon::cyan(r_expr_s2),"\n", sep = eol)
 }
 
+
+#' Notifications
+#'
+#' @param id
+#' @param property
+#'
+#' @return
+#'
+#' @examples
 notify_update <- function(id, property) {
   cat(crayon::yellow("Definition of "), crayon::red(id), crayon::yellow(" has changed (", property, ")", sep = ""), "\n", sep = "")
 }

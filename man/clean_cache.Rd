@@ -2,7 +2,7 @@
 % Please edit documentation in R/rflow_dag.R
 \name{clean_cache}
 \alias{clean_cache}
-\title{Title}
+\title{Clean cache folder}
 \usage{
 clean_cache(x, ...)
 }
@@ -10,5 +10,5 @@ clean_cache(x, ...)
 \item{...}{}
 }
 \description{
-Title
+Clean cache folder
 }

@@ -3,16 +3,20 @@
 \docType{data}
 \name{node}
 \alias{node}
-\title{nodes can represent different type of data targets (R objects, files, database tables), or jobs...
-interconnected nodes together function as basic building elements of directed acyclic graph (DAG)}
+\title{basic building block of an rflow}
 \format{An object of class \code{R6ClassGenerator} of length 24.}
 \usage{
 node
 }
 \description{
-nodes are implemented using R6 classes with multiple descendants (r_node, db_node, file_node) that have their specific requirements and features
+basic building block of an rflow
 }
 \details{
+nodes can represent different type of data targets (R objects, files, database tables), or jobs...
+interconnected nodes together function as basic building elements of directed acyclic graph (DAG)
+
+nodes are implemented using R6 classes with multiple descendants (r_node, db_node, file_node) that have their specific requirements and features
+
 nodes are initialized
 \itemize{
 \item from stored state
