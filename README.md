@@ -30,3 +30,4 @@ system.
   - query function to set or get fields of multiple objects
   - quick start guide
   - enable defining objects from R scripts (without TOML files)
+  - support for Python nodes
