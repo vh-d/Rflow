@@ -29,8 +29,8 @@ nodes.rflow <- function(rflow) {
             name  = null2na(x$name),
             env   = null2na(x$env),
             desc  = null2na(x$desc),
-            sql_code  = null2na(x$sql_code),
-            r_expr    = as.character(null2na(x$r_expr)),
+            sql_code  = deescape_quotes(paste_sql(x$sql_code)),
+            r_expr    = paste_sql(as.character(x$r_expr)),
             node_type = class(x)[1])
         }
       )
@@ -59,21 +59,7 @@ plot.rflow <- function(rflow, direction = "LR", ...) {
         mget(ls(rflow), envir = rflow),
         function(x) if (length(x$depends)) data.table(from = x$depends, to = x$id) else NULL))
 
-  dtNODES <-
-    rbindlist(
-      lapply(
-        mget(ls(rflow), envir = rflow),
-        function(x) {
-          data.table(
-            id    = null2na(x$id),
-            name  = null2na(x$name),
-            env   = null2na(x$env),
-            desc  = null2na(x$desc),
-            sql_code  = null2na(paste_sql(x$sql_code)),
-            node_type  = class(x)[1])
-        }
-      )
-    )
+  dtNODES <- nodes.rflow(rflow)
   # TODO: objects will have their own methods for printing nice hover titles
 
   dtNODES[, label := paste0(env, " / ", name)]
@@ -99,6 +85,19 @@ plot.rflow <- function(rflow, direction = "LR", ...) {
                           stringr::str_replace_all(
                             stringr::str_replace_all(
                               sql_code,
+                              stringr::fixed("\n"), "<br>"),
+                            stringr::fixed(" "), "&nbsp;"),
+                          "</font></p>")]
+
+  # add SQL code if present
+  dtNODES[(is.na(sql_code) | nchar(sql_code)==0),
+          title := paste0(title,
+                          "<p>",
+                          "R:<br>
+                          <font size=\"-2\" face = \"monospace\">",
+                          stringr::str_replace_all(
+                            stringr::str_replace_all(
+                              r_expr,
                               stringr::fixed("\n"), "<br>"),
                             stringr::fixed(" "), "&nbsp;"),
                           "</font></p>")]
@@ -151,7 +150,7 @@ plot.rflow <- function(rflow, direction = "LR", ...) {
     visNetwork::visInteraction(
       tooltipDelay      = 1,
       navigationButtons = TRUE,
-      dragNodes         = TRUE) %>% 
+      dragNodes         = TRUE) %>%
     visNetwork::visPhysics(
       enabled = FALSE
     )
