@@ -376,7 +376,7 @@ r_node <- R6::R6Class(
 
     eval = function(verbose = TRUE, verbose_prefix = "") {
       if (verbose) {
-        cat(verbose_prefix, "Evaluating R expression:\n")
+        cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
         cat_r_expr(self$r_expr, verbose_prefix)
       }
 
@@ -576,7 +576,7 @@ db_node <- R6::R6Class(
 
       if (verbose) {
         # if (!is.null(self$sql_code)) cat(verbose_prefix, "SQL: ", self$sql_code, sep = "")
-        cat(verbose_prefix, "Evaluating R expression:\n", sep = "")
+        cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
         cat_r_expr(self$r_expr, paste0(verbose_prefix, "  "))
       }
 
@@ -815,7 +815,8 @@ file_node <- R6::R6Class(
       exists_check <- self$exists()
 
       if (verbose) {
-        cat(verbose_prefix, "Evaluating R expression:\n", as.character(self$r_expr), "\n")
+        cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
+        cat_r_expr(self$r_expr, paste0(verbose_prefix, "  "))
       }
 
       eval(self$r_expr, envir = self$r_env)
