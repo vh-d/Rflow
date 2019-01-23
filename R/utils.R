@@ -83,9 +83,16 @@ notify_update <- function(id, property) {
 }
 
 
-clean_escape_chars <- function(x) {
-  x <- stringr::str_replace_all(string = x, pattern = stringr::fixed("\\n"), replacement = "\n")
+escape_quotes <- function(x) {
+  # x <- stringr::str_replace_all(string = x, pattern = stringr::fixed("\\n"), replacement = "\n")
   x <- stringr::str_replace_all(string = x, pattern = stringr::fixed("'"),   replacement = "\\'")
+
+  return(x)
+}
+
+deescape_quotes <- function(x) {
+  # x <- stringr::str_replace_all(string = x, pattern = stringr::fixed("\\n"), replacement = "\n")
+  x <- stringr::str_replace_all(string = x, pattern = stringr::fixed("\\'"),   replacement = "'")
 
   return(x)
 }

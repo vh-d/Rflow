@@ -488,7 +488,7 @@ db_node <- R6::R6Class(
               warning(id, ": no R expression/code or SQL code!")
               self$r_expr <- NULL
             } else {
-              sql_code      <- clean_escape_chars(sql_code)
+              sql_code      <- escape_quotes(sql_code)
               self$r_expr   <- parse(text = private$sql_to_r_expr(sql_code))
               self$sql_code <- sql_code # storning sql_code really just for printing now!
             }
@@ -547,7 +547,7 @@ db_node <- R6::R6Class(
               warning(id, ": no R expression/code or SQL code!")
               r_expr <- NULL
             } else {
-              sql_code      <- clean_escape_chars(sql_code)
+              sql_code      <- escape_quotes(sql_code)
               r_expr        <- parse(text = private$sql_to_r_expr(sql_code))
               self$sql_code <- sql_code # storning sql_code really just for printing now!
             }
