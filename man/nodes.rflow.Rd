@@ -4,7 +4,10 @@
 \alias{nodes.rflow}
 \title{list all nodes of an Rflow object}
 \usage{
-\method{nodes}{rflow}(rflow, ...)
+\method{nodes}{rflow}(rflow)
+}
+\arguments{
+\item{rflow}{rflow object}
 }
 \description{
 list all nodes of an Rflow object

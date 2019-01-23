@@ -2,7 +2,7 @@
 % Please edit documentation in R/rflow_dag.R
 \name{make}
 \alias{make}
-\title{Title}
+\title{Make/build target or multiple targets}
 \usage{
 make(x, ...)
 }
@@ -10,5 +10,5 @@ make(x, ...)
 \item{...}{}
 }
 \description{
-Title
+Make/build target or multiple targets
 }

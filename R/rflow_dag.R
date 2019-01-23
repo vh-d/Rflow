@@ -42,7 +42,7 @@ clean_rflow <- function(rflow) {
 }
 
 
-#' Title
+#' Clean cache folder
 #'
 #' @param x
 #' @param ...
@@ -97,15 +97,15 @@ load_nodes.rflow <- function(
 ) {
 
   obj_defs <-
-    load_obj_definitions(
+    load_node_definitions(
       path = x$.def_path,
       modified_since = x$.last_updated,
       verbose = verbose)
 
   if (length(obj_defs)) {
-    res <- add_objs(
+    res <- add_nodes(
       objs        = obj_defs,
-      rflow         = x,
+      rflow       = x,
       conflict    = conflict,
       storage     = x$.storage_path,
       cache_store = x$.cache_store_path,
@@ -128,7 +128,7 @@ load_nodes.rflow <- function(
 #' @param modified_since
 #' @param verbose
 #' @export
-load_obj_definitions <- function(path, modified_since = NULL, verbose = TRUE) {
+load_node_definitions <- function(path, modified_since = NULL, verbose = TRUE) {
 
   if (!requireNamespace("RcppTOML")) stop("Package RcppTOML not available!")
 
@@ -173,8 +173,7 @@ load_obj_definitions <- function(path, modified_since = NULL, verbose = TRUE) {
 #'
 #' @param path
 #' @param ...
-#' @export
-load_obj_state <- function(path, ...) {
+load_state_of_node <- function(path, ...) {
   state_list <- readRDS(file = path, ...)
 
   return(
@@ -191,11 +190,10 @@ load_obj_state <- function(path, ...) {
 #' @param recursive
 #' @param ignore.case
 #' @param ...
-#' @export
-load_objs_state <- function(path, recursive = FALSE, ignore.case = TRUE, ...) {
+load_state_of_nodes <- function(path, recursive = FALSE, ignore.case = TRUE, ...) {
 
   # list all relevant files
-  obj_storage_files <-
+  nodes_storage_files <-
     list.files(path       = path,
                pattern    = "*.rds",
                full.names = TRUE,
@@ -204,12 +202,12 @@ load_objs_state <- function(path, recursive = FALSE, ignore.case = TRUE, ...) {
                include.dirs = FALSE)
 
   # load it into a list and return
-  obj_list <- lapply(obj_storage_files, load_obj_state, ...)
+  nodes_list <- lapply(nodes_storage_files, load_state_of_node, ...)
 
-  return(obj_list)
+  return(nodes_list)
 }
 
-#' Title
+#' Initialize a node and adds it to an rflow
 #'
 #' @param obj
 #' @param rflow
@@ -223,7 +221,7 @@ load_objs_state <- function(path, recursive = FALSE, ignore.case = TRUE, ...) {
 #' @export
 #'
 #' @examples
-add_obj <- function(
+add_node <- function(
   obj,
   rflow,
   ...,
@@ -231,14 +229,6 @@ add_obj <- function(
   storage = NULL,   # path to saved state
   connect = FALSE,
   verbose = TRUE) {
-
-  # id   <- obj[["id"]]
-  # env  <- obj[["env"]]
-  # name <- obj[["name"]]
-  #
-  # # id is noc required (it can be env.name)
-  # if (!length(id)) id <- paste0(env, ".", name)
-
 
   # extract object's id
   id <- get_id(obj)
@@ -270,7 +260,7 @@ add_obj <- function(
   if (!updated) {
 
     if (length(storage) && {fp <- file.path(storage, paste0(id, ".rds"));file.exists(fp)}) {
-      saved_state   <- load_obj_state(path = fp)
+      saved_state   <- load_state_of_node(path = fp)
       initiated_obj <- as_node(saved_state, storage = storage, ...)
       recovered     <- TRUE
     } else {
@@ -287,7 +277,7 @@ add_obj <- function(
     parent.env(rflow[[id]]) <- rflow
   }
 
-  if (recovered || updated) update_obj(obj = obj, rflow = rflow, verbose = verbose)
+  if (recovered || updated) update_node(obj = obj, rflow = rflow, verbose = verbose)
 
   # connect to required objects
   if (connect) rflow[[id]]$connect()
@@ -314,12 +304,12 @@ get_id <- function(obj) {
 #' @param ...
 #' @param verbose
 #' @export
-add_objs <- function(objs, rflow, connect = TRUE, ..., verbose = TRUE) {
+add_nodes <- function(objs, rflow, connect = TRUE, ..., verbose = TRUE) {
 
   result <-
     lapply(
       X       = objs,
-      FUN     = add_obj,
+      FUN     = add_node,
       rflow   = rflow,
       verbose = verbose,
       ...)
@@ -336,7 +326,7 @@ add_objs <- function(objs, rflow, connect = TRUE, ..., verbose = TRUE) {
 #' @param rflow
 #' @param verbose
 #' @export
-update_obj <- function(
+update_node <- function(
   obj,
   rflow,
   verbose = FALSE
@@ -353,7 +343,7 @@ update_obj <- function(
 }
 
 
-#' Title
+#' Batch update nodes
 #'
 #' @param objs
 #' @param rflow
@@ -363,12 +353,12 @@ update_obj <- function(
 #' @export
 #'
 #' @examples
-update_objs <- function(objs, rflow, verbose = FALSE) {
+update_nodes <- function(objs, rflow, verbose = FALSE) {
 
   result <-
     lapply(
       X   = objs,
-      FUN = update_obj,
+      FUN = update_node,
       rflow = rflow,
       verbose = verbose)
 
@@ -411,7 +401,7 @@ eval_node.character <- function(id, rflow) {
 
 
 # generic make function
-#' Title
+#' Make/build target or multiple targets
 #'
 #' @param x
 #' @param ...
@@ -447,10 +437,10 @@ get.rflow <- function(rflow, id) {
   rflow[[id]]$get()
 }
 
-#' Title
+#' Obtain value represented by a node
 #'
-#' @param id
-#' @param rflow
+#' @param id node's id
+#' @param rflow rflow object
 #'
 #' @return
 #' @export

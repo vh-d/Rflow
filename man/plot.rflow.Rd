@@ -2,13 +2,17 @@
 % Please edit documentation in R/plots.R
 \name{plot.rflow}
 \alias{plot.rflow}
-\title{visualize DAG networks}
+\title{visualize Rflow DAGs using visNetwork}
 \usage{
 \method{plot}{rflow}(rflow, direction = "LR", ...)
 }
 \arguments{
-\item{...}{}
+\item{rflow}{an rflow objects}
+
+\item{direction}{see visNetwork docs on hierarchical graphs}
+
+\item{...}{args passed to visNetwork}
 }
 \description{
-visualize DAG networks
+visualize Rflow DAGs using visNetwork
 }

@@ -7,7 +7,7 @@
 new_rflow(path = NULL)
 }
 \arguments{
-\item{path}{}
+\item{path}{path to folder with nodes' definitions}
 }
 \description{
 Initialize a new DAG

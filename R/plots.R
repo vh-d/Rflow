@@ -7,16 +7,18 @@ disc_scale <- function(
 
 
 #' @export
-nodes <- function(x, ...) {
+nodes <- function(x) {
   UseMethod("nodes", x)
 }
 
 #' list all nodes of an Rflow object
 #'
-#' @param rflow
-#' @param ...
+#' @param rflow rflow object
 #' @export
-nodes.rflow <- function(rflow, ...) {
+nodes.rflow <- function(rflow) {
+
+  if (!requireNamespace("data.table")) stop("data.table package required to plot graphs")
+
   dtNODES <-
     rbindlist(
       lapply(
@@ -39,17 +41,17 @@ nodes.rflow <- function(rflow, ...) {
 }
 
 
-#' visualize DAG networks
+#' visualize Rflow DAGs using visNetwork
 #'
-#' @param rflow
-#' @param direction
-#' @param ...
+#' @param rflow an rflow objects
+#' @param direction see visNetwork docs on hierarchical graphs
+#' @param ... args passed to visNetwork
 #'
 #' @export
 plot.rflow <- function(rflow, direction = "LR", ...) {
 
   if (!requireNamespace("visNetwork")) stop("visNetwork package required to plot graphs")
-
+  if (!requireNamespace("data.table")) stop("data.table package required to plot graphs")
 
   dtEDGES <-
     rbindlist(
