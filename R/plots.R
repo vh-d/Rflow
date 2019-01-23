@@ -151,7 +151,10 @@ plot.rflow <- function(rflow, direction = "LR", ...) {
     visNetwork::visInteraction(
       tooltipDelay      = 1,
       navigationButtons = TRUE,
-      dragNodes         = TRUE)
+      dragNodes         = TRUE) %>% 
+    visNetwork::visPhysics(
+      enabled = FALSE
+    )
 }
 
 
