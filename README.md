@@ -16,12 +16,13 @@ system.
 
 ## TODO:
 
+  - enable defining objects from R scripts (without TOML files)
+  - R code in standalone R scripts
+  - Python nodes
   - SQL execution by a generic R function instead of metaprogramming
       - solves potential problems with escaping quotes in SQL code
-  - more SQL dialects (Oracle, Access)
   - better logging
       - show result of each trigger
-  - reuse node’s generic update() in other nodes
   - handling of obsolete nodes
   - function for removing objects from DAG
   - node method for deleting represented objects
@@ -29,5 +30,5 @@ system.
       - currently, if a property is deleted update() method ignores it
   - query function to set or get fields of multiple objects
   - quick start guide
-  - enable defining objects from R scripts (without TOML files)
-  - support for Python nodes
+  - more SQL dialects (Oracle, Access)
+  - Rflow manager as a Shiny app
