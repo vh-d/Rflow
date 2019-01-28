@@ -582,7 +582,7 @@ db_node <- R6::R6Class(
         cat_r_expr(self$r_expr, paste0(verbose_prefix, "  "))
       }
 
-      eval(self$r_expr, envir = self$r_env)
+      eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
 
       private$.last_updated <- Sys.time()
 
@@ -821,7 +821,7 @@ file_node <- R6::R6Class(
         cat_r_expr(self$r_expr, paste0(verbose_prefix, "  "))
       }
 
-      eval(self$r_expr, envir = self$r_env)
+      eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
 
       private$.last_updated <- Sys.time()
 
