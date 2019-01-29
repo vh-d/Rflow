@@ -390,7 +390,7 @@ r_node <- R6::R6Class(
       hash    <- digest::digest(object = self$get(), algo = "md5")
       changed <- self$hash != hash
 
-      if (!length(changed) || changed) {
+      if (!length(changed) || is.na(changed) || changed) {
         changed <- TRUE
         self$hash <- hash
         if (self$caching) saveRDS(object = self$get(), file = self$cache_store)
