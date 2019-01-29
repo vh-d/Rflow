@@ -37,6 +37,7 @@ system.
   - special test node type
   - file nodes: option to check hash before triggering
   - add csv file nodes
+  - make(): add option to run on end-nodes only
 
 **Implementation**
 
