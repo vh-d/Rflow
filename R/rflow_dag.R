@@ -408,7 +408,7 @@ make.character <- function(id, rflow, verbose = TRUE, verbose_prefix = "") {
     if (length(id) == 0) return(NULL)
     make(rflow[[id]], verbose = verbose, verbose_prefix = verbose_prefix)
   } else {
-    sapply(id, make, verbose = verbose, verbose_prefix = verbose_prefix)
+    sapply(id, make.character, verbose = verbose, verbose_prefix = verbose_prefix)
   }
 }
 
