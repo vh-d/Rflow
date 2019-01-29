@@ -386,6 +386,7 @@ r_node <- R6::R6Class(
 
       private$.last_updated <- Sys.time()
 
+      # checking hash before signalling change to parent
       # compute md5 hash of the result
       hash    <- digest::digest(object = self$get(), algo = "md5")
       changed <- self$hash != hash
@@ -719,6 +720,8 @@ file_node <- R6::R6Class(
     path       = NULL,
     r_expr     = NULL,
 
+    hash = NULL,
+
     initialize =
       function(
         id       = NULL,
@@ -811,7 +814,7 @@ file_node <- R6::R6Class(
     },
 
     eval = function(verbose = TRUE, verbose_prefix = "") {
-      exists_check <- self$exists()
+      # exists_check <- self$exists()
 
       if (verbose) {
         cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
@@ -822,9 +825,20 @@ file_node <- R6::R6Class(
 
       private$.last_updated <- Sys.time()
 
+      # checking hash before signalling change to parent
+      # copied from r_node
+      # compute md5 hash of the result
+      hash    <- digest::digest(object = self$path, file = TRUE, algo = "md5")
+      changed <- self$hash != hash
+
+      if (!length(changed) || is.na(changed) || changed) {
+        changed <- TRUE
+        self$hash <- hash
+      }
+
       self$store_state()
 
-      return(TRUE)
+      return(changed)
     },
 
     exists = function() {
