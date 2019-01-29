@@ -6,9 +6,6 @@
 \usage{
 in.R6(obj, objs)
 }
-\arguments{
-\item{objs}{}
-}
 \description{
 %in% equivalent for R6 objects
 }

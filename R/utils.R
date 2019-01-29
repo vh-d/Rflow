@@ -3,10 +3,6 @@
 #'
 #' @param obj
 #' @param objs
-#'
-#' @return
-#'
-#' @examples
 in.R6 <- function(obj, objs) {
   any(sapply(objs, identical, y = obj))
 }

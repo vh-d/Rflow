@@ -11,6 +11,9 @@ get_value(id, rflow)
 
 \item{rflow}{rflow object}
 }
+\value{
+Value/object represented by given node.
+}
 \description{
 Obtain value represented by a node
 }

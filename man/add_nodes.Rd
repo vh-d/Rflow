@@ -6,6 +6,15 @@
 \usage{
 add_nodes(objs, rflow, connect = TRUE, ..., verbose = TRUE)
 }
+\arguments{
+\item{objs}{list of nodes' definitions}
+
+\item{rflow}{an rflow object}
+
+\item{connect}{logical;}
+
+\item{verbose}{logical; print verbose output?}
+}
 \description{
 batch init objects
 }

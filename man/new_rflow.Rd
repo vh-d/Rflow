@@ -9,6 +9,12 @@ new_rflow(path = NULL)
 \arguments{
 \item{path}{path to folder with nodes' definitions}
 }
+\value{
+A new rflow object.
+}
 \description{
 Initialize a new DAG
+}
+\examples{
+RF <- new_rflow()
 }

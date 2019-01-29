@@ -7,7 +7,11 @@
 update_nodes(objs, rflow, verbose = FALSE)
 }
 \arguments{
-\item{verbose}{}
+\item{objs}{list of nodes' definitions}
+
+\item{rflow}{an rflow object}
+
+\item{verbose}{logical; print verbose output?}
 }
 \description{
 Batch update nodes

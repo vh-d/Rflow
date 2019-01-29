@@ -6,6 +6,9 @@
 \usage{
 load_state_of_node(path, ...)
 }
+\arguments{
+\item{path}{path to RDS file with saved state}
+}
 \description{
 loads object definition/state from a RDS file
 }

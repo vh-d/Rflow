@@ -6,6 +6,9 @@
 \usage{
 \method{connect_nodes}{rflow}(rflow)
 }
+\arguments{
+\item{rflow}{an rflow object}
+}
 \description{
 batch connect all objects
 }

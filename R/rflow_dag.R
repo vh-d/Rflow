@@ -3,10 +3,11 @@
 #'
 #' @param path path to folder with nodes' definitions
 #'
-#' @return
+#' @return A new rflow object.
 #' @export
 #'
 #' @examples
+#' RF <- new_rflow()
 new_rflow <- function(
   path = NULL
 ) {
@@ -29,14 +30,11 @@ new_rflow <- function(
 }
 
 
-#' Title
+#' Remove all nodes from an rflow object
 #'
 #' @param rflow
 #'
-#' @return
 #' @export
-#'
-#' @examples
 clean_rflow <- function(rflow) {
   remove(list = ls(envir = rflow, all.names = FALSE), envir = rflow)
 }
@@ -47,10 +45,7 @@ clean_rflow <- function(rflow) {
 #' @param x
 #' @param ...
 #'
-#' @return
 #' @export
-#'
-#' @examples
 clean_cache <- function(x, ...) {
   UseMethod("clean_cache", x)
 }
@@ -86,9 +81,9 @@ load_nodes <- function(x, ...) {
 
 #' batch load object definitions
 #'
-#' @param rflow
-#' @param conflict
-#' @param verbose
+#' @param rflow an rflow object
+#' @param conflict logical; How to resolve conflict when an object of the same id already exists in the rflow?
+#' @param verbose logical; print verbose output?
 #' @export
 load_nodes.rflow <- function(
   x,
@@ -126,7 +121,7 @@ load_nodes.rflow <- function(
 #'
 #' @param path path to folder with node definitions
 #' @param modified_since
-#' @param verbose
+#' @param verbose logical; print verbose output?
 #' @export
 load_node_definitions <- function(path, modified_since = NULL, verbose = TRUE) {
 
@@ -171,7 +166,7 @@ load_node_definitions <- function(path, modified_since = NULL, verbose = TRUE) {
 
 #' loads object definition/state from a RDS file
 #'
-#' @param path
+#' @param path path to RDS file with saved state
 #' @param ...
 load_state_of_node <- function(path, ...) {
   state_list <- readRDS(file = path, ...)
@@ -186,9 +181,9 @@ load_state_of_node <- function(path, ...) {
 
 #' batch loading objects' definition/state from RDS files
 #'
-#' @param path
-#' @param recursive
-#' @param ignore.case
+#' @param path path to folder containg RDS files with saved state (typically .rflow subdir of rflow config dir)
+#' @param recursive passed to list.files
+#' @param ignore.case passed to list.files
 #' @param ...
 load_state_of_nodes <- function(path, recursive = FALSE, ignore.case = TRUE, ...) {
 
@@ -210,17 +205,14 @@ load_state_of_nodes <- function(path, recursive = FALSE, ignore.case = TRUE, ...
 #' Initialize a node and adds it to an rflow
 #'
 #' @param obj
-#' @param rflow
+#' @param rflow an rflow object
 #' @param ...
-#' @param conflict
-#' @param storage
-#' @param connect
-#' @param verbose
+#' @param conflict logical; How to resolve conflict when an object of the same id already exists in the rflow?
+#' @param storage path to folder containg RDS files with saved state (typically .rflow subdir of rflow config dir)
+#' @param connect logical;
+#' @param verbose logical; print verbose output?
 #'
-#' @return
 #' @export
-#'
-#' @examples
 add_node <- function(
   obj,
   rflow,
@@ -289,7 +281,7 @@ add_node <- function(
 
 #' extract id from a object's definition (in a list)
 #'
-#' @param obj
+#' @param obj object definition
 #' @export
 get_id <- function(obj) {
   id <- if (length(obj$id)) obj$id else paste0(obj$env, ".", obj$name)
@@ -298,11 +290,11 @@ get_id <- function(obj) {
 
 #' batch init objects
 #'
-#' @param objs
-#' @param rflow
-#' @param connect
+#' @param objs list of nodes' definitions
+#' @param rflow an rflow object
+#' @param connect logical;
 #' @param ...
-#' @param verbose
+#' @param verbose logical; print verbose output?
 #' @export
 add_nodes <- function(objs, rflow, connect = TRUE, ..., verbose = TRUE) {
 
@@ -322,9 +314,9 @@ add_nodes <- function(objs, rflow, connect = TRUE, ..., verbose = TRUE) {
 
 #' update object (call whenever definition in config file could have potentially changed)
 #'
-#' @param obj
-#' @param rflow
-#' @param verbose
+#' @param obj list with definition of node
+#' @param rflow an rflow object
+#' @param verbose logical; print verbose output?
 #' @export
 update_node <- function(
   obj,
@@ -345,14 +337,11 @@ update_node <- function(
 
 #' Batch update nodes
 #'
-#' @param objs
-#' @param rflow
-#' @param verbose
+#' @param objs list of nodes' definitions
+#' @param rflow an rflow object
+#' @param verbose logical; print verbose output?
 #'
-#' @return
 #' @export
-#'
-#' @examples
 update_nodes <- function(objs, rflow, verbose = FALSE) {
 
   result <-
@@ -373,7 +362,7 @@ connect_nodes <- function(x, ...) {
 
 #' batch connect all objects
 #'
-#' @param rflow
+#' @param rflow an rflow object
 #' @export
 connect_nodes.rflow <- function(rflow) {
   lapply(rflow, function(x) x$connect())
@@ -383,13 +372,10 @@ connect_nodes.rflow <- function(rflow) {
 # evaluates/build a single node assuming requirements are ready
 #' Title
 #'
-#' @param id
+#' @param id node's id
 #' @param ...
 #'
-#' @return
 #' @export
-#'
-#' @examples
 eval_node <- function(id, ...) {
   UseMethod("eval_node", id)
 }
@@ -403,13 +389,8 @@ eval_node.character <- function(id, rflow) {
 # generic make function
 #' Make/build target or multiple targets
 #'
-#' @param x
+#' @param x node's id or rflow object
 #' @param ...
-#'
-#' @return
-#' @export
-#'
-#' @examples
 #' @export
 make <- function(x, ...){
   UseMethod("make", x)
@@ -442,10 +423,8 @@ get.rflow <- function(rflow, id) {
 #' @param id node's id
 #' @param rflow rflow object
 #'
-#' @return
+#' @return Value/object represented by given node.
 #' @export
-#'
-#' @examples
 get_value <- function(id, rflow) {
   rflow[[id]]$get()
 }

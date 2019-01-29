@@ -6,6 +6,13 @@
 \usage{
 load_state_of_nodes(path, recursive = FALSE, ignore.case = TRUE, ...)
 }
+\arguments{
+\item{path}{path to folder containg RDS files with saved state (typically .rflow subdir of rflow config dir)}
+
+\item{recursive}{passed to list.files}
+
+\item{ignore.case}{passed to list.files}
+}
 \description{
 batch loading objects' definition/state from RDS files
 }

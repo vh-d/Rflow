@@ -6,6 +6,13 @@
 \usage{
 update_node(obj, rflow, verbose = FALSE)
 }
+\arguments{
+\item{obj}{list with definition of node}
+
+\item{rflow}{an rflow object}
+
+\item{verbose}{logical; print verbose output?}
+}
 \description{
 update object (call whenever definition in config file could have potentially changed)
 }

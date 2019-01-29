@@ -7,6 +7,8 @@
 eval_node(id, ...)
 }
 \arguments{
+\item{id}{node's id}
+
 \item{...}{}
 }
 \description{

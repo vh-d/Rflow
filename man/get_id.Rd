@@ -6,6 +6,9 @@
 \usage{
 get_id(obj)
 }
+\arguments{
+\item{obj}{object definition}
+}
 \description{
 extract id from a object's definition (in a list)
 }

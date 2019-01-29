@@ -2,7 +2,7 @@
 % Please edit documentation in R/rflow_dag.R
 \name{clean_rflow}
 \alias{clean_rflow}
-\title{Title}
+\title{Remove all nodes from an rflow object}
 \usage{
 clean_rflow(rflow)
 }
@@ -10,5 +10,5 @@ clean_rflow(rflow)
 \item{rflow}{}
 }
 \description{
-Title
+Remove all nodes from an rflow object
 }

@@ -7,7 +7,7 @@
 make(x, ...)
 }
 \arguments{
-\item{...}{}
+\item{x}{node's id or rflow object}
 }
 \description{
 Make/build target or multiple targets

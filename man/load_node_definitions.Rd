@@ -8,6 +8,8 @@ load_node_definitions(path, modified_since = NULL, verbose = TRUE)
 }
 \arguments{
 \item{path}{path to folder with node definitions}
+
+\item{verbose}{logical; print verbose output?}
 }
 \description{
 load DAG's objects' definition from TOML files

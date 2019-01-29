@@ -6,6 +6,13 @@
 \usage{
 \method{load_nodes}{rflow}(x, conflict = "update", verbose = TRUE)
 }
+\arguments{
+\item{conflict}{logical; How to resolve conflict when an object of the same id already exists in the rflow?}
+
+\item{verbose}{logical; print verbose output?}
+
+\item{rflow}{an rflow object}
+}
 \description{
 batch load object definitions
 }
