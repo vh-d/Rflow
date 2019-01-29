@@ -421,8 +421,7 @@ r_node <- R6::R6Class(
     remove = function() {
       if (self$exists()) {
         warning("Deleting R object represented by ", crayon::red(self$id), " !")
-        rm(list = self$name, pos =  self$r_env)
-        return(invisible(TRUE))
+        return(invisible(rm(list = self$name, pos = self$r_env)))
       } else {
         warning("Object ", self$id, " (", self$name, ")", " does not exist.")
         return(invisible(FALSE))
@@ -625,8 +624,7 @@ db_node <- R6::R6Class(
     remove = function() {
       if (self$exists()) {
         warning("Deleting DB object represented by ", crayon::red(self$id), " !")
-        return(DBI::dbRemoveTable(conn = self$connection, name = self$name))
-        return(invisible(TRUE))
+        return(invisible(DBI::dbRemoveTable(conn = self$connection, name = self$name)))
       } else {
         warning("Object ", self$id, " (", self$name, ")", " does not exist.")
         return(invisible(FALSE))
@@ -675,8 +673,7 @@ accdb_node <- R6::R6Class(
     remove = function() {
       if (self$exists()) {
         warning("Deleting DB object represented by ", crayon::red(self$id), " !")
-        return(odbc32::sqlDrop(con = self$connection, name = self$name))
-        return(invisible(TRUE))
+        return(invisible(odbc32::sqlDrop(con = self$connection, name = self$name)))
       } else {
         warning("Object ", self$id, " (", self$name, ")", " does not exist.")
         return(invisible(FALSE))
@@ -841,8 +838,7 @@ file_node <- R6::R6Class(
     remove = function() {
       if (self$exists()) {
         warning("Deleting file represented by ", crayon::red(self$id), " !")
-        return(file.remove(self$path))
-        return(invisible(TRUE))
+        return(invisible(file.remove(self$path)))
       } else {
         warning("Object ", self$id, " (", self$name, ")", " does not exist.")
         return(invisible(FALSE))
