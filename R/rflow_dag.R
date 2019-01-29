@@ -413,9 +413,26 @@ make.character <- function(id, rflow, verbose = TRUE, verbose_prefix = "") {
 }
 
 #' @export
-make.rflow <- function(rflow, verbose = TRUE) {
+make.rflow <- function(rflow, leaves_only = TRUE, verbose = TRUE) {
   if (verbose) cat(rep("\u2500", 3), " Make ", rep("\u2500", 25), "\n\n", sep = "")
-  return(invisible(sapply(X = ls(rflow), FUN = make, rflow = rflow, verbose = verbose)))
+
+  if (leaves_only) {
+    E <- edges(rflow)
+    N <- nodes(rflow)
+    nodes_to_make <- N[!E, on = c("id" = "from"), id]
+  } else {
+    nodes_to_make <- ls(rflow)
+  }
+
+  # RUN
+  res <- sapply(
+    X       = nodes_to_make,
+    FUN     = make,
+    rflow   = rflow,
+    verbose = verbose
+  )
+
+  return(invisible(res))
 }
 
 #' @export
