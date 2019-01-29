@@ -30,6 +30,25 @@ new_rflow <- function(
 }
 
 
+#' @export
+as_igraph <- function(x, ...) {
+  UseMethod("as.igraph", x)
+}
+
+as_igraph.rflow <- function(rflow) {
+  if (!requireNamespace("igraph")) stop("igraph package required")
+
+  E <- edges(rflow)
+  G <- igraph::graph_from_data_frame(E)
+
+  G
+}
+
+check_rflow_dag <- function(rflow) {
+  G <- as_igraph.rflow(rflow)
+  igraph::is_dag(G)
+}
+
 #' Remove all nodes from an rflow object
 #'
 #' @param rflow
@@ -412,6 +431,11 @@ make.character <- function(id, rflow, verbose = TRUE, verbose_prefix = "") {
   }
 }
 
+#' @param rflow rflow object
+#'
+#' @param leaves_only logical; Option to run make only from ending nodes. Avoids redundant visits on intermediate nodes.
+#' @param verbose logical; Print verbose output?
+#'
 #' @export
 make.rflow <- function(rflow, leaves_only = TRUE, verbose = TRUE) {
   if (verbose) cat(rep("\u2500", 3), " Make ", rep("\u2500", 25), "\n\n", sep = "")
