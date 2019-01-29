@@ -41,6 +41,22 @@ nodes.rflow <- function(rflow) {
 }
 
 
+#' @export
+edges <- function(x) {
+  UseMethod("edges", x)
+}
+
+edges.rflow <- function(rflow) {
+  if (!requireNamespace("data.table")) stop("data.table package required to plot graphs")
+
+  rbindlist(
+    lapply(
+      mget(ls(rflow), envir = rflow),
+      function(x) if (length(x$depends)) data.table(from = x$depends, to = x$id) else NULL))
+
+}
+
+
 #' visualize Rflow DAGs using visNetwork
 #'
 #' @param rflow an rflow objects
@@ -53,12 +69,7 @@ plot.rflow <- function(rflow, direction = "LR", ...) {
   if (!requireNamespace("visNetwork")) stop("visNetwork package required to plot graphs")
   if (!requireNamespace("data.table")) stop("data.table package required to plot graphs")
 
-  dtEDGES <-
-    rbindlist(
-      lapply(
-        mget(ls(rflow), envir = rflow),
-        function(x) if (length(x$depends)) data.table(from = x$depends, to = x$id) else NULL))
-
+  dtEDGES <- edges.rflow(rflow)
   dtNODES <- nodes.rflow(rflow)
   # TODO: objects will have their own methods for printing nice hover titles
 
