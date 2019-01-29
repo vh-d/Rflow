@@ -404,7 +404,12 @@ make.node <- function(x, verbose = TRUE, verbose_prefix = "") {
 # recurrent procedure
 #' @export
 make.character <- function(id, rflow, verbose = TRUE, verbose_prefix = "") {
-  make(rflow[[id]], verbose = verbose, verbose_prefix = verbose_prefix)
+  if (length(id) < 2) {
+    if (length(id) == 0) return(NULL)
+    make(rflow[[id]], verbose = verbose, verbose_prefix = verbose_prefix)
+  } else {
+    sapply(id, make, verbose = verbose, verbose_prefix = verbose_prefix)
+  }
 }
 
 #' @export
