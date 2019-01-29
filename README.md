@@ -46,3 +46,4 @@ system.
   - rflow object as R6 class
   - environments as R6 classes
   - add check that Rflow is DAG
+  - store hashes in RDS
