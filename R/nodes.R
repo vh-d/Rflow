@@ -382,6 +382,9 @@ r_node <- R6::R6Class(
         cat_r_expr(self$r_expr, verbose_prefix)
       }
 
+      # for referencing other objects in rflow
+      .RFLOW <- parent.env(self)
+
       assign(self$name, eval(self$r_expr, envir = self$r_env), pos = self$r_env)
 
       private$.last_updated <- Sys.time()
@@ -581,6 +584,9 @@ db_node <- R6::R6Class(
         cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
         cat_r_expr(self$r_expr, paste0(verbose_prefix, "  "))
       }
+
+      # for referencing other objects in rflow
+      .RFLOW <- parent.env(self)
 
       eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
 
@@ -820,6 +826,9 @@ file_node <- R6::R6Class(
         cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
         cat_r_expr(self$r_expr, paste0(verbose_prefix, "  "))
       }
+
+      # for referencing other objects in rflow
+      .RFLOW <- parent.env(self)
 
       eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
 
