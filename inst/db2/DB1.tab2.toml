@@ -1,0 +1,11 @@
+env  = "DB1"
+name = "tab2"
+type = "db_node"
+con_code = "DB1$con"
+depends = "RE1.tab2"
+
+r_code = '''
+{
+  DBI::dbWriteTable(conn = DB1$con, name = 'tab2', value = RE1$tab2, overwrite = TRUE)
+}
+'''

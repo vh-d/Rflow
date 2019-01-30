@@ -1,0 +1,13 @@
+env  = "RE1"
+name = "tab1"
+type = "r_node"
+
+trigger_condition = '''as.numeric(Sys.time() - last_updated, units = "secs") > 10'''
+
+r_code = '''
+{
+  N = 10
+  data.table(id = 1:N, value = rnorm(N))
+}
+'''
+

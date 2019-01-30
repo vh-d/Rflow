@@ -1,0 +1,23 @@
+env  = "DB1"
+name = "tab3"
+desc = "Table is a join of tab1 and tab2"
+type = "db_node"
+con_code = "DB1$con"
+depends = ["DB1.tab1", "DB1.tab2"]
+
+sql_code = [
+
+'''DROP TABLE IF EXISTS tab3''', 
+
+'''
+CREATE TABLE tab3 AS
+SELECT
+  tab1.id     AS "id",
+  tab1.value  AS value1,
+  tab2.value  AS value2
+FROM 
+  tab1, tab2
+WHERE 
+  tab1.id = tab2.id
+'''
+]

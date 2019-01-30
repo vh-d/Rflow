@@ -1,0 +1,11 @@
+env  = "RE1"
+name = "iristab"
+type = "r_node"
+depends = ["file.irisfile"]
+
+r_code = '''
+{
+  read.csv(file = "./inst/db2/data/iris.csv")
+}
+'''
+
