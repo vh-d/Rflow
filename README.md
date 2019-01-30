@@ -35,7 +35,10 @@ system.
   - more SQL dialects (Oracle, Access)
   - Rflow manager as a Shiny app
   - special test node type
-  - add csv file nodes
+  - new node types:
+      - csv file nodes
+      - excel sheets (check file change -\> check hash of extracted
+        data)
 
 **Implementation**
 
