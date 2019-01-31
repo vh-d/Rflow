@@ -412,7 +412,9 @@ eval_node.character <- function(id, rflow) {
 #' @param ...
 #' @export
 make <- function(x, ...){
-  UseMethod("make", x)
+  if (!is.null(x)) {
+    UseMethod("make", x)
+  } else stop(substitute(x), " cannot be NULL!")
 }
 
 #' @export
