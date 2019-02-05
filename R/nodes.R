@@ -884,6 +884,104 @@ file_node <- R6::R6Class(
 )
 
 
+# csv_node ----------------------------------------------------------------
+
+csv_node <- R6::R6Class(
+
+  classname = "py_node",
+  inherit   = file_node,
+
+  public = list(
+    read_args = NULL,
+
+    initialize =
+      function(
+        id       = NULL,
+        env      = NULL,
+        name     = NULL,
+        desc     = NULL,
+        path     = NULL,
+        storage  = NULL,
+        depends  = NULL,
+        r_code   = NULL,
+        r_expr   = NULL,  # R expression (from r_code)
+        type     = NULL,
+        store    = TRUE,
+        read_args= NULL,
+        ...
+      ) {
+        super$initialize(
+          id       = id,
+          env      = env,
+          name     = name,
+          desc     = desc,
+          path     = path,
+          storage  = storage,
+          depends  = depends,
+          r_code   = r_code,
+          r_expr   = r_expr,
+          type     = type,
+          store    = FALSE
+        )
+
+        self$read_args <- read_args
+
+        if (store) self$store_state()
+
+        return(invisible(TRUE))
+      },
+
+    get = function() {
+      do.call(
+        if (requireNamespace("data.table")) data.table::fread else read.csv,
+        args = c(
+          list(file = self$path),
+          self$read_args
+        )
+      )
+    }
+  )
+)
+
+
+# Python nodes ------------------------------------------------------------
+
+py_node <- R6::R6Class(
+
+  classname = "py_node",
+  inherit   = node,
+
+  public    = list(
+
+    py_code = NULL,
+
+    initialize = function(
+      id       = NULL,
+      name     = NULL,
+      env      = NULL,
+      desc     = NULL,
+      storage  = NULL,
+      depends  = NULL,
+      trigger_condition = NULL,
+      py_code = NULL
+    ) {
+
+      super$initialize(
+        id      = id,
+        name    = name,
+        env     = env,
+        desc    = desc,
+        depends = depends,
+        trigger_condition = trigger_condition,
+        storage = storage,
+        store   = FALSE)
+
+      if (!requireNamespace(reticulate)) stop("'reticulate' package required!")
+
+    }
+  )
+)
+
 # construct/initiate a node object
 
 as_node <- function(x, ...) {
