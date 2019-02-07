@@ -72,6 +72,7 @@ clean_cache <- function(x, ...) {
 #' Clean cache folder
 #'
 #' @param rflow
+#' @export
 clean_cache.rflow <- function(rflow) {
 
   # warn if not defined and return

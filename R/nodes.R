@@ -715,18 +715,18 @@ accdb_node <- R6::R6Class(
 # excel shee node ---------------------------------------------------------
 
 excel_sheet <- R6::R6Class(
-  
+
   classname = "excel_sheet",
   inherit   = node,
 
   public    = list(
-    
+
     path   = NULL,
     sheet  = NULL,
     read_args = NULL, # TODO!
     r_expr = NULL,
     hash   = NULL,
-    
+
     initialize =
       function(
         id       = NULL,
@@ -871,7 +871,7 @@ excel_sheet <- R6::R6Class(
         do.call(openxlsx::read.xlsx, args = c(list(xlsxFile = self$path, sheet = self$sheet), read_args))
       } else stop(self$id, ": sheet '", self$sheet, "' does not exists!")
     }
-    
+
     # remove = function() {
     #   if (self$exists()) {
     #     warning("Deleting file represented by ", crayon::red(self$id), " !")
