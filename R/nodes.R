@@ -1072,7 +1072,7 @@ file_node <- R6::R6Class(
 
 csv_node <- R6::R6Class(
 
-  classname = "py_node",
+  classname = "csv_node",
   inherit   = file_node,
 
   public = list(
