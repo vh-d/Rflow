@@ -712,6 +712,190 @@ accdb_node <- R6::R6Class(
 )
 
 
+# excel shee node ---------------------------------------------------------
+
+excel_sheet <- R6::R6Class(
+  
+  classname = "excel_sheet",
+  inherit   = node,
+
+  public    = list(
+    
+    path   = NULL,
+    sheet  = NULL,
+    read_args = NULL, # TODO!
+    r_expr = NULL,
+    hash   = NULL,
+    
+    initialize =
+      function(
+        id       = NULL,
+        env      = NULL,
+        name     = NULL,
+        desc     = NULL,
+        path     = NULL,
+        sheet    = NULL, # not in file_node
+        storage  = NULL,
+        depends  = NULL,
+        r_code   = NULL,
+        r_expr   = NULL,  # R expression (from r_code)
+        type     = NULL,
+        store    = TRUE,
+        ...
+      ) {
+        super$initialize(
+          id      = id,
+          env     = env,
+          name    = name,
+          desc    = desc,
+          depends = depends,
+          storage = storage,
+          store   = FALSE)
+
+        if (is.null(r_expr)) {
+          if (is.null(r_code) | !length(r_code)) {
+            warning(id, ": no R expression/code!")
+            self$r_expr <- NULL
+          } else {
+            self$r_expr <- parse(text = r_code)
+          }
+        } else {
+          self$r_expr <- r_expr
+        }
+
+        if (length(path))  self$path  <- path
+        if (length(sheet)) self$sheet <- sheet
+
+        if (store) self$store_state()
+
+        return(invisible(TRUE))
+      },
+
+    update_definition =
+      function(
+        id      = NULL,
+        type    = NULL,
+        desc    = NULL,
+        depends = NULL,
+        trigger_condition = NULL,
+        path    = NULL,
+        sheet   = NULL, # not in file_node
+        r_code  = NULL,
+        r_expr  = NULL,
+        ...,
+        verbose = FALSE
+      ) {
+        super$update_definition(
+          desc    = desc,
+          depends = depends,
+          trigger_condition = trigger_condition,
+          store = FALSE)
+
+        if (!identical(self$path, path)) {
+          if (verbose) notify_update(self$id, "file path")
+          self$path <- path
+          self$trigger_defchange <- TRUE
+        }
+
+        if (!identical(self$sheet, sheet)) {
+          if (verbose) notify_update(self$id, "sheet name/index")
+          self$sheet <- sheet
+          self$trigger_defchange <- TRUE
+        }
+
+        r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
+        if (!identical(as.character(self$r_expr), as.character(r_expr))) {
+          if (verbose) notify_update(self$id, "R expression")
+          self$r_expr <- r_expr
+          self$trigger_defchange <- TRUE
+        }
+
+        other_args <- list(...)
+        if (length(other_args)) warning("Not updating ", paste(names(other_args), collapse = ", "), " properties.")
+
+        self$store_state()
+
+        return(invisible(TRUE))
+      },
+
+    store_state = function() {
+      super$store_state(
+        public_fields  = c("r_expr", "path", "sheet"),
+        private_fields = c(".last_updated")
+      )
+    },
+
+    eval = function(verbose = TRUE, verbose_prefix = "") {
+      # exists_check <- self$exists()
+
+      if (verbose) {
+        cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
+        cat_r_expr(self$r_expr, paste0(verbose_prefix, "  "))
+      }
+
+      # for referencing other objects in rflow
+      .RFLOW <- parent.env(self)
+
+      eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
+
+      private$.last_updated <- Sys.time()
+
+      # checking hash before signalling change to parent
+      # copied from r_node
+      # compute md5 hash of the result
+      hash    <- digest::digest(object = self$path, file = TRUE, algo = "md5")
+      changed <- self$hash != hash
+
+      if (!length(changed) || is.na(changed) || changed) {
+        changed <- TRUE
+        self$hash <- hash
+      }
+
+      self$store_state()
+
+      return(changed)
+    },
+
+    exists = function() {
+      if (file.exists(self$path)) {
+        return(isTRUE(self$sheet %in% openxlsx::getSheetNames(self$path)))
+      }
+    },
+
+    check_triggers = function() {
+      return(super$check_triggers() || !self$exists() || !length(self$last_updated) || is.na(self$last_updated))
+    },
+
+    get = function() {
+      if (self$exists()) {
+        do.call(openxlsx::read.xlsx, args = c(list(xlsxFile = self$path, sheet = self$sheet), read_args))
+      } else stop(self$id, ": sheet '", self$sheet, "' does not exists!")
+    }
+    
+    # remove = function() {
+    #   if (self$exists()) {
+    #     warning("Deleting file represented by ", crayon::red(self$id), " !")
+    #     return(invisible(file.remove(self$path)))
+    #   } else {
+    #     warning("Object ", self$id, " (", self$name, ")", " does not exist.")
+    #     return(invisible(FALSE))
+    #   }
+    # }
+
+  ),
+
+  active = list(
+
+    last_updated = function(value) {
+      if (missing(value)) {
+        return(file.mtime(self$path))
+      } else {
+        stop("Can't set `$last_updated")
+      }
+    }
+
+  )
+)
 
 # file_node ---------------------------------------------------------------
 
@@ -855,7 +1039,7 @@ file_node <- R6::R6Class(
     },
 
     check_triggers = function() {
-      return(super$check_triggers() || !self$exists() || !length(self$last_updated))
+      return(super$check_triggers() || !self$exists() || !length(self$last_updated) || is.na(self$last_updated))
     },
 
     remove = function() {

@@ -60,3 +60,4 @@ Rflow is an R package providing R users a general-purpose workflow system.
 * environments as R6 classes
 * add check that Rflow is not empty before plotting etc...
 * store hashes in RDS
+* generic methods in node class for initializing and updating properties
