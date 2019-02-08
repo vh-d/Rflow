@@ -666,7 +666,7 @@ accdb_node <- R6::R6Class(
 
   public    = list(
     exists = function() {
-      isTRUE(self$name %in% odbc32::sqlTables(accdb_con)$TABLE_NAME)
+      isTRUE(self$name %in% odbc32::sqlTables(self$connection)$TABLE_NAME)
     },
     get = function() {
       if (self$exists()) {
