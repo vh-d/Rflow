@@ -696,7 +696,7 @@ accdb_node <- R6::R6Class(
         sapply(X = sql_statements,
                FUN = function(sql_statement)
                  stringr::str_interp(
-                   "odbc32::sqlQuery(con = self$connection, query = '${sql_statement}')"
+                   "odbc32::sqlQuery(con = self$connection, query = '${sql_statement}', errors = TRUE)"
                  )
         )
 

@@ -94,6 +94,42 @@ clean_cache.rflow <- function(rflow) {
   }
 }
 
+#' Clean stored state folder
+#'
+#' @param x
+#' @param ...
+#'
+#' @export
+clean_stored_state <- function(x, ...) {
+  UseMethod("clean_stored_state", x)
+}
+
+#' Clean stored state folder
+#'
+#' @param rflow
+#' @export
+clean_stored_state.rflow <- function(rflow) {
+
+  # warn if not defined and return
+  if (!length(rflow$.storage_path)) {
+    warning("State storage dir not defined!")
+    return(TRUE)
+  }
+
+  # warn if nonexistet and return
+  if (dir.exists(rflow$.storage_path)) {
+    as.logical(
+      1-unlink(
+        file.path(rflow$.storage_path, "*"),
+        recursive = FALSE)
+    )
+  } else {
+    warning("State storage dir does not exists")
+    return(TRUE)
+  }
+}
+
+
 #' @export
 load_nodes <- function(x, ...) {
   UseMethod("load_nodes", x)
@@ -467,14 +503,60 @@ get.rflow <- function(rflow, id) {
   rflow[[id]]$get()
 }
 
-#' Obtain value represented by a node
+#' Obtain value/object represented by a node
 #'
-#' @param id node's id
+#' @param x a node or node's id
 #' @param rflow rflow object
 #'
 #' @return Value/object represented by given node.
 #' @export
-get_value <- function(id, rflow) {
-  rflow[[id]]$get()
+get_value <- function(x, ...) {
+  UseMethod("get_value", x)
 }
 
+
+#' @rdname get_value
+#' @export
+get_value.character <- function(x, rflow) {
+  rflow[[x]]$get()
+}
+
+#' @rdname get_value
+#' @export
+get_value.node <- function(x) {
+  x$get()
+}
+
+
+#' Obtain value/object represented by a node
+#'
+#' @param x a node or node's id
+#' @param rflow rflow object
+#'
+#' @return Value/object represented by given node.
+#' @export
+trigger_manual <- function(x, ...) {
+  if (length(x) > 1) {
+    sapply(x, trigger_manual, ...)
+  } else {
+    UseMethod("trigger_manual", x)
+  }
+}
+
+#' @rdname trigger_manual
+#' @export
+trigger_manual.node <- function(x) {
+  x$trigger_manual <- TRUE
+}
+
+#' @rdname trigger_manual
+#' @export
+trigger_manual.character <- function(x, rflow) {
+  rflow[[id]]$trigger_manual <- TRUE
+}
+
+#' @rdname trigger_manual
+#' @export
+trigger_manual.rflow <- function(rflow, x) {
+  rflow[[id]]$trigger_manual <- TRUE
+}
