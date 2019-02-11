@@ -293,7 +293,7 @@ r_node <- R6::R6Class(
         if (isTRUE(self$caching)) {
           if (length(cache_store)) {
             if (dir.exists(cache_store)) {
-              cache_store <- file.path(cache_store, self$id)
+              cache_store <- file.path(cache_store, paste0(self$id, ".rds"))
             } else if (!file.exists(cache_store)) stop(cache_store, " does not exists!")
 
             self$cache_store <- cache_store
