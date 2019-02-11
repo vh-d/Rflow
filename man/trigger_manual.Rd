@@ -4,18 +4,19 @@
 \alias{trigger_manual}
 \alias{trigger_manual.node}
 \alias{trigger_manual.character}
+\alias{trigger_manual.rflow}
 \title{Obtain value/object represented by a node}
 \usage{
 trigger_manual(x, ...)
 
 \method{trigger_manual}{node}(x)
 
-\method{trigger_manual}{character}(id, rflow)
+\method{trigger_manual}{character}(x, rflow)
+
+\method{trigger_manual}{rflow}(rflow, x)
 }
 \arguments{
 \item{x}{a node or node's id}
-
-\item{id}{node's id}
 
 \item{rflow}{rflow object}
 }
