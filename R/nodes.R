@@ -318,9 +318,13 @@ r_node <- R6::R6Class(
 
         # from deprecated setup()
         # connect to specified R environment
-        r_env <- get(self$env, .GlobalEnv) # other than .GlobalEnv?
-        stopifnot(is.environment(r_env))
-        self$r_env <- r_env
+        if (is.null(self$env)) {
+          self$r_env <- .GlobalEnv
+        } else {
+          r_env <- get(self$env, .GlobalEnv) # other than .GlobalEnv?
+          if (!is.environment(r_env)) stop(paste(self$env, "is not an R environment object"))
+          self$r_env <- r_env
+        }
 
         # try restoring the object from cache
         if (self$caching)
