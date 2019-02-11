@@ -66,6 +66,8 @@ node <- R6::R6Class(
         self$desc    <- desc
 
         # where should I store myself?
+        # TODO: make storage optional
+        # list(enabled = TRUE, path = ...)
         self$storage <- storage
 
         depends_char <- if (is.character(depends)) depends else names(depends)

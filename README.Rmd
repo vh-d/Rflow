@@ -48,6 +48,7 @@ Rflow is an R package providing R users a general-purpose workflow system.
 * more SQL dialects (Oracle, Access)
 * Rflow manager as a Shiny app
 * special test node type
+* make storage optional
 * new node types:
   * csv file nodes
   * excel sheets (check file change -> check hash of extracted data)

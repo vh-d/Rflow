@@ -35,6 +35,7 @@ system.
   - more SQL dialects (Oracle, Access)
   - Rflow manager as a Shiny app
   - special test node type
+  - make storage optional
   - new node types:
       - csv file nodes
       - excel sheets (check file change -\> check hash of extracted
@@ -48,3 +49,5 @@ system.
   - environments as R6 classes
   - add check that Rflow is not empty before plotting etc…
   - store hashes in RDS
+  - generic methods in node class for initializing and updating
+    properties
