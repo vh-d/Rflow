@@ -72,7 +72,8 @@ node <- R6::R6Class(
         self$depends <- depends_char
 
         # self$trigger_defchange <- TRUE # WHY???
-        self$trigger_condition <- as_r_expr(r_code = trigger_condition)
+        if (!is.null(trigger_condition))
+          self$trigger_condition <- as_r_expr(r_code = trigger_condition)
 
         if (store) self$store_state()
 
