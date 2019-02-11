@@ -51,7 +51,6 @@ node <- R6::R6Class(
         desc    = NULL,
         depends = NULL,
         trigger_condition = NULL,
-        type    = "node",
         storage = NULL,
         store   = TRUE,
         caching = TRUE,
@@ -78,6 +77,9 @@ node <- R6::R6Class(
           self$trigger_condition <- as_r_expr(r_code = trigger_condition)
 
         if (store) self$store_state()
+
+        # other_args <- list(...)
+        # if (length(other_args)) warning("Ignoring ", paste(names(other_args), collapse = ", "), " properties.\n")
 
         return(invisible(TRUE))
       },
@@ -129,8 +131,8 @@ node <- R6::R6Class(
           self$trigger_defchange <- TRUE
         }
 
-        other_args <- list(...)
-        if (length(other_args)) warning("Not updating ", paste(names(other_args), collapse = ", "), " properties.\n")
+        # other_args <- list(...)
+        # if (length(other_args)) warning("Not updating ", paste(names(other_args), collapse = ", "), " properties.\n")
 
         # storing may be not be neccesary when e.g. update_definition() is called from ancestor's method
         if (store) self$store_state()
@@ -255,7 +257,6 @@ r_node <- R6::R6Class(
 
   public = list(
 
-    env      = NULL,  # name of objects' parent R envinronment
     r_env    = NULL,  # reference to R envinronment
     r_code   = NULL,  # R code text
     r_expr   = NULL,  # R expression (from r_code)
@@ -272,33 +273,16 @@ r_node <- R6::R6Class(
 
     initialize =
       function(
-        id      = NULL,
-        name    = NULL,
-        env     = NULL,
-        desc    = NULL,
-        storage = NULL,
-        depends = NULL,
-        trigger_condition = NULL,
-
+        ...,
         r_code  = NULL,
         r_expr  = NULL,
         .last_updated = NULL,
         type    = NULL,
         store   = TRUE,
         caching = TRUE,
-        cache_store = NULL,
-        ...
+        cache_store = NULL
       ) {
-        super$initialize(
-          id      = id,
-          name    = name,
-          env     = env,
-          desc    = desc,
-          depends = depends,
-          trigger_condition = trigger_condition,
-          storage = storage,
-          store   = FALSE
-        )
+        super$initialize(..., store = FALSE)
 
         self$r_code <- r_code
         self$r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
@@ -352,23 +336,12 @@ r_node <- R6::R6Class(
 
     update_definition =
       function(
-        id      = NULL,
-        type    = NULL,
-        desc    = NULL,
-
-        depends = NULL,
-        trigger_condition = NULL,
-
+        ...,
         r_code  = NULL,
         r_expr  = NULL,
-        ...,
         verbose = FALSE
       ) {
-        super$update_definition(
-          desc    = desc,
-          depends = depends,
-          trigger_condition = trigger_condition,
-          store = FALSE)
+        super$update_definition(..., verbose = verbose, store = FALSE)
 
         r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
         if (!identical(as.character(self$r_expr), as.character(r_expr))) {
@@ -376,9 +349,6 @@ r_node <- R6::R6Class(
           self$r_expr <- r_expr
           self$trigger_defchange <- TRUE
         }
-
-        other_args <- list(...)
-        if (length(other_args)) warning("Not updating ", paste(names(other_args), collapse = ", "), " properties.\n")
 
         self$store_state()
 
@@ -461,13 +431,7 @@ db_node <- R6::R6Class(
 
     initialize =
       function(
-        id       = NULL,
-        name     = NULL,
-        env      = NULL,
-        desc     = NULL,
-        storage  = NULL,
-        depends  = NULL,
-        trigger_condition = NULL,
+        ...,
         sql_code = NULL,
         r_code   = NULL,
         r_expr   = NULL,  # R expression (from r_code)
@@ -475,18 +439,9 @@ db_node <- R6::R6Class(
         connection = NULL,
         .last_updated = NULL,
         type     = NULL,
-        store   = TRUE,
-        ...
+        store    = TRUE
       ) {
-        super$initialize(
-          id      = id,
-          name    = name,
-          env     = env,
-          desc    = desc,
-          depends = depends,
-          trigger_condition = trigger_condition,
-          storage = storage,
-          store   = FALSE)
+        super$initialize(..., store = FALSE)
 
         # TODO:
         # * how to handle storage of connection when DBI connection object is given? One solution is to only allow con_code?
@@ -527,25 +482,14 @@ db_node <- R6::R6Class(
 
     update_definition =
       function(
-        id      = NULL,
-        type    = NULL,
-        desc    = NULL,
-
-        depends  = NULL,
-        trigger_condition = NULL,
-
+        ...,
         con_code = NULL,
         sql_code = NULL,
         r_code   = NULL,
         r_expr   = NULL,  # R expression (from r_code)
-        ...,
-        verbose = FALSE
+        verbose  = FALSE
       ) {
-        super$update_definition(
-          desc    = desc,
-          depends = depends,
-          trigger_condition = trigger_condition,
-          store = FALSE)
+        super$update_definition(..., verbose = verbose, store = FALSE)
 
         if (!identical(self$con_code, con_code)) {
           self$con_code <- con_code
@@ -575,9 +519,6 @@ db_node <- R6::R6Class(
           self$r_expr <- r_expr
           self$trigger_defchange <- TRUE
         }
-
-        other_args <- list(...)
-        if (length(other_args)) warning("Not updating ", paste(names(other_args), collapse = ", "), " properties.")
 
         self$store_state()
 
@@ -721,7 +662,7 @@ accdb_node <- R6::R6Class(
 )
 
 
-# excel shee node ---------------------------------------------------------
+# excel sheet node ---------------------------------------------------------
 
 excel_sheet <- R6::R6Class(
 
@@ -738,32 +679,19 @@ excel_sheet <- R6::R6Class(
 
     initialize =
       function(
-        id       = NULL,
-        env      = NULL,
-        name     = NULL,
-        desc     = NULL,
+        ...,
         path     = NULL,
         sheet    = NULL, # not in file_node
-        storage  = NULL,
-        depends  = NULL,
         r_code   = NULL,
         r_expr   = NULL,  # R expression (from r_code)
         type     = NULL,
-        store    = TRUE,
-        ...
+        store    = TRUE
       ) {
-        super$initialize(
-          id      = id,
-          env     = env,
-          name    = name,
-          desc    = desc,
-          depends = depends,
-          storage = storage,
-          store   = FALSE)
+        super$initialize(..., store = FALSE)
 
         if (is.null(r_expr)) {
           if (is.null(r_code) | !length(r_code)) {
-            warning(id, ": no R expression/code!")
+            warning(self$id, ": no R expression/code!")
             self$r_expr <- NULL
           } else {
             self$r_expr <- parse(text = r_code)
@@ -782,23 +710,14 @@ excel_sheet <- R6::R6Class(
 
     update_definition =
       function(
-        id      = NULL,
-        type    = NULL,
-        desc    = NULL,
-        depends = NULL,
-        trigger_condition = NULL,
+        ...,
         path    = NULL,
         sheet   = NULL, # not in file_node
         r_code  = NULL,
         r_expr  = NULL,
-        ...,
         verbose = FALSE
       ) {
-        super$update_definition(
-          desc    = desc,
-          depends = depends,
-          trigger_condition = trigger_condition,
-          store = FALSE)
+        super$update_definition(..., verbose = verbose, store = FALSE)
 
         if (!identical(self$path, path)) {
           if (verbose) notify_update(self$id, "file path")
@@ -818,9 +737,6 @@ excel_sheet <- R6::R6Class(
           self$r_expr <- r_expr
           self$trigger_defchange <- TRUE
         }
-
-        other_args <- list(...)
-        if (length(other_args)) warning("Not updating ", paste(names(other_args), collapse = ", "), " properties.")
 
         self$store_state()
 
@@ -916,38 +832,24 @@ file_node <- R6::R6Class(
 
   public    = list(
 
-    path       = NULL,
-    r_expr     = NULL,
-
-    hash = NULL,
+    path    = NULL,
+    r_expr  = NULL,
+    hash    = NULL,
 
     initialize =
       function(
-        id       = NULL,
-        env      = NULL,
-        name     = NULL,
-        desc     = NULL,
+        ...,
         path     = NULL,
-        storage  = NULL,
-        depends  = NULL,
         r_code   = NULL,
         r_expr   = NULL,  # R expression (from r_code)
         type     = NULL,
-        store    = TRUE,
-        ...
+        store    = TRUE
       ) {
-        super$initialize(
-          id      = id,
-          env     = env,
-          name    = name,
-          desc    = desc,
-          depends = depends,
-          storage = storage,
-          store   = FALSE)
+        super$initialize(..., store = FALSE)
 
         if (is.null(r_expr)) {
           if (is.null(r_code) | !length(r_code)) {
-            warning(id, ": no R expression/code!")
+            warning(self$id, ": no R expression/code!")
             self$r_expr <- NULL
           } else {
             self$r_expr <- parse(text = r_code)
@@ -967,22 +869,13 @@ file_node <- R6::R6Class(
 
     update_definition =
       function(
-        id      = NULL,
-        type    = NULL,
-        desc    = NULL,
-        depends = NULL,
-        trigger_condition = NULL,
+        ...,
         path    = NULL,
         r_code  = NULL,
         r_expr  = NULL,
-        ...,
         verbose = FALSE
       ) {
-        super$update_definition(
-          desc    = desc,
-          depends = depends,
-          trigger_condition = trigger_condition,
-          store = FALSE)
+        super$update_definition(..., verbose = verbose, store = FALSE)
 
         if (!identical(self$path, path)) {
           if (verbose) notify_update(self$id, "file path")
@@ -996,9 +889,6 @@ file_node <- R6::R6Class(
           self$r_expr <- r_expr
           self$trigger_defchange <- TRUE
         }
-
-        other_args <- list(...)
-        if (length(other_args)) warning("Not updating ", paste(names(other_args), collapse = ", "), " properties.")
 
         self$store_state()
 
@@ -1089,33 +979,11 @@ csv_node <- R6::R6Class(
 
     initialize =
       function(
-        id       = NULL,
-        env      = NULL,
-        name     = NULL,
-        desc     = NULL,
-        path     = NULL,
-        storage  = NULL,
-        depends  = NULL,
-        r_code   = NULL,
-        r_expr   = NULL,  # R expression (from r_code)
-        type     = NULL,
-        store    = TRUE,
-        read_args= NULL,
-        ...
+        ...,
+        store     = TRUE,
+        read_args = NULL
       ) {
-        super$initialize(
-          id       = id,
-          env      = env,
-          name     = name,
-          desc     = desc,
-          path     = path,
-          storage  = storage,
-          depends  = depends,
-          r_code   = r_code,
-          r_expr   = r_expr,
-          type     = type,
-          store    = FALSE
-        )
+        super$initialize(..., store = FALSE)
 
         self$read_args <- read_args
 
@@ -1149,25 +1017,10 @@ py_node <- R6::R6Class(
     py_code = NULL,
 
     initialize = function(
-      id       = NULL,
-      name     = NULL,
-      env      = NULL,
-      desc     = NULL,
-      storage  = NULL,
-      depends  = NULL,
-      trigger_condition = NULL,
+      ...,
       py_code = NULL
     ) {
-
-      super$initialize(
-        id      = id,
-        name    = name,
-        env     = env,
-        desc    = desc,
-        depends = depends,
-        trigger_condition = trigger_condition,
-        storage = storage,
-        store   = FALSE)
+      super$initialize(..., store = FALSE)
 
       if (!requireNamespace(reticulate)) stop("'reticulate' package required!")
 
