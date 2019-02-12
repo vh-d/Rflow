@@ -304,7 +304,7 @@ r_node <- R6::R6Class(
             } else if (!file.exists(cache_store)) stop(cache_store, " does not exists!")
 
             self$cache_store <- cache_store
-          } else stop("Path to a cache folder is required (when cashing is turned on).")
+          } else stop("Path to a cache folder is required (when caching is turned on).")
         }
 
         private$.last_updated <- if (length(.last_updated)) .last_updated else as.POSIXct(NA)
