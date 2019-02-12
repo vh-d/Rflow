@@ -155,16 +155,24 @@ plot.rflow <- function(rflow, direction = "LR", ...) {
       smooth = FALSE
     ) %>%
     visNetwork::visOptions(
+
+      nodesIdSelection =
+        list(
+          enabled = TRUE,
+          useLabels = TRUE
+        ),
+
       selectedBy =
-        list(variable = "label"),
+        list(
+          variable = "env"
+        ),
 
       highlightNearest =
         list(enabled = TRUE,
              algorithm = "hierarchical",
              degree = list(from = 50, to = 50),
-             hover   = TRUE),
+             hover   = TRUE)
 
-      nodesIdSelection = FALSE
     ) %>%
     # visNetwork::visLegend(
     #   enabled = TRUE,
