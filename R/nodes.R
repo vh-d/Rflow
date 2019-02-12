@@ -323,15 +323,16 @@ r_node <- R6::R6Class(
 
         # try restoring the object from cache
         if (self$caching)
-          try(
-            {
-              value <- readRDS(self$cache_store)
-              assign(self$name, value, pos = self$r_env)
-              hash <- digest::digest(object = self$get(), algo = "md5")
-              self$hash <- hash
-            },
-            silent = TRUE
-          )
+          if (file.exists(self$cache_store))
+            try(
+              {
+                value <- readRDS(self$cache_store)
+                assign(self$name, value, pos = self$r_env)
+                hash <- digest::digest(object = self$get(), algo = "md5")
+                self$hash <- hash
+              },
+              silent = TRUE
+            )
 
         if (self$persistence$enabled && store) self$store_state()
 
