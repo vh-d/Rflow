@@ -27,9 +27,13 @@ new_rflow <- function(
     cache_store_path <- file.path(path, ".rflow", "cache")
     if (!dir.exists(cache_store_path)) dir.create(cache_store_path, recursive = TRUE)
 
-    result[[".persistence"]]      <- .persistence
-    result[[".cache_store_path"]] <- cache_store_path
+  } else {
+    .persistence <- list(enabled = FALSE)
+    cache_store_path <- NULL
   }
+
+  result[[".persistence"]]      <- .persistence
+  result[[".cache_store_path"]] <- cache_store_path
 
   return(result)
 }
