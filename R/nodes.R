@@ -30,7 +30,7 @@ node <- R6::R6Class(
     upstream   = NULL,
     downstream = NULL,
 
-    storage    = NULL,
+    persistence        = NULL,
     trigger_defchange  = FALSE,
     trigger_manual     = FALSE,
     trigger_condition  = NULL,
@@ -51,7 +51,7 @@ node <- R6::R6Class(
         desc    = NULL,
         depends = NULL,
         trigger_condition = NULL,
-        storage = NULL,
+        persistence = list(enabled = FALSE),
         store   = TRUE,
         caching = TRUE,
         ...
@@ -61,13 +61,17 @@ node <- R6::R6Class(
         self$id      <- if (is.null(id)) paste0(env, ".", name) else id
         self$name    <- name
         self$env     <- env
-
         self$desc    <- desc
 
         # where should I store myself?
         # TODO: make storage optional
         # list(enabled = TRUE, path = ...)
-        self$storage <- storage
+        if (is.list(persistence) && length(persistence$path)) {
+          self$persistence <- list(
+            enabled = TRUE,
+            path    = file.path(persistence$path, paste0(self$id, ".rds"))
+          )
+        }
 
         depends_char <- if (is.character(depends)) depends else names(depends)
         self$depends <- depends_char
@@ -76,10 +80,12 @@ node <- R6::R6Class(
         if (!is.null(trigger_condition))
           self$trigger_condition <- as_r_expr(r_code = trigger_condition)
 
-        if (store) self$store_state()
-
         # other_args <- list(...)
         # if (length(other_args)) warning("Ignoring ", paste(names(other_args), collapse = ", "), " properties.\n")
+
+        # this should be always at the very end
+        # storing is not neccesary when e.g. update_definition() is called from ancestor's method
+        if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
       },
@@ -96,7 +102,7 @@ node <- R6::R6Class(
                       if (length(public_fields))  mget(public_fields,  envir = self)    else NULL),
           private =   if (length(private_fields)) mget(private_fields, envir = private) else NULL
         ),
-        file = file.path(self$storage, paste0(self$id, ".rds"))
+        file = self$persistence$path
       )
     },
 
@@ -134,8 +140,9 @@ node <- R6::R6Class(
         # other_args <- list(...)
         # if (length(other_args)) warning("Not updating ", paste(names(other_args), collapse = ", "), " properties.\n")
 
-        # storing may be not be neccesary when e.g. update_definition() is called from ancestor's method
-        if (store) self$store_state()
+        # this should be always at the very end
+        # storing is not neccesary when e.g. update_definition() is called from ancestor's method
+        if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
       },
@@ -322,7 +329,7 @@ r_node <- R6::R6Class(
             silent = TRUE
           )
 
-        if (store) self$store_state()
+        if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
       },
@@ -339,6 +346,7 @@ r_node <- R6::R6Class(
         ...,
         r_code  = NULL,
         r_expr  = NULL,
+        store   = TRUE,
         verbose = FALSE
       ) {
         super$update_definition(..., verbose = verbose, store = FALSE)
@@ -350,7 +358,7 @@ r_node <- R6::R6Class(
           self$trigger_defchange <- TRUE
         }
 
-        self$store_state()
+        if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
       },
@@ -379,7 +387,7 @@ r_node <- R6::R6Class(
         if (self$caching) saveRDS(object = self$get(), file = self$cache_store)
       }
 
-      self$store_state() # or move it to make()?
+      if (self$persistence$enabled) self$store_state()
 
       return(changed)
     },
@@ -468,7 +476,7 @@ db_node <- R6::R6Class(
 
         private$.last_updated <- if (length(.last_updated)) .last_updated else as.POSIXct(NA)
 
-        if (store) self$store_state()
+        if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
       },
@@ -487,6 +495,7 @@ db_node <- R6::R6Class(
         sql_code = NULL,
         r_code   = NULL,
         r_expr   = NULL,  # R expression (from r_code)
+        store    = TRUE,
         verbose  = FALSE
       ) {
         super$update_definition(..., verbose = verbose, store = FALSE)
@@ -520,7 +529,7 @@ db_node <- R6::R6Class(
           self$trigger_defchange <- TRUE
         }
 
-        self$store_state()
+        if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
       },
@@ -542,7 +551,7 @@ db_node <- R6::R6Class(
 
       private$.last_updated <- Sys.time()
 
-      self$store_state()
+      if (self$persistence$enabled) self$store_state()
 
       return(TRUE)
     },
@@ -703,7 +712,7 @@ excel_sheet <- R6::R6Class(
         if (length(path))  self$path  <- path
         if (length(sheet)) self$sheet <- sheet
 
-        if (store) self$store_state()
+        if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
       },
@@ -715,6 +724,7 @@ excel_sheet <- R6::R6Class(
         sheet   = NULL, # not in file_node
         r_code  = NULL,
         r_expr  = NULL,
+        store   = TRUE,
         verbose = FALSE
       ) {
         super$update_definition(..., verbose = verbose, store = FALSE)
@@ -738,7 +748,7 @@ excel_sheet <- R6::R6Class(
           self$trigger_defchange <- TRUE
         }
 
-        self$store_state()
+        if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
       },
@@ -776,7 +786,7 @@ excel_sheet <- R6::R6Class(
         self$hash <- hash
       }
 
-      self$store_state()
+      if (self$persistence$enabled) self$store_state()
 
       return(changed)
     },
@@ -862,7 +872,7 @@ file_node <- R6::R6Class(
           self$path <- path
         }
 
-        if (store) self$store_state()
+        if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
       },
@@ -873,6 +883,7 @@ file_node <- R6::R6Class(
         path    = NULL,
         r_code  = NULL,
         r_expr  = NULL,
+        store   = TRUE,
         verbose = FALSE
       ) {
         super$update_definition(..., verbose = verbose, store = FALSE)
@@ -890,7 +901,7 @@ file_node <- R6::R6Class(
           self$trigger_defchange <- TRUE
         }
 
-        self$store_state()
+        if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
       },
@@ -928,7 +939,7 @@ file_node <- R6::R6Class(
         self$hash <- hash
       }
 
-      self$store_state()
+      if (self$persistence$enabled) self$store_state()
 
       return(changed)
     },
@@ -987,7 +998,7 @@ csv_node <- R6::R6Class(
 
         self$read_args <- read_args
 
-        if (store) self$store_state()
+        if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
       },

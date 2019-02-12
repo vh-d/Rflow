@@ -17,13 +17,18 @@ new_rflow <- function(
   if (length(path)) {
     result[[".def_path"]] <- path
 
-    .storage_path <- file.path(path, ".rflow", "state")
-    if (!dir.exists(.storage_path)) dir.create(.storage_path, recursive = TRUE)
-    result[[".storage_path"]] <- .storage_path
+    persistence_path <- file.path(path, ".rflow", "persistence")
+    if (!dir.exists(persistence_path)) dir.create(persistence_path, recursive = TRUE)
+    .persistence <- list(
+      enabled = TRUE,
+      path    = persistence_path
+    )
 
-    .cache_store_path <- file.path(path, ".rflow", "cache")
-    if (!dir.exists(.cache_store_path)) dir.create(.cache_store_path, recursive = TRUE)
-    result[[".cache_store_path"]] <- .cache_store_path
+    cache_store_path <- file.path(path, ".rflow", "cache")
+    if (!dir.exists(cache_store_path)) dir.create(cache_store_path, recursive = TRUE)
+
+    result[[".persistence"]]      <- .persistence
+    result[[".cache_store_path"]] <- cache_store_path
   }
 
   return(result)
@@ -100,31 +105,31 @@ clean_cache.rflow <- function(rflow) {
 #' @param ...
 #'
 #' @export
-clean_stored_state <- function(x, ...) {
-  UseMethod("clean_stored_state", x)
+clean_persistence <- function(x, ...) {
+  UseMethod("clean_persistence", x)
 }
 
 #' Clean stored state folder
 #'
 #' @param rflow
 #' @export
-clean_stored_state.rflow <- function(rflow) {
+clean_persistence.rflow <- function(rflow) {
 
   # warn if not defined and return
-  if (!length(rflow$.storage_path)) {
-    warning("State storage dir not defined!")
+  if (!length(rflow$.persistence$path)) {
+    warning("Persistence storage folder not defined!")
     return(TRUE)
   }
 
   # warn if nonexistet and return
-  if (dir.exists(rflow$.storage_path)) {
+  if (dir.exists(rflow$.persistence$path)) {
     as.logical(
       1-unlink(
-        file.path(rflow$.storage_path, "*"),
+        file.path(rflow$.persistence$path, "*"),
         recursive = FALSE)
     )
   } else {
-    warning("State storage dir does not exists")
+    warning("Persistence storage folder does not exists")
     return(TRUE)
   }
 }
@@ -158,7 +163,6 @@ load_nodes.rflow <- function(
       objs        = obj_defs,
       rflow       = x,
       conflict    = conflict,
-      storage     = x$.storage_path,
       cache_store = x$.cache_store_path,
       verbose     = verbose
     )
@@ -244,7 +248,7 @@ load_state_of_node <- function(path, ...) {
 load_state_of_nodes <- function(path, recursive = FALSE, ignore.case = TRUE, ...) {
 
   # list all relevant files
-  nodes_storage_files <-
+  persistence_files <-
     list.files(path       = path,
                pattern    = "*.rds",
                full.names = TRUE,
@@ -253,7 +257,7 @@ load_state_of_nodes <- function(path, recursive = FALSE, ignore.case = TRUE, ...
                include.dirs = FALSE)
 
   # load it into a list and return
-  nodes_list <- lapply(nodes_storage_files, load_state_of_node, ...)
+  nodes_list <- lapply(persistence_files, load_state_of_node, ...)
 
   return(nodes_list)
 }
@@ -264,7 +268,7 @@ load_state_of_nodes <- function(path, recursive = FALSE, ignore.case = TRUE, ...
 #' @param rflow an rflow object
 #' @param ...
 #' @param conflict logical; How to resolve conflict when an object of the same id already exists in the rflow?
-#' @param storage path to folder containg RDS files with saved state (typically .rflow subdir of rflow config dir)
+#' @param persistence path to folder containg RDS files with saved state (typically .rflow subdir of rflow config dir)
 #' @param connect logical;
 #' @param verbose logical; print verbose output?
 #'
@@ -274,7 +278,6 @@ add_node <- function(
   rflow,
   ...,
   conflict= "update",
-  storage = NULL,   # path to saved state
   connect = FALSE,
   verbose = TRUE) {
 
@@ -307,12 +310,16 @@ add_node <- function(
   # either completely new objects or objects being recovered
   if (!updated) {
 
-    if (length(storage) && {fp <- file.path(storage, paste0(id, ".rds"));file.exists(fp)}) {
-      saved_state   <- load_state_of_node(path = fp)
-      initiated_obj <- as_node(saved_state, storage = storage, ...)
-      recovered     <- TRUE
-    } else {
-      initiated_obj <- as_node(obj, storage = storage, ...)
+    if (rflow$.persistence$enabled) {
+      fp <- file.path(rflow$.persistence$path, paste0(id, ".rds"))
+
+      if (file.exists(fp)) {
+        saved_state   <- load_state_of_node(path = fp)
+        initiated_obj <- as_node(saved_state, persistence = rflow$.persistence, ...)
+        recovered     <- TRUE
+      } else {
+        initiated_obj <- as_node(obj, persistence = rflow$.persistence, ...)
+      }
     }
 
     # assign reference

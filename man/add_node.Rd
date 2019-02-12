@@ -4,19 +4,19 @@
 \alias{add_node}
 \title{Initialize a node and adds it to an rflow}
 \usage{
-add_node(obj, rflow, ..., conflict = "update", storage = NULL,
-  connect = FALSE, verbose = TRUE)
+add_node(obj, rflow, ..., conflict = "update", connect = FALSE,
+  verbose = TRUE)
 }
 \arguments{
 \item{rflow}{an rflow object}
 
 \item{conflict}{logical; How to resolve conflict when an object of the same id already exists in the rflow?}
 
-\item{storage}{path to folder containg RDS files with saved state (typically .rflow subdir of rflow config dir)}
-
 \item{connect}{logical;}
 
 \item{verbose}{logical; print verbose output?}
+
+\item{persistence}{path to folder containg RDS files with saved state (typically .rflow subdir of rflow config dir)}
 }
 \description{
 Initialize a node and adds it to an rflow
