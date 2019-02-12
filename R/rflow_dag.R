@@ -268,7 +268,7 @@ load_state_of_nodes <- function(path, recursive = FALSE, ignore.case = TRUE, ...
 
 #' Initialize a node and adds it to an rflow
 #'
-#' @param obj
+#' @param x
 #' @param rflow an rflow object
 #' @param ...
 #' @param conflict logical; How to resolve conflict when an object of the same id already exists in the rflow?
@@ -277,8 +277,13 @@ load_state_of_nodes <- function(path, recursive = FALSE, ignore.case = TRUE, ...
 #' @param verbose logical; print verbose output?
 #'
 #' @export
-add_node <- function(
-  obj,
+add_node <- function(x, ...) {
+  UseMethod("add_node", x)
+}
+
+#' @export
+add_node.list <- function(
+  x,
   rflow,
   ...,
   conflict= "update",
@@ -286,7 +291,7 @@ add_node <- function(
   verbose = TRUE) {
 
   # extract object's id
-  id <- get_id(obj)
+  id <- get_id(x)
 
   if (verbose) cat("Adding node ", crayon::red(id), "\n", sep = "")
 
@@ -322,9 +327,9 @@ add_node <- function(
         initiated_obj <- as_node(saved_state, persistence = rflow$.persistence, ...)
         recovered     <- TRUE
       } else
-        initiated_obj <- as_node(obj, persistence = rflow$.persistence, ...)
+        initiated_obj <- as_node(x, persistence = rflow$.persistence, ...)
     } else {
-      initiated_obj <- as_node(obj, persistence = rflow$.persistence, ...)
+      initiated_obj <- as_node(x, persistence = rflow$.persistence, ...)
     }
 
     # assign reference
@@ -337,7 +342,7 @@ add_node <- function(
     parent.env(rflow[[id]]) <- rflow
   }
 
-  if (recovered || updated) update_node(obj = obj, rflow = rflow, verbose = verbose)
+  if (recovered || updated) update_node(x, rflow = rflow, verbose = verbose)
 
   # connect to required objects
   if (connect) rflow[[id]]$connect()

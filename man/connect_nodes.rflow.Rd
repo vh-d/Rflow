@@ -4,7 +4,7 @@
 \alias{connect_nodes.rflow}
 \title{batch connect all objects}
 \usage{
-\method{connect_nodes}{rflow}(rflow)
+\method{connect_nodes}{rflow}(rflow, ...)
 }
 \arguments{
 \item{rflow}{an rflow object}
