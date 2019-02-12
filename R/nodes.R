@@ -129,7 +129,7 @@ node <- R6::R6Class(
 
         if (!is.null(desc)) self$desc <- desc
 
-        trigger_condition <- as_r_expr(r_code = trigger_condition)
+        trigger_condition <- suppressWarnings(as_r_expr(r_code = trigger_condition))
         if (!identical(as.character(self$trigger_condition), as.character(trigger_condition))) {
           if (verbose) notify_update(self$id, "trigger condition")
           self$trigger_condition <- trigger_condition
@@ -291,7 +291,10 @@ r_node <- R6::R6Class(
         super$initialize(..., store = FALSE)
 
         self$r_code <- r_code
-        self$r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
+        self$r_expr <- suppressWarnings(as_r_expr(r_code = r_code, r_expr = r_expr))
+
+        if (is.null(self$r_expr) && length(self$depends))
+          warning(self$id, " is not a leaf node but has no R expression to evaluate")
 
         # caching properties
         self$caching <- caching
