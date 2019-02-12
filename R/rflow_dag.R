@@ -432,8 +432,8 @@ connect_nodes <- function(x, ...) {
 #'
 #' @param rflow an rflow object
 #' @export
-connect_nodes.rflow <- function(rflow) {
-  lapply(rflow, function(x) x$connect())
+connect_nodes.rflow <- function(rflow, ...) {
+  lapply(rflow, function(x) x$connect(...))
 }
 
 
