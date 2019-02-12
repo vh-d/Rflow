@@ -53,7 +53,6 @@ node <- R6::R6Class(
         trigger_condition = NULL,
         persistence = list(enabled = FALSE),
         store   = TRUE,
-        caching = TRUE,
         ...
       ) {
         if (is.null(id) & (is.null(name) | is.null(env))) stop("Missing id or (env + name)!") # either 'id' or 'name' + 'env' arguments have to be provided
@@ -286,7 +285,7 @@ r_node <- R6::R6Class(
         .last_updated = NULL,
         type    = NULL,
         store   = TRUE,
-        caching = TRUE,
+        caching = FALSE,
         cache_store = NULL
       ) {
         super$initialize(..., store = FALSE)
