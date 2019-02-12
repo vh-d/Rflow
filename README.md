@@ -35,7 +35,7 @@ system.
   - more SQL dialects (Oracle, Access)
   - Rflow manager as a Shiny app
   - special test node type
-  - make storage optional
+  - hashing of leaf nodes (currently only after eval())
   - new node types:
       - csv file nodes
       - excel sheets (check file change -\> check hash of extracted
