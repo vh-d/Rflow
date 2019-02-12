@@ -71,7 +71,7 @@ node <- R6::R6Class(
             enabled = TRUE,
             path    = file.path(persistence$path, paste0(self$id, ".rds"))
           )
-        }
+        } else self$persistence <- list(enabled = FALSE)
 
         depends_char <- if (is.character(depends)) depends else names(depends)
         self$depends <- depends_char
