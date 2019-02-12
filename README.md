@@ -20,7 +20,7 @@ system.
 
   - enable defining objects from R scripts (without TOML files)
   - R/SQL code in standalone R scripts (outside of TOML file)
-  - Python nodes
+  - more nuanced verbose settings
   - better logging
       - show result of each trigger
   - handling of obsolete nodes
@@ -37,6 +37,7 @@ system.
   - special test node type
   - hashing of leaf nodes (currently only after eval())
   - new node types:
+      - Python nodes
       - csv file nodes
       - excel sheets (check file change -\> check hash of extracted
         data)
@@ -48,6 +49,6 @@ system.
   - rflow object as R6 class
   - environments as R6 classes
   - add check that Rflow is not empty before plotting etc…
-  - store hashes in RDS
+  - store hashes of files in RDS
   - generic methods in node class for initializing and updating
     properties
