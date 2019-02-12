@@ -325,6 +325,8 @@ r_node <- R6::R6Class(
             {
               value <- readRDS(self$cache_store)
               assign(self$name, value, pos = self$r_env)
+              hash <- digest::digest(object = self$get(), algo = "md5")
+              self$hash <- hash
             },
             silent = TRUE
           )
