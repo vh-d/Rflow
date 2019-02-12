@@ -19,10 +19,18 @@ nodes.rflow <- function(rflow) {
 
   if (!requireNamespace("data.table")) stop("data.table package required to plot graphs")
 
+  coln <- c("id", "name", "env", "desc", "sql_code", "r_expr", "node_type")
+
+  # for empty rflow return empty data.table
+  node_ids <- mget(ls(rflow), envir = rflow)
+  if (!length(node_ids)) {
+    return(setnames(data.table(matrix(character(), 1, length(coln))), coln)[0])
+  }
+
   dtNODES <-
     rbindlist(
       lapply(
-        mget(ls(rflow), envir = rflow),
+        node_ids,
         function(x) {
           data.table(
             id    = null2na(x$id),
@@ -66,11 +74,15 @@ edges.rflow <- function(rflow) {
 #' @export
 plot.rflow <- function(rflow, direction = "LR", ...) {
 
-  if (!requireNamespace("visNetwork")) stop("visNetwork package required to plot graphs")
-  if (!requireNamespace("data.table")) stop("data.table package required to plot graphs")
+  if (!requireNamespace("visNetwork", quietly = TRUE)) stop("visNetwork package required to plot graphs")
+  if (!requireNamespace("data.table", quietly = TRUE)) stop("data.table package required to plot graphs")
 
   dtEDGES <- edges.rflow(rflow)
   dtNODES <- nodes.rflow(rflow)
+  if (!nrow(dtNODES)) {
+    warning("Nothing to plot...")
+    return(invisible(NULL))
+  }
   # TODO: objects will have their own methods for printing nice hover titles
 
   dtNODES[, label := paste0(env, " / ", name)]
