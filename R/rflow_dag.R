@@ -321,9 +321,10 @@ add_node <- function(
         saved_state   <- load_state_of_node(path = fp)
         initiated_obj <- as_node(saved_state, persistence = rflow$.persistence, ...)
         recovered     <- TRUE
-      } else {
+      } else
         initiated_obj <- as_node(obj, persistence = rflow$.persistence, ...)
-      }
+    } else {
+      initiated_obj <- as_node(obj, persistence = rflow$.persistence, ...)
     }
 
     # assign reference
