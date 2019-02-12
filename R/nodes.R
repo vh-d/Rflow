@@ -1038,7 +1038,7 @@ py_node <- R6::R6Class(
     ) {
       super$initialize(..., store = FALSE)
 
-      if (!requireNamespace(reticulate)) stop("'reticulate' package required!")
+      if (!requireNamespace("reticulate")) stop("'reticulate' package required!")
 
     }
   )
