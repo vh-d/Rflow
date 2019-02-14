@@ -2,15 +2,9 @@
 % Please edit documentation in R/rflow_dag.R
 \name{get_value}
 \alias{get_value}
-\alias{get_value.character}
-\alias{get_value.node}
 \title{Obtain value/object represented by a node}
 \usage{
 get_value(x, ...)
-
-\method{get_value}{character}(x, rflow)
-
-\method{get_value}{node}(x)
 }
 \arguments{
 \item{x}{a node or node's id}

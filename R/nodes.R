@@ -1,18 +1,35 @@
 # node --------------------------------------------------------------------
 
 #' basic building block of an rflow
+#' @docType class
+#' @importFrom R6 R6Class
+#' @export
+#' @keywords node
+#' @return Object of \code{\link{R6Class}} with basic functionality for rflows.
+#' @format \code{\link{R6Class}} object.
+#' @field id character; unique id
+#' @field env character; name of a environemnt (container or group of objects)
+#' @field name character; object's name
+#' @field desc character; description
+#' @field depends character; vector of uppstream nodes (other nodes this node is depending on)
+#'
 #' @details
-#' nodes can represent different type of data targets (R objects, files, database tables), or jobs...
-#' interconnected nodes together function as basic building elements of directed acyclic graph (DAG)
+#' Nodes may represent different types of data targets (R objects, files, database tables), or jobs.
+#' Interconnected nodes together function as basic building elements of directed acyclic graph (DAG).
 #'
-#' nodes are implemented using R6 classes with multiple descendants (r_node, db_node, file_node) that have their specific requirements and features
+#' Nodes are implemented using R6 classes. There are various flavours of the basic node class (r_node, db_node, file_node) that have their specific requirements and features
 #'
 #'
-#' nodes are initialized
+#' Constructing nodes
 #' * from stored state
 #' * from lists (comming from TOML, YAML...)
 #'
-#' @export
+#' @usage
+#' node("node1", desc = "This an example")
+#' @section Methods:
+#' \describe{
+#'   \item{\code{new(serveraddress)}}{This method is used to create object of this class with \code{serveraddress} as address of the server object is connecting to.}
+#' }
 node <- R6::R6Class(
 
   classname = "node",
@@ -1166,11 +1183,13 @@ py_node <- R6::R6Class(
 
 # construct/initiate a node object
 
+#' instantiate a node
+#' @export
 as_node <- function(x, ...) {
   UseMethod("as_node", x)
 }
 
-# from a list (usually comming from a TOML definition)
+#' @export
 as_node.list <- function(
   x,
   type = if (!is.null(x$type)) x$type else "r_node",  # if not given type is r_node by default
@@ -1179,7 +1198,7 @@ as_node.list <- function(
   do.call(get(type)$new, args = c(x, list(...)))
 }
 
-# if its a node already
+#' @export
 as_node.node <- function(x) {
   x
 }

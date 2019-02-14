@@ -6,14 +6,14 @@ disc_scale <- function(
 }
 
 
+#' list all nodes of an Rflow object
+#'
+#' @param rflow rflow object
 #' @export
 nodes <- function(x) {
   UseMethod("nodes", x)
 }
 
-#' list all nodes of an Rflow object
-#'
-#' @param rflow rflow object
 #' @export
 nodes.rflow <- function(rflow) {
 
@@ -54,6 +54,7 @@ edges <- function(x) {
   UseMethod("edges", x)
 }
 
+#' @export
 edges.rflow <- function(rflow) {
   if (!requireNamespace("data.table")) stop("data.table package required to plot graphs")
 

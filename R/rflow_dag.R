@@ -39,11 +39,14 @@ new_rflow <- function(
 }
 
 
+#' convert DAG to an igraph object
+#' @param x rflow object
 #' @export
 as_igraph <- function(x, ...) {
   UseMethod("as.igraph", x)
 }
 
+#' @export
 as_igraph.rflow <- function(rflow) {
   if (!requireNamespace("igraph")) stop("igraph package required")
 
@@ -74,13 +77,10 @@ clean_rflow <- function(rflow) {
 #' @param ...
 #'
 #' @export
-clean_cache <- function(x, ...) {
+clean_cache <- function(x) {
   UseMethod("clean_cache", x)
 }
 
-#' Clean cache folder
-#'
-#' @param rflow
 #' @export
 clean_cache.rflow <- function(rflow) {
 
@@ -138,17 +138,17 @@ clean_persistence.rflow <- function(rflow) {
   }
 }
 
-
+#' batch load object definitions
 #' @export
 load_nodes <- function(x, ...) {
   UseMethod("load_nodes", x)
 }
 
-#' batch load object definitions
-#'
-#' @param rflow an rflow object
+
+#' @param x an rflow object
 #' @param conflict logical; How to resolve conflict when an object of the same id already exists in the rflow?
 #' @param verbose logical; print verbose output?
+#' @rdname load_nodes
 #' @export
 load_nodes.rflow <- function(
   x,
@@ -428,14 +428,13 @@ update_nodes <- function(objs, rflow, verbose = FALSE) {
 }
 
 
+#' batch connect all objects
+#'
 #' @export
 connect_nodes <- function(x, ...) {
   UseMethod("connect_nodes", x)
 }
 
-#' batch connect all objects
-#'
-#' @param rflow an rflow object
 #' @export
 connect_nodes.rflow <- function(rflow, ...) {
   lapply(rflow, function(x) x$connect(...))
@@ -454,6 +453,7 @@ eval_node <- function(id, ...) {
 }
 
 
+#' @export
 eval_node.character <- function(id, rflow) {
   rflow[[id]]$eval()
 }
@@ -532,13 +532,11 @@ get_value <- function(x, ...) {
 }
 
 
-#' @rdname get_value
 #' @export
 get_value.character <- function(x, rflow) {
   rflow[[x]]$get()
 }
 
-#' @rdname get_value
 #' @export
 get_value.node <- function(x) {
   x$get()
@@ -560,19 +558,16 @@ trigger_manual <- function(x, ...) {
   }
 }
 
-#' @rdname trigger_manual
 #' @export
 trigger_manual.node <- function(x) {
   x$trigger_manual <- TRUE
 }
 
-#' @rdname trigger_manual
 #' @export
 trigger_manual.character <- function(x, rflow) {
   rflow[[id]]$trigger_manual <- TRUE
 }
 
-#' @rdname trigger_manual
 #' @export
 trigger_manual.rflow <- function(rflow, x) {
   rflow[[id]]$trigger_manual <- TRUE
