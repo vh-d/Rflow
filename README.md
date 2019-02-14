@@ -20,7 +20,7 @@ system.
 
   - enable defining objects from R scripts (without TOML files)
   - R/SQL code in standalone R scripts (outside of TOML file)
-  - more nuanced verbose settings
+  - more nuanced `verbose` option
   - better logging
       - show result of each trigger
   - handling of obsolete nodes
@@ -31,24 +31,24 @@ system.
   - deleting properties / setting some to NULL
       - currently, if a property is deleted update() method ignores it
   - query function to set or get fields of multiple objects
+  - documentation
   - quick start guide
-  - more SQL dialects (Oracle, Access)
-  - Rflow manager as a Shiny app
-  - special test node type
   - hashing of leaf nodes (currently only after eval())
   - new node types:
       - Python nodes
+      - test node
       - csv file nodes
       - excel sheets (check file change -\> check hash of extracted
         data)
+  - Rflow manager as a Shiny app
 
 **Implementation**
 
   - SQL execution by a generic R function instead of metaprogramming
       - solves potential problems with escaping quotes in SQL code
-  - rflow object as R6 class
   - environments as R6 classes
   - add check that Rflow is not empty before plotting etc…
   - store hashes of files in RDS
   - generic methods in node class for initializing and updating
     properties
+  - more unit tests
