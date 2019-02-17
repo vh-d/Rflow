@@ -49,6 +49,7 @@ Rflow is an R package providing R users a general-purpose workflow system.
 * hashing of leaf nodes (currently only after eval())
 * new node types:
   * Python nodes
+  * Julia nodes
   * test node
   * csv file nodes
   * excel sheets (check file change -> check hash of extracted data)
@@ -63,3 +64,4 @@ Rflow is an R package providing R users a general-purpose workflow system.
 * store hashes of files in RDS
 * generic methods in node class for initializing and updating properties
 * more unit tests
+* make all public properties active (trigger persistence storage)

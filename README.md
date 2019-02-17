@@ -36,6 +36,7 @@ system.
   - hashing of leaf nodes (currently only after eval())
   - new node types:
       - Python nodes
+      - Julia nodes
       - test node
       - csv file nodes
       - excel sheets (check file change -\> check hash of extracted
@@ -52,3 +53,4 @@ system.
   - generic methods in node class for initializing and updating
     properties
   - more unit tests
+  - make all public properties active (trigger persistence storage)
