@@ -53,6 +53,31 @@ node <- R6::R6Class(
     trigger_condition  = NULL,
     # last_updated = NULL,
 
+    set_id = function(id, name, env) {
+      if (is.null(id) & (is.null(name) | is.null(env))) stop("Missing id or (env + name)!") # either 'id' or 'name' + 'env' arguments have to be provided
+      self$id <- if (is.null(id)) paste0(env, ".", name) else id
+      # set_persistence(self$persistence)
+    },
+
+    set_persistence = function(persistence) {
+      self$persistence <-
+        if (is.list(persistence) && length(persistence$path)) {
+          if (dir.exists(persistence$path)) {
+            list(
+              enabled = TRUE,
+              path    = persistence$path,
+              file    = paste0(self$id, ".rds")
+            )
+          } else stop(persistence$path, " does not exist.")
+        } else {
+          list(
+            enabled = FALSE
+          )
+        }
+
+      invisible(TRUE)
+    },
+
     print = function(...) {
       cat("<", class(self)[1], "> ", crayon::red(self$id), ": ", self$name,  "\n", sep = "")
       if (length(self$desc)) cat("  desc: ", crayon::italic(self$desc),         "\n", sep = "")
@@ -72,22 +97,13 @@ node <- R6::R6Class(
         store   = TRUE,
         ...
       ) {
-        if (is.null(id) & (is.null(name) | is.null(env))) stop("Missing id or (env + name)!") # either 'id' or 'name' + 'env' arguments have to be provided
+        self$set_id(id = id, name = name, env = env)
 
-        self$id      <- if (is.null(id)) paste0(env, ".", name) else id
         self$name    <- name
         self$env     <- env
         self$desc    <- desc
 
-        # where should I store myself?
-        # TODO: make storage optional
-        # list(enabled = TRUE, path = ...)
-        if (is.list(persistence) && length(persistence$path)) {
-          self$persistence <- list(
-            enabled = TRUE,
-            path    = file.path(persistence$path, paste0(self$id, ".rds"))
-          )
-        } else self$persistence <- list(enabled = FALSE)
+        self$set_persistence(persistence)
 
         depends_char <- if (is.character(depends)) depends else names(depends)
         self$depends <- depends_char
@@ -118,7 +134,7 @@ node <- R6::R6Class(
                       if (length(public_fields))  mget(public_fields,  envir = self)    else NULL),
           private =   if (length(private_fields)) mget(private_fields, envir = private) else NULL
         ),
-        file = self$persistence$path
+        file = file.path(self$persistence$path, self$persistence$file)
       )
     },
 
@@ -285,9 +301,28 @@ r_node <- R6::R6Class(
     r_expr   = NULL,  # R expression (from r_code)
 
     hash     = NULL,  # hash of the represented R object from digest(), hashing enables checking for changes of the R objects
-    caching  = NULL,  # logical; whether or not the represented R object should be cached or not
-    cache_store = NULL, # reference to a storr cache object
+    cache    = list(enabled = FALSE),
+
     # triggers  = NULL, # every node has a list of triggers that are checked before evaluation
+
+    set_cache = function(cache) {
+      self$cache <-
+        if (is.list(cache) && length(cache$path)) {
+          if (dir.exists(cache$path)) {
+            list(
+              enabled = TRUE,
+              path    = cache$path,
+              file    = paste0(self$id, ".rds")
+            )
+          } else stop(cache$path, " does not exist.")
+        } else {
+          list(
+            enabled = FALSE
+          )
+        }
+
+      invisible(TRUE)
+    },
 
     print = function(...) {
       super$print()
@@ -302,8 +337,7 @@ r_node <- R6::R6Class(
         .last_updated = NULL,
         type    = NULL,
         store   = TRUE,
-        caching = FALSE,
-        cache_store = NULL
+        cache   = list(enabled = FALSE)
       ) {
         super$initialize(..., store = FALSE)
 
@@ -314,17 +348,7 @@ r_node <- R6::R6Class(
           warning(self$id, " is not a leaf node but has no R expression to evaluate")
 
         # caching properties
-        self$caching <- caching
-
-        if (isTRUE(self$caching)) {
-          if (length(cache_store)) {
-            if (dir.exists(cache_store)) {
-              cache_store <- file.path(cache_store, paste0(self$id, ".rds"))
-            } else if (!file.exists(cache_store)) stop(cache_store, " does not exists!")
-
-            self$cache_store <- cache_store
-          } else stop("Path to a cache folder is required (when caching is turned on).")
-        }
+        self$set_cache(cache)
 
         private$.last_updated <- if (length(.last_updated)) .last_updated else as.POSIXct(NA)
 
@@ -339,11 +363,11 @@ r_node <- R6::R6Class(
         }
 
         # try restoring the object from cache
-        if (self$caching)
-          if (file.exists(self$cache_store))
+        if (self$cache$enabled)
+          if (file.exists(file.path(self$cache$path, self$cache$file)))
             try(
               {
-                value <- readRDS(self$cache_store)
+                value <- readRDS(file.path(self$cache$path, self$cache$file))
                 assign(self$name, value, pos = self$r_env)
                 hash <- digest::digest(object = self$get(), algo = "md5")
                 self$hash <- hash
@@ -406,7 +430,7 @@ r_node <- R6::R6Class(
       if (!length(changed) || is.na(changed) || changed) {
         changed <- TRUE
         self$hash <- hash
-        if (self$caching) saveRDS(object = self$get(), file = self$cache_store)
+        if (self$cache$enabled) saveRDS(object = self$get(), file = file.path(self$cache$path, self$cache$file))
       }
 
       if (self$persistence$enabled) self$store_state()

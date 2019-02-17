@@ -24,16 +24,20 @@ new_rflow <- function(
       path    = persistence_path
     )
 
-    cache_store_path <- file.path(path, ".rflow", "cache")
-    if (!dir.exists(cache_store_path)) dir.create(cache_store_path, recursive = TRUE)
+    cache_path <- file.path(path, ".rflow", "cache")
+    if (!dir.exists(cache_path)) dir.create(cache_path, recursive = TRUE)
+    .cache <- list(
+      enabled = TRUE,
+      path    = cache_path
+    )
 
   } else {
     .persistence <- list(enabled = FALSE)
-    cache_store_path <- NULL
+    .cache       <- list(enabled = FALSE)
   }
 
-  result[[".persistence"]]      <- .persistence
-  result[[".cache_store_path"]] <- cache_store_path
+  result[[".persistence"]] <- .persistence
+  result[[".cache"]]       <- .cache
 
   return(result)
 }
@@ -85,16 +89,16 @@ clean_cache <- function(x) {
 clean_cache.rflow <- function(rflow) {
 
   # warn if not defined and return
-  if (!length(rflow$.cache_store_path)) {
+  if (!length(rflow$.cache$path)) {
     warning("Cache dir not defined!")
     return(TRUE)
   }
 
   # warn if nonexistet and return
-  if (dir.exists(rflow$.cache_store_path)) {
+  if (dir.exists(rflow$.cache$path)) {
     as.logical(
       1-unlink(
-        file.path(rflow$.cache_store_path, "*"),
+        file.path(rflow$.cache$path, "*"),
         recursive = FALSE)
     )
   } else {
@@ -167,7 +171,7 @@ load_nodes.rflow <- function(
       objs        = obj_defs,
       rflow       = x,
       conflict    = conflict,
-      cache_store = x$.cache_store_path,
+      cache       = x$.cache$path,
       verbose     = verbose
     )
   } else {
@@ -360,6 +364,33 @@ get_id <- function(obj) {
   id <- if (length(obj$id)) obj$id else paste0(obj$env, ".", obj$name)
   return(id)
 }
+
+# @param x
+# @param id_old
+# @param id_new
+# @param ...
+#
+# @usage change_id.rflow(obj, id_old, id_new, ...)
+# @export
+set_id <- function(x, ...) {
+  UseMethod("change_id", x)
+}
+
+# @export
+set_id.node <- function(x, id_new, ...) {
+  x$set_id(id_new)
+}
+
+# @export
+set_id.rflow <- function(x, id_old, id_new, ...) {
+  rflow <- x
+
+  rflow[[id_new]] <- rflow[[id_old]] # new reference
+  rm(id_old, pos = rflow)
+
+  set_id(rflow[[id_new]], id_new)
+}
+
 
 #' batch init objects
 #'

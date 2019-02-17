@@ -25,7 +25,7 @@ test_that("nodes can be initiated", {
 
 test_that("nodes can be initiated with persistence", {
   tmp_rflow_dir <- tempdir()
-  node2 <- Rflow::node$new(id = "node2", persistence = list(path = tmp_rflow_dir), caching = FALSE)
+  node2 <- Rflow::node$new(id = "node2", persistence = list(path = tmp_rflow_dir))
 
   expect_is(node2$persistence, "list")
   expect_true(node2$persistence$enabled)
@@ -59,15 +59,13 @@ test_that("nodes can be initiated", {
 
 test_that("nodes can be initiated with persistence", {
   tmp_rflow_dir <- tempdir()
-  node2 <- Rflow::r_node$new(id = "node2", persistence = list(path = tmp_rflow_dir), caching = FALSE)
+  node2 <- Rflow::r_node$new(id = "node2", persistence = list(path = tmp_rflow_dir))
   expect_is(node2$persistence, "list")
   expect_true(node2$persistence$enabled)
 })
 
 test_that("nodes can be initiated with caching", {
   tmp_rflow_dir <- tempdir()
-  expect_error(Rflow::r_node$new(id = "node3", caching = TRUE), "caching")
-  node3 <- Rflow::r_node$new(id = "node3", caching = TRUE, cache_store = tmp_rflow_dir)
-  node4 <- Rflow::r_node$new(id = "node3", caching = TRUE, cache_store = tmp_rflow_dir)
+  node3 <- Rflow::r_node$new(id = "node3", cache = list(path = tmp_rflow_dir))
 })
 
