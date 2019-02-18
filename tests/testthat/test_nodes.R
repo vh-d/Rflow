@@ -74,3 +74,30 @@ test_that("nodes can be initiated with caching", {
   expect_equal(node3$cache$file, "node3.rds")
 })
 
+
+# file_node ---------------------------------------------------------------
+
+
+context("Creating file_node objects")
+
+test_that("nodes can be initiated", {
+  expect_error(Rflow::file_node$new(),               regexp = "[Mm]issing", info = "initialization requires id or env + name")
+  expect_error(Rflow::file_node$new(name = "node1"), regexp = "[Mm]issing", info = "initialization requires id or env + name")
+  expect_error(Rflow::file_node$new(env  = "env1"),  regexp = "[Mm]issing", info = "initialization requires id or env + name")
+  expect_error(Rflow::file_node$new(id = "node1"),   regexp = "[Mm]issing", info = "initialization requires file path")
+
+  tmp_file <- tempfile()
+
+  node1 <- Rflow::file_node$new(id = "node1", path = tmp_file)
+  expect_s3_class(object = node1, class = "file_node")
+  expect_s3_class(object = node1, class = "node")
+  expect_s3_class(object = node1, class = "R6")
+
+  expect_is(node1$persistence, "list")
+  expect_false(node1$persistence$enabled)
+
+  expect_null(node1$depends)
+  expect_null(node1$trigger_condition)
+  expect_true(is.null(node1$last_updated) || is.na(node1$last_updated))
+})
+
