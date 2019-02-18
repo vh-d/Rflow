@@ -369,8 +369,7 @@ r_node <- R6::R6Class(
               {
                 value <- readRDS(file.path(self$cache$path, self$cache$file))
                 assign(self$name, value, pos = self$r_env)
-                hash <- digest::digest(object = self$get(), algo = "md5")
-                self$hash <- hash
+                self$check_hash()
               },
               silent = TRUE
             )
@@ -423,15 +422,10 @@ r_node <- R6::R6Class(
       private$.last_updated <- Sys.time()
 
       # checking hash before signalling change to parent
-      # compute md5 hash of the result
-      hash    <- digest::digest(object = self$get(), algo = "md5")
-      changed <- self$hash != hash
+      changed <- self$check_hash()
 
-      if (!length(changed) || is.na(changed) || changed) {
-        changed <- TRUE
-        self$hash <- hash
-        if (self$cache$enabled) saveRDS(object = self$get(), file = file.path(self$cache$path, self$cache$file))
-      }
+      if (changed && self$cache$enabled)
+        saveRDS(object = self$get(), file = file.path(self$cache$path, self$cache$file))
 
       if (self$persistence$enabled) self$store_state()
 
@@ -440,6 +434,21 @@ r_node <- R6::R6Class(
 
     exists = function() {
       exists(self$name, where = self$r_env)
+    },
+
+    check_hash = function() {
+      if (!self$exists()) return(NA) # TODO: or NULL?
+
+      hash <- digest::digest(object = self$get(), file = FALSE, algo = "md5")
+      changed <- isNotTRUE(self$hash$hash == hash)
+
+      if (changed)
+        self$hash <- list(
+          hash = hash,
+          time = Sys.time()
+        )
+
+      return(changed)
     },
 
     check_triggers = function() {
@@ -889,6 +898,7 @@ file_node <- R6::R6Class(
   public    = list(
 
     path    = NULL,
+    r_code  = NULL,
     r_expr  = NULL,
     hash    = NULL,
 
@@ -903,19 +913,16 @@ file_node <- R6::R6Class(
       ) {
         super$initialize(..., store = FALSE)
 
-        if (is.null(r_expr)) {
-          if (is.null(r_code) | !length(r_code)) {
-            warning(self$id, ": no R expression/code!")
-            self$r_expr <- NULL
-          } else {
-            self$r_expr <- parse(text = r_code)
-          }
-        } else {
-          self$r_expr <- r_expr
-        }
+        self$r_code <- r_code
+        self$r_expr <- suppressWarnings(as_r_expr(r_code = r_code, r_expr = r_expr))
+
+        if (is.null(self$r_expr) && length(self$depends))
+          warning(self$id, " is not a leaf node but has no R expression to evaluate")
 
         if (length(path)) {
-          self$path <- path
+          self$path <- as.character(path[1])
+        } else {
+          stop(self$id, ": missing file path.")
         }
 
         if (self$persistence$enabled && store) self$store_state()
@@ -954,9 +961,23 @@ file_node <- R6::R6Class(
 
     store_state = function() {
       super$store_state(
-        public_fields  = c("r_expr", "path"),
-        private_fields = c(".last_updated")
+        public_fields  = c("r_expr", "path")
       )
+    },
+
+    check_hash = function() {
+      if (!self$exists()) return(NA) # TODO: or NULL?
+
+      hash <- digest::digest(object = self$path, file = TRUE, algo = "md5")
+      changed <- isNotTRUE(self$hash$hash == hash)
+
+      if (changed)
+        self$hash <- list(
+          hash = hash,
+          time = Sys.time()
+        )
+
+      return(changed)
     },
 
     eval = function(verbose = TRUE, verbose_prefix = "") {
@@ -972,18 +993,10 @@ file_node <- R6::R6Class(
 
       eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
 
-      private$.last_updated <- Sys.time()
-
       # checking hash before signalling change to parent
-      # copied from r_node
-      # compute md5 hash of the result
-      hash    <- digest::digest(object = self$path, file = TRUE, algo = "md5")
-      changed <- self$hash != hash
+      changed <- self$check_hash()
 
-      if (!length(changed) || is.na(changed) || changed) {
-        changed <- TRUE
-        self$hash <- hash
-      }
+      private$.last_updated <- Sys.time()
 
       if (self$persistence$enabled) self$store_state()
 
@@ -995,7 +1008,7 @@ file_node <- R6::R6Class(
     },
 
     check_triggers = function() {
-      return(super$check_triggers() || !self$exists() || !length(self$last_updated) || is.na(self$last_updated))
+      return(super$check_triggers() || !self$exists())
     },
 
     remove = function() {
@@ -1014,7 +1027,11 @@ file_node <- R6::R6Class(
 
     last_updated = function(value) {
       if (missing(value)) {
-        return(file.mtime(self$path))
+        # file might have been modified but the content stayed the same
+        self$check_hash()
+        time_changed  <- self$hash$time
+        time_modified <- file.mtime(self$path)
+        return(min(time_changed, time_modified)) # TODO: na.rm = ?
       } else {
         stop("Can't set `$last_updated")
       }
