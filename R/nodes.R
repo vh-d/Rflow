@@ -127,7 +127,8 @@ node <- R6::R6Class(
       public_fields  = NULL,
       private_fields = NULL) {
 
-      public_fields <- c("id", "name", "env", "depends", "trigger_condition", public_fields)
+      public_fields  <- unique(c("id", "name", "env", "depends", "trigger_condition", public_fields))
+      private_fields <- unique(c(".last_evaluated", ".last_changed", private_fields))
 
       saveRDS(
         object = list(
@@ -391,8 +392,7 @@ r_node <- R6::R6Class(
 
     store_state = function() {
       super$store_state(
-        public_fields  = c("r_expr"),
-        private_fields = c(".last_evaluated")
+        public_fields  = c("r_code", "r_expr")
       )
     },
 
@@ -570,8 +570,7 @@ db_node <- R6::R6Class(
 
     store_state = function() {
       super$store_state(
-        public_fields  = c("con_code", "r_expr", "sql_code"),
-        private_fields = c(".last_evaluated")
+        public_fields  = c("con_code", "r_expr", "sql_code")
       )
     },
 
@@ -842,8 +841,7 @@ excel_sheet <- R6::R6Class(
 
     store_state = function() {
       super$store_state(
-        public_fields  = c("r_expr", "path", "sheet"),
-        private_fields = c(".last_evaluated")
+        public_fields  = c("r_expr", "path", "sheet")
       )
     },
 
