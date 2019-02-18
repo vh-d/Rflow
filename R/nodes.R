@@ -35,7 +35,8 @@ node <- R6::R6Class(
   classname = "node",
 
   private = list(
-    .last_updated  = NULL
+    .last_evaluated  = NULL,
+    .last_changed   = NULL
   ),
 
   public    = list(
@@ -51,7 +52,7 @@ node <- R6::R6Class(
     trigger_defchange  = FALSE,
     trigger_manual     = FALSE,
     trigger_condition  = NULL,
-    # last_updated = NULL,
+    # last_evaluated = NULL,
 
     set_id = function(id, name, env) {
       if (is.null(id) & (is.null(name) | is.null(env))) stop("Missing id or (env + name)!") # either 'id' or 'name' + 'env' arguments have to be provided
@@ -250,7 +251,7 @@ node <- R6::R6Class(
       for (y in self[["upstream"]]) {
         results <-
           results |
-          y$last_updated > self$last_updated |
+          y$last_changed > self$last_evaluated |
           y$make(verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  "))
       }
 
@@ -276,11 +277,20 @@ node <- R6::R6Class(
 
   active = list(
 
-    last_updated = function(value) {
+    last_evaluated = function(value) {
       if (missing(value)) {
-        return(private$.last_updated)
+        return(private$.last_evaluated)
       } else {
-        private$.last_updated <- value
+        private$.last_evaluated <- value
+        private$.last_changed   <- value
+      }
+    },
+
+    last_changed = function(value) {
+      if (missing(value)) {
+        return(private$.last_evaluated)
+      } else {
+        stop("Can't set `$last_changed")
       }
     }
   )
@@ -334,7 +344,7 @@ r_node <- R6::R6Class(
         ...,
         r_code  = NULL,
         r_expr  = NULL,
-        .last_updated = NULL,
+        .last_evaluated = NULL,
         type    = NULL,
         store   = TRUE,
         cache   = list(enabled = FALSE)
@@ -350,7 +360,7 @@ r_node <- R6::R6Class(
         # caching properties
         self$set_cache(cache)
 
-        private$.last_updated <- if (length(.last_updated)) .last_updated else as.POSIXct(NA)
+        private$.last_evaluated <- if (length(.last_evaluated)) .last_evaluated else as.POSIXct(NA)
 
         # from deprecated setup()
         # connect to specified R environment
@@ -382,7 +392,7 @@ r_node <- R6::R6Class(
     store_state = function() {
       super$store_state(
         public_fields  = c("r_expr"),
-        private_fields = c(".last_updated")
+        private_fields = c(".last_evaluated")
       )
     },
 
@@ -419,7 +429,7 @@ r_node <- R6::R6Class(
 
       assign(self$name, eval(self$r_expr, envir = self$r_env), pos = self$r_env)
 
-      private$.last_updated <- Sys.time()
+      private$.last_evaluated <- Sys.time()
 
       # checking hash before signalling change to parent
       changed <- self$check_hash()
@@ -452,7 +462,7 @@ r_node <- R6::R6Class(
     },
 
     check_triggers = function() {
-      return(super$check_triggers() || !self$exists() || !length(self$last_updated) || is.na(self$last_updated))
+      return(super$check_triggers() || !self$exists() || !length(self$last_evaluated) || is.na(self$last_evaluated))
     },
 
     get = function() {
@@ -473,6 +483,28 @@ r_node <- R6::R6Class(
         return(invisible(FALSE))
       }
     }
+  ),
+
+  active = list(
+
+    last_evaluated = function(value) {
+      if (missing(value)) {
+        return(private$.last_evaluated)
+      } else {
+        private$.last_evaluated <- value
+      }
+    },
+
+    last_changed = function(value) {
+      if (missing(value)) {
+        # file might have been modified but the content stayed the same
+        self$check_hash()
+        return(self$hash$time)
+      } else {
+        stop("Can't set `$last_changed")
+      }
+    }
+
   )
 )
 
@@ -500,7 +532,7 @@ db_node <- R6::R6Class(
         r_expr   = NULL,  # R expression (from r_code)
         con_code = NULL,
         connection = NULL,
-        .last_updated = NULL,
+        .last_evaluated = NULL,
         type     = NULL,
         store    = TRUE
       ) {
@@ -529,7 +561,7 @@ db_node <- R6::R6Class(
           self$r_expr <- r_expr
         }
 
-        private$.last_updated <- if (length(.last_updated)) .last_updated else as.POSIXct(NA)
+        private$.last_evaluated <- if (length(.last_evaluated)) .last_evaluated else as.POSIXct(NA)
 
         if (self$persistence$enabled && store) self$store_state()
 
@@ -539,7 +571,7 @@ db_node <- R6::R6Class(
     store_state = function() {
       super$store_state(
         public_fields  = c("con_code", "r_expr", "sql_code"),
-        private_fields = c(".last_updated")
+        private_fields = c(".last_evaluated")
       )
     },
 
@@ -604,7 +636,7 @@ db_node <- R6::R6Class(
 
       eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
 
-      private$.last_updated <- Sys.time()
+      private$.last_evaluated <- Sys.time()
 
       if (self$persistence$enabled) self$store_state()
 
@@ -811,7 +843,7 @@ excel_sheet <- R6::R6Class(
     store_state = function() {
       super$store_state(
         public_fields  = c("r_expr", "path", "sheet"),
-        private_fields = c(".last_updated")
+        private_fields = c(".last_evaluated")
       )
     },
 
@@ -828,7 +860,7 @@ excel_sheet <- R6::R6Class(
 
       eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
 
-      private$.last_updated <- Sys.time()
+      private$.last_evaluated <- Sys.time()
 
       # checking hash before signalling change to parent
       # copied from r_node
@@ -853,7 +885,7 @@ excel_sheet <- R6::R6Class(
     },
 
     check_triggers = function() {
-      return(super$check_triggers() || !self$exists() || !length(self$last_updated) || is.na(self$last_updated))
+      return(super$check_triggers() || !self$exists() || !length(self$last_evaluated) || is.na(self$last_evaluated))
     },
 
     get = function() {
@@ -876,11 +908,11 @@ excel_sheet <- R6::R6Class(
 
   active = list(
 
-    last_updated = function(value) {
+    last_evaluated = function(value) {
       if (missing(value)) {
         return(file.mtime(self$path))
       } else {
-        stop("Can't set `$last_updated")
+        stop("Can't set `$last_evaluated")
       }
     }
 
@@ -996,7 +1028,7 @@ file_node <- R6::R6Class(
       # checking hash before signalling change to parent
       changed <- self$check_hash()
 
-      private$.last_updated <- Sys.time()
+      private$.last_evaluated <- Sys.time()
 
       if (self$persistence$enabled) self$store_state()
 
@@ -1025,18 +1057,25 @@ file_node <- R6::R6Class(
 
   active = list(
 
-    last_updated = function(value) {
+    last_evaluated = function(value) {
+      if (missing(value)) {
+        return(private$.last_evaluated)
+      } else {
+        private$.last_evaluated <- value
+      }
+    },
+
+    last_changed = function(value) {
       if (missing(value)) {
         # file might have been modified but the content stayed the same
         self$check_hash()
         time_changed  <- self$hash$time
         time_modified <- file.mtime(self$path)
-        return(min(time_changed, time_modified)) # TODO: na.rm = ?
+        return(min(time_changed, time_modified, na.rm = TRUE)) # TODO: na.rm = ?
       } else {
-        stop("Can't set `$last_updated")
+        stop("Can't set `$last_changed")
       }
     }
-
   )
 )
 
