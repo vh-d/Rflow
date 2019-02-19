@@ -163,7 +163,7 @@ load_nodes.rflow <- function(
   obj_defs <-
     load_node_definitions(
       path = x$.def_path,
-      modified_since = x$.last_evaluated,
+      modified_since = x$.last_updated,
       verbose = verbose)
 
   if (length(obj_defs)) {
@@ -178,7 +178,7 @@ load_nodes.rflow <- function(
     res <- NULL
   }
 
-  # x$.last_evaluated <- Sys.time()
+  x$.last_updated <- Sys.time()
 
   return(invisible(res))
 }
