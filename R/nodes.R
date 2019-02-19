@@ -227,9 +227,14 @@ node <- R6::R6Class(
     },
 
     check_triggers = function() {
-      return(self$trigger_defchange || self$trigger_manual || self$check_trigger_condition())
+      return(
+        FALSE || 
+          self$trigger_defchange || 
+          self$trigger_manual || 
+          self$check_trigger_condition() || 
+          !length(self$last_evaluated) || is.na(self$last_evaluated))
     },
-
+    
     reset_triggers = function() {
       self$trigger_defchange <- FALSE
       self$trigger_manual <- FALSE
@@ -462,7 +467,7 @@ r_node <- R6::R6Class(
     },
 
     check_triggers = function() {
-      return(super$check_triggers() || !self$exists() || !length(self$last_evaluated) || is.na(self$last_evaluated))
+      return(super$check_triggers() || !self$exists())
     },
 
     get = function() {
