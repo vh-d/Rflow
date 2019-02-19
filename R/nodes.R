@@ -780,7 +780,7 @@ excel_sheet <- R6::R6Class(
       function(
         ...,
         path      = NULL,
-        sheet     = NULL, # not in file_node
+        sheet     = 1L, # not in file_node
         read_args = NULL, # TODO!
         type      = NULL,
         store     = TRUE
@@ -789,8 +789,13 @@ excel_sheet <- R6::R6Class(
 
         super$initialize(..., store = FALSE)
 
-        if (length(path))  self$path  <- path
-        if (length(sheet)) self$sheet <- sheet
+        if (length(path)) {
+          self$path <- as.character(path[1])
+        } else {
+          stop(self$id, ": missing file path.")
+        }
+
+        self$sheet <- if (length(sheet)) sheet else 1L
 
         if (self$persistence$enabled && store) self$store_state()
 
@@ -801,7 +806,7 @@ excel_sheet <- R6::R6Class(
       function(
         ...,
         path    = NULL,
-        sheet   = NULL, # not in file_node
+        sheet   = 1L, # not in file_node
         store   = TRUE,
         verbose = FALSE
       ) {
@@ -836,7 +841,9 @@ excel_sheet <- R6::R6Class(
 
     exists = function() {
       if (file.exists(self$path)) {
-        return(isTRUE(self$sheet %in% openxlsx::getSheetNames(self$path)))
+        if (is.numeric(self$sheet))
+          return(isTRUE(as.integer(self$sheet) %in% seq_along(openxlsx::getSheetNames(self$path)))) else
+            return(isTRUE(self$sheet %in% openxlsx::getSheetNames(self$path)))
       }
     },
 
@@ -861,8 +868,8 @@ excel_sheet <- R6::R6Class(
 
     get = function() {
       if (self$exists()) {
-        do.call(openxlsx::read.xlsx, args = c(list(xlsxFile = self$path, sheet = self$sheet), read_args))
-      } else stop(self$id, ": sheet '", self$sheet, "' does not exists!")
+        do.call(openxlsx::read.xlsx, args = c(list(xlsxFile = self$path, sheet = self$sheet), self$read_args))
+      } else stop(self$id, ": sheet '", self$sheet, "' does not exists in ", self$path)
     }
 
   ),
