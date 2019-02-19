@@ -40,6 +40,8 @@ DB1 <- list(con = DBI::dbConnect(RSQLite::SQLite(), ":memory:"))
 
 ```{r DAG}
 RF <- new_rflow(path = params$rflow)
+Rflow::clean_cache(RF)
+Rflow::clean_persistence(RF)
 ```
 
 
@@ -47,11 +49,12 @@ RF <- new_rflow(path = params$rflow)
 ```{r load obj definitions from files}
 # r_node$debug("initialize")
 load_nodes(RF)
+# Rflow:::check_rflow_dag(RF)
 ```
 
 ```{r}
 plot(RF)
-View(nodes(RF))
+# View(nodes(RF))
 ```
 
 ```{r make}

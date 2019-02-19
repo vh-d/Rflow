@@ -763,7 +763,7 @@ accdb_node <- R6::R6Class(
 
 
 # excel sheet node ---------------------------------------------------------
-
+#' @export
 excel_sheet <- R6::R6Class(
 
   classname = "excel_sheet",

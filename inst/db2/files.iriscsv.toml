@@ -1,4 +1,4 @@
-env  = "file"
-name = "irisfile"
+env  = "files"
+name = "iriscsv"
 path = "./inst/db2/data/iris.csv"
 type = "csv_node"

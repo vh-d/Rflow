@@ -1,11 +1,10 @@
-env  = "file"
-name = "irisaggr"
+env  = "files"
+name = "irisaggrcsv"
 path = "./inst/db2/data/iris_aggr.csv"
 type = "file_node"
 
 depends = ["RE1.iristab"]
 
 r_code = '''
-  print(.RFLOW$DB1.tab1$last_updated)
   write.csv(x = RE1$iristab, file = self$path)
 '''

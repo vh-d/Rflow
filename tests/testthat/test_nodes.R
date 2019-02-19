@@ -101,3 +101,28 @@ test_that("nodes can be initiated", {
   expect_true(is.null(node1$last_evaluated) || is.na(node1$last_evaluated))
 })
 
+
+
+context("Creating excel_sheet objects")
+
+test_that("nodes can be initiated", {
+  expect_error(Rflow::excel_sheet$new(),               regexp = "[Mm]issing", info = "initialization requires id or env + name")
+  expect_error(Rflow::excel_sheet$new(name = "node1"), regexp = "[Mm]issing", info = "initialization requires id or env + name")
+  expect_error(Rflow::excel_sheet$new(env  = "env1"),  regexp = "[Mm]issing", info = "initialization requires id or env + name")
+  expect_error(Rflow::excel_sheet$new(id = "node1"),   regexp = "[Mm]issing", info = "initialization requires file path")
+
+  tmp_file <- tempfile()
+
+  node1 <- Rflow::excel_sheet$new(id = "node1", path = tmp_file)
+  expect_s3_class(object = node1, class = "excel_sheet")
+  expect_s3_class(object = node1, class = "node")
+  expect_s3_class(object = node1, class = "R6")
+
+  expect_is(node1$persistence, "list")
+  expect_false(node1$persistence$enabled)
+
+  expect_null(node1$depends)
+  expect_null(node1$trigger_condition)
+  expect_true(is.null(node1$last_evaluated) || is.na(node1$last_evaluated))
+})
+
