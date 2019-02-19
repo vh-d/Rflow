@@ -228,13 +228,13 @@ node <- R6::R6Class(
 
     check_triggers = function() {
       return(
-        FALSE || 
-          self$trigger_defchange || 
-          self$trigger_manual || 
-          self$check_trigger_condition() || 
+        FALSE ||
+          self$trigger_defchange ||
+          self$trigger_manual ||
+          self$check_trigger_condition() ||
           !length(self$last_evaluated) || is.na(self$last_evaluated))
     },
-    
+
     reset_triggers = function() {
       self$trigger_defchange <- FALSE
       self$trigger_manual <- FALSE
@@ -773,32 +773,21 @@ excel_sheet <- R6::R6Class(
 
     path   = NULL,
     sheet  = NULL,
-    read_args = NULL, # TODO!
-    r_expr = NULL,
     hash   = NULL,
+    read_args = NULL, # TODO!
 
     initialize =
       function(
         ...,
-        path     = NULL,
-        sheet    = NULL, # not in file_node
-        r_code   = NULL,
-        r_expr   = NULL,  # R expression (from r_code)
-        type     = NULL,
-        store    = TRUE
+        path      = NULL,
+        sheet     = NULL, # not in file_node
+        read_args = NULL, # TODO!
+        type      = NULL,
+        store     = TRUE
       ) {
-        super$initialize(..., store = FALSE)
+        if (!requireNamespace("openxlsx", quietly = TRUE)) stop(self$id, " requires openxlsx package.")
 
-        if (is.null(r_expr)) {
-          if (is.null(r_code) | !length(r_code)) {
-            warning(self$id, ": no R expression/code!")
-            self$r_expr <- NULL
-          } else {
-            self$r_expr <- parse(text = r_code)
-          }
-        } else {
-          self$r_expr <- r_expr
-        }
+        super$initialize(..., store = FALSE)
 
         if (length(path))  self$path  <- path
         if (length(sheet)) self$sheet <- sheet
@@ -813,8 +802,6 @@ excel_sheet <- R6::R6Class(
         ...,
         path    = NULL,
         sheet   = NULL, # not in file_node
-        r_code  = NULL,
-        r_expr  = NULL,
         store   = TRUE,
         verbose = FALSE
       ) {
@@ -832,13 +819,6 @@ excel_sheet <- R6::R6Class(
           self$trigger_defchange <- TRUE
         }
 
-        r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
-        if (!identical(as.character(self$r_expr), as.character(r_expr))) {
-          if (verbose) notify_update(self$id, "R expression")
-          self$r_expr <- r_expr
-          self$trigger_defchange <- TRUE
-        }
-
         if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
@@ -846,39 +826,12 @@ excel_sheet <- R6::R6Class(
 
     store_state = function() {
       super$store_state(
-        public_fields  = c("r_expr", "path", "sheet")
+        public_fields  = c("path", "sheet")
       )
     },
 
-    eval = function(verbose = TRUE, verbose_prefix = "") {
-      # exists_check <- self$exists()
-
-      if (verbose) {
-        cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
-        cat_r_expr(self$r_expr, paste0(verbose_prefix, "  "))
-      }
-
-      # for referencing other objects in rflow
-      .RFLOW <- parent.env(self)
-
-      eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
-
-      private$.last_evaluated <- Sys.time()
-
-      # checking hash before signalling change to parent
-      # copied from r_node
-      # compute md5 hash of the result
-      hash    <- digest::digest(object = self$path, file = TRUE, algo = "md5")
-      changed <- self$hash != hash
-
-      if (!length(changed) || is.na(changed) || changed) {
-        changed <- TRUE
-        self$hash <- hash
-      }
-
-      if (self$persistence$enabled) self$store_state()
-
-      return(changed)
+    eval = function(...) {
+      # warning(self$id, " is read only node")
     },
 
     exists = function() {
@@ -887,8 +840,23 @@ excel_sheet <- R6::R6Class(
       }
     },
 
+    check_hash = function() {
+      if (!self$exists()) return(NA) # TODO: or NULL?
+
+      hash <- digest::digest(object = self$get(), algo = "md5")
+      changed <- isNotTRUE(self$hash$hash == hash)
+
+      if (changed)
+        self$hash <- list(
+          hash = hash,
+          time = Sys.time()
+        )
+
+      return(changed)
+    },
+
     check_triggers = function() {
-      return(super$check_triggers() || !self$exists() || !length(self$last_evaluated) || is.na(self$last_evaluated))
+      return(super$check_triggers() || !self$exists())
     },
 
     get = function() {
@@ -896,16 +864,6 @@ excel_sheet <- R6::R6Class(
         do.call(openxlsx::read.xlsx, args = c(list(xlsxFile = self$path, sheet = self$sheet), read_args))
       } else stop(self$id, ": sheet '", self$sheet, "' does not exists!")
     }
-
-    # remove = function() {
-    #   if (self$exists()) {
-    #     warning("Deleting file represented by ", crayon::red(self$id), " !")
-    #     return(invisible(file.remove(self$path)))
-    #   } else {
-    #     warning("Object ", self$id, " (", self$name, ")", " does not exist.")
-    #     return(invisible(FALSE))
-    #   }
-    # }
 
   ),
 
@@ -916,6 +874,18 @@ excel_sheet <- R6::R6Class(
         return(file.mtime(self$path))
       } else {
         stop("Can't set `$last_evaluated")
+      }
+    },
+
+    last_changed = function(value) {
+      if (missing(value)) {
+        # file might have been modified but the content stayed the same
+        self$check_hash()
+        time_changed  <- self$hash$time
+        time_modified <- file.mtime(self$path)
+        return(min(time_changed, time_modified, na.rm = TRUE)) # TODO: na.rm = ?
+      } else {
+        stop("Can't set `$last_changed")
       }
     }
 
