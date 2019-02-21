@@ -1,8 +1,10 @@
 env  = "DB1"
 name = "tab2"
 type = "db_node"
-con_code = "DB1$con"
+desc = "This is a database table"
+tags = ["sometag", "someothertag"]
 depends = "RE1.tab2"
+con_code = "DB1$con"
 
 r_code = '''
 {

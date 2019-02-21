@@ -44,6 +44,9 @@ node <- R6::R6Class(
     env        = NULL,
     name       = NULL,
     desc       = NULL,
+
+    tags       = NULL,
+
     depends    = NULL,
     upstream   = NULL,
     downstream = NULL,
@@ -82,6 +85,7 @@ node <- R6::R6Class(
     print = function(...) {
       cat("<", class(self)[1], "> ", crayon::red(self$id), ": ", self$name,  "\n", sep = "")
       if (length(self$desc)) cat("  desc: ", crayon::italic(self$desc),         "\n", sep = "")
+      if (length(self$tags)) cat("  tags: ", paste0(self$tags, collapse = " "), "\n", sep = "")
       cat("  depends: ", paste0(self$depends, collapse = ", "), "\n", sep = "")
       # invisible(self)
     },
@@ -92,6 +96,7 @@ node <- R6::R6Class(
         name    = NULL,
         env     = NULL,
         desc    = NULL,
+        tags    = NULL,
         depends = NULL,
         trigger_condition = NULL,
         persistence = list(enabled = FALSE),
@@ -107,6 +112,8 @@ node <- R6::R6Class(
         self$desc    <- desc
 
         self$set_persistence(persistence)
+
+        self$tags    <- tags
 
         depends_char <- if (is.character(depends)) depends else names(depends)
         self$depends <- depends_char
@@ -132,7 +139,7 @@ node <- R6::R6Class(
       public_fields  = NULL,
       private_fields = NULL) {
 
-      public_fields  <- unique(c("id", "name", "env", "depends", "trigger_condition", "trigger_defchange", public_fields))
+      public_fields  <- unique(c("id", "name", "env", "desc", "tags", "depends", "trigger_condition", "trigger_defchange", public_fields))
       private_fields <- unique(c(".last_evaluated", ".last_changed", private_fields))
 
       saveRDS(
@@ -149,8 +156,8 @@ node <- R6::R6Class(
       function(
         id      = NULL,
         type    = NULL,
-
         desc    = NULL,
+        tags    = NULL,
         depends = NULL,
         trigger_condition = NULL,
 
@@ -168,6 +175,12 @@ node <- R6::R6Class(
         }
 
         if (!is.null(desc)) self$desc <- desc
+
+        if (!identical(as.character(self$tags), as.character(tags))) {
+          if (verbose) notify_update(self$id, "tags")
+          self$tags <- tags
+          # self$trigger_defchange <- TRUE
+        }
 
         trigger_condition <- suppressWarnings(as_r_expr(r_code = trigger_condition))
         if (!identical(as.character(self$trigger_condition), as.character(trigger_condition))) {
