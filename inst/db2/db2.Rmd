@@ -40,8 +40,8 @@ DB1 <- list(con = DBI::dbConnect(RSQLite::SQLite(), ":memory:"))
 
 ```{r DAG}
 RF <- new_rflow(path = params$rflow)
-Rflow::clean_cache(RF)
-Rflow::clean_persistence(RF)
+# Rflow::clean_cache(RF)
+# Rflow::clean_persistence(RF)
 ```
 
 

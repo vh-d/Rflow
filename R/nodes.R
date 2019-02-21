@@ -95,6 +95,8 @@ node <- R6::R6Class(
         depends = NULL,
         trigger_condition = NULL,
         persistence = list(enabled = FALSE),
+        .last_evaluated = NULL,
+        .last_changed   = NULL,
         store   = TRUE,
         ...
       ) {
@@ -112,6 +114,9 @@ node <- R6::R6Class(
         # self$trigger_defchange <- TRUE # WHY???
         if (!is.null(trigger_condition))
           self$trigger_condition <- as_r_expr(r_code = trigger_condition)
+
+        private$.last_evaluated <- if (length(.last_evaluated)) .last_evaluated else as.POSIXct(NA)
+        private$.last_changed   <- if (length(.last_changed))   .last_changed else as.POSIXct(NA)
 
         # other_args <- list(...)
         # if (length(other_args)) warning("Ignoring ", paste(names(other_args), collapse = ", "), " properties.\n")
@@ -350,7 +355,6 @@ r_node <- R6::R6Class(
         ...,
         r_code  = NULL,
         r_expr  = NULL,
-        .last_evaluated = NULL,
         type    = NULL,
         store   = TRUE,
         cache   = list(enabled = FALSE)
@@ -365,8 +369,6 @@ r_node <- R6::R6Class(
 
         # caching properties
         self$set_cache(cache)
-
-        private$.last_evaluated <- if (length(.last_evaluated)) .last_evaluated else as.POSIXct(NA)
 
         # from deprecated setup()
         # connect to specified R environment
@@ -782,6 +784,7 @@ excel_sheet <- R6::R6Class(
         path      = NULL,
         sheet     = 1L, # not in file_node
         read_args = NULL, # TODO!
+        hash      = NULL,
         type      = NULL,
         store     = TRUE
       ) {
@@ -797,6 +800,10 @@ excel_sheet <- R6::R6Class(
 
         self$sheet <- if (length(sheet)) sheet else 1L
 
+        if (length(hash)) {
+          self$hash <- hash
+        }
+
         if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
@@ -807,6 +814,7 @@ excel_sheet <- R6::R6Class(
         ...,
         path    = NULL,
         sheet   = 1L, # not in file_node
+        hash    = NULL,
         store   = TRUE,
         verbose = FALSE
       ) {
@@ -824,6 +832,10 @@ excel_sheet <- R6::R6Class(
           self$trigger_defchange <- TRUE
         }
 
+        if (length(hash)) {
+          self$hash <- hash
+        }
+
         if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
@@ -831,7 +843,7 @@ excel_sheet <- R6::R6Class(
 
     store_state = function() {
       super$store_state(
-        public_fields  = c("path", "sheet")
+        public_fields  = c("path", "sheet", "hash")
       )
     },
 
@@ -920,6 +932,7 @@ file_node <- R6::R6Class(
         path     = NULL,
         r_code   = NULL,
         r_expr   = NULL,  # R expression (from r_code)
+        hash     = NULL,
         type     = NULL,
         store    = TRUE
       ) {
@@ -937,6 +950,10 @@ file_node <- R6::R6Class(
           stop(self$id, ": missing file path.")
         }
 
+        if (length(hash)) {
+          self$hash <- hash
+        }
+
         if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
@@ -948,6 +965,7 @@ file_node <- R6::R6Class(
         path    = NULL,
         r_code  = NULL,
         r_expr  = NULL,
+        hash    = NULL,
         store   = TRUE,
         verbose = FALSE
       ) {
@@ -966,6 +984,10 @@ file_node <- R6::R6Class(
           self$trigger_defchange <- TRUE
         }
 
+        if (length(hash)) {
+          self$hash <- hash
+        }
+
         if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
@@ -973,7 +995,7 @@ file_node <- R6::R6Class(
 
     store_state = function() {
       super$store_state(
-        public_fields  = c("r_expr", "path")
+        public_fields  = c("r_expr", "path", "hash")
       )
     },
 
