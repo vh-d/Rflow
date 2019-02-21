@@ -17,7 +17,6 @@ test_that("nodes can be initiated", {
 
   expect_null(node1$depends)
   expect_null(node1$trigger_condition)
-  expect_null(node1$last_evaluated)
 
   node12 <- Rflow::node$new(name = "node12", env = "env")
   expect_equal(node12$id, "env.node12", info = "Nodes can be initialize with name/env pair instead of id")
