@@ -411,7 +411,7 @@ add_nodes <- function(objs, rflow, connect = TRUE, ..., verbose = TRUE) {
       ...)
 
   # connect objects after all are initiated
-  if (connect) connect_nodes(rflow)
+  if (connect) connect_nodes(rflow, verbose = max(0, verbose - 1L))
 
   return(unlist(result))
 }
