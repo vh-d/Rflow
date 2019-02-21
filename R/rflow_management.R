@@ -297,7 +297,7 @@ add_node.list <- function(
   # extract object's id
   id <- get_id(x)
 
-  if (verbose) cat("Adding node ", crayon::red(id), "\n", sep = "")
+  if (verbose) cat("Adding/updating  ", crayon::red(id), "\n", sep = "")
 
   # default behaviour
   updated   <- FALSE # when object already exists and is only going to be updated
