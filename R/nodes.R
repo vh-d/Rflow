@@ -132,7 +132,7 @@ node <- R6::R6Class(
       public_fields  = NULL,
       private_fields = NULL) {
 
-      public_fields  <- unique(c("id", "name", "env", "depends", "trigger_condition", public_fields))
+      public_fields  <- unique(c("id", "name", "env", "depends", "trigger_condition", "trigger_defchange", public_fields))
       private_fields <- unique(c(".last_evaluated", ".last_changed", private_fields))
 
       saveRDS(
