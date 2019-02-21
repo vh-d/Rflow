@@ -426,7 +426,7 @@ r_node <- R6::R6Class(
       ) {
         super$update_definition(..., verbose = verbose, store = FALSE)
 
-        r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
+        r_expr <- suppressWarnings(as_r_expr(r_code = r_code, r_expr = r_expr))
         if (!identical(as.character(self$r_expr), as.character(r_expr))) {
           if (verbose) notify_update(self$id, "R expression")
           self$r_expr <- r_expr
@@ -990,7 +990,7 @@ file_node <- R6::R6Class(
           self$trigger_defchange <- TRUE
         }
 
-        r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
+        r_expr <- suppressWarnings(as_r_expr(r_code = r_code, r_expr = r_expr))
         if (!identical(as.character(self$r_expr), as.character(r_expr))) {
           if (verbose) notify_update(self$id, "R expression")
           self$r_expr <- r_expr
