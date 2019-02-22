@@ -8,6 +8,10 @@ make(x, ...)
 }
 \arguments{
 \item{x}{node's id or rflow object}
+
+\item{force}{logical; force eval()}
+
+\item{verbose}{logical; switch on/off verbose output}
 }
 \description{
 Make/build target or multiple targets

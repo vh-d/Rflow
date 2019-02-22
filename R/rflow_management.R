@@ -494,6 +494,8 @@ eval_node.character <- function(id, rflow) {
 #' Make/build target or multiple targets
 #'
 #' @param x node's id or rflow object
+#' @param force logical; force eval()
+#' @param verbose logical; switch on/off verbose output
 #' @param ...
 #' @export
 make <- function(x, ...){
@@ -503,28 +505,29 @@ make <- function(x, ...){
 }
 
 #' @export
-make.node <- function(x, verbose = TRUE, verbose_prefix = "") {
-  x$make(verbose = verbose, verbose_prefix = verbose_prefix)
+make.node <- function(x, force = FALSE, verbose = TRUE, verbose_prefix = "") {
+  x$make(force = force, verbose = verbose, verbose_prefix = verbose_prefix)
 }
 
 # recurrent procedure
 #' @export
-make.character <- function(id, rflow, verbose = TRUE, verbose_prefix = "") {
+make.character <- function(id, rflow, force = FALSE, verbose = TRUE, verbose_prefix = "") {
   if (length(id) < 2) {
     if (length(id) == 0) return(NULL)
-    make(rflow[[id]], verbose = verbose, verbose_prefix = verbose_prefix)
+    make(rflow[[id]], force = force, verbose = verbose, verbose_prefix = verbose_prefix)
   } else {
-    sapply(id, make.character, verbose = verbose, verbose_prefix = verbose_prefix)
+    sapply(id, make.character, force = force, verbose = verbose, verbose_prefix = verbose_prefix)
   }
 }
 
 #' @param rflow rflow object
 #'
 #' @param leaves_only logical; Option to run make only from ending nodes. Avoids redundant visits on intermediate nodes.
+#' @param force logical; force eval()?
 #' @param verbose logical; Print verbose output?
 #'
 #' @export
-make.rflow <- function(rflow, leaves_only = TRUE, verbose = TRUE) {
+make.rflow <- function(rflow, leaves_only = TRUE, force = FALSE, verbose = TRUE) {
   if (verbose) cat(rep("\u2500", 3), " Make ", rep("\u2500", 25), "\n\n", sep = "")
 
   if (leaves_only) {
@@ -540,6 +543,7 @@ make.rflow <- function(rflow, leaves_only = TRUE, verbose = TRUE) {
     X       = nodes_to_make,
     FUN     = make,
     rflow   = rflow,
+    force   = force,
     verbose = verbose
   )
 

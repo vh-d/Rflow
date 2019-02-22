@@ -262,7 +262,7 @@ node <- R6::R6Class(
 
     },
 
-    make = function(verbose = TRUE, verbose_prefix = "") {
+    make = function(force = FALSE, verbose = TRUE, verbose_prefix = "") {
 
       if (verbose) {
         cat(verbose_prefix, "\u250C Solving node ", crayon::red(crayon::bold(self$id)), "\n", sep = "")
@@ -276,10 +276,10 @@ node <- R6::R6Class(
         results <-
           results |
           y$last_changed > self$last_evaluated |
-          y$make(verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  "))
+          y$make(force = force, verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  "))
       }
 
-      triggered <- isNotFALSE(results) | isNotFALSE(self$check_triggers())
+      triggered <- isTRUE(force) || isNotFALSE(results) || isNotFALSE(self$check_triggers())
 
       if (!triggered) {
         if (verbose) cat(verbose_prefix, "\u2514 ", crayon::silver(self$id, " not triggered.", sep = ""), "\n", sep = "")
