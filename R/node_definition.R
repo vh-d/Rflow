@@ -63,7 +63,7 @@ process_obj_defs <- function(obj_defs) {
 
 #' @export
 env_name_from_id <- function(id) {
-  strm <- stringr::str_match(string = id, pattern = "^([0-9a-zA-Z]+?\\.)?([0-9a-zA-Z]+?[0-9a-zA-Z._]*?)$")
+  strm <- stringr::str_match(string = id, pattern = "^([0-9a-zA-Z_]+?\\.)?([0-9a-zA-Z]+?[0-9a-zA-Z._]*?)$")
   strm[, 2] <- stringr::str_replace(strm[, 2], "\\.$", "")
   
   data.table(
