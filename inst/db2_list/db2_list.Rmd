@@ -51,6 +51,7 @@ obj_defs <-
   list(
     "RE1.tab1" =
       list(
+        tags = c("table"),
         type = "r_node",
         r_expr =
           expression({
@@ -65,6 +66,7 @@ obj_defs <-
     
     "DB1.tab1" = 
       list(
+        tags    = c("db", "table"),
         type    = "db_node",
         depends = "RE1.tab1",
         con_code= "DB1$con",
@@ -83,6 +85,7 @@ obj_defs <-
     list(
       env  = "RE1",
       name = "tab2",
+      tags = c("table", "R"),
       type = "r_node",
       r_code = "{N = 20;data.table(id = 1:N, value = rnorm(N))}"
     )
@@ -112,7 +115,7 @@ plot(RF)
 ```
 
 ```{r make}
-make(RF)
+make(RF, tags = "db")
 ```
 
 
