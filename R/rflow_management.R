@@ -527,15 +527,25 @@ make.character <- function(id, rflow, force = FALSE, verbose = TRUE, verbose_pre
 #' @param verbose logical; Print verbose output?
 #'
 #' @export
-make.rflow <- function(rflow, leaves_only = TRUE, force = FALSE, verbose = TRUE) {
+make.rflow <- function(rflow, tags = NULL, leaves_only = TRUE, force = FALSE, verbose = TRUE) {
   if (verbose) cat(rep("\u2500", 3), " Make ", rep("\u2500", 25), "\n\n", sep = "")
 
+  E <- edges(rflow)
+  N <- nodes(rflow)
+
   if (leaves_only) {
-    E <- edges(rflow)
-    N <- nodes(rflow)
     nodes_to_make <- N[!E, on = c("id" = "from"), id]
   } else {
-    nodes_to_make <- ls(rflow)
+    # nodes_to_make <- ls(rflow)
+    nodes_to_make <- N[["id"]]
+  }
+
+  if (length(tags)) {
+    query_tags <- tags
+    rm(tags)
+    nodes_to_make <-
+      N[id %in% nodes_to_make
+        ][stringr::str_detect(tags, stringr::fixed(paste0("|", query_tags, "|"))), id]
   }
 
   # RUN

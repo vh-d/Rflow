@@ -5,6 +5,10 @@ disc_scale <- function(
   scales::hue_pal(h, c, l, h.start, direction)
 }
 
+format_tags <- function(tags = NULL) {
+  if (!length(tags)) return("")
+  paste0("|", paste0(tags, collapse = "|"), "|")
+}
 
 #' list all nodes of an Rflow object
 #'
@@ -37,6 +41,7 @@ nodes.rflow <- function(rflow) {
             name  = null2na(x$name),
             env   = null2na(x$env),
             desc  = null2na(x$desc),
+            tags  = format_tags(x$tags),
             sql_code  = deescape_quotes(paste_sql(x$sql_code)),
             r_expr    = paste_sql(as.character(x$r_expr)),
             node_type = class(x)[1])
