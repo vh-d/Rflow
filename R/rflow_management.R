@@ -81,24 +81,25 @@ clean_rflow <- function(rflow) {
 #' @param ...
 #'
 #' @export
-clean_cache <- function(x) {
+clean_cache <- function(x, ...) {
   UseMethod("clean_cache", x)
 }
 
+#' @method clean_cache rflow
 #' @export
-clean_cache.rflow <- function(rflow) {
+clean_cache.rflow <- function(x, ...) {
 
   # warn if not defined and return
-  if (!length(rflow$.cache$path)) {
+  if (!length(x$.cache$path)) {
     warning("Cache dir not defined!")
     return(TRUE)
   }
 
   # warn if nonexistet and return
-  if (dir.exists(rflow$.cache$path)) {
+  if (dir.exists(x$.cache$path)) {
     as.logical(
       1-unlink(
-        file.path(rflow$.cache$path, "*"),
+        file.path(x$.cache$path, "*"),
         recursive = FALSE)
     )
   } else {
@@ -119,21 +120,22 @@ clean_persistence <- function(x, ...) {
 
 #' Clean stored state folder
 #'
-#' @param rflow
+#' @param x
+#' @method clean_persistence rflow
 #' @export
-clean_persistence.rflow <- function(rflow) {
+clean_persistence.rflow <- function(x) {
 
   # warn if not defined and return
-  if (!length(rflow$.persistence$path)) {
+  if (!length(x$.persistence$path)) {
     warning("Persistence storage folder not defined!")
     return(TRUE)
   }
 
   # warn if nonexistet and return
-  if (dir.exists(rflow$.persistence$path)) {
+  if (dir.exists(x$.persistence$path)) {
     as.logical(
       1-unlink(
-        file.path(rflow$.persistence$path, "*"),
+        file.path(x$.persistence$path, "*"),
         recursive = FALSE)
     )
   } else {
@@ -153,6 +155,7 @@ load_nodes <- function(x, ...) {
 #' @param conflict logical; How to resolve conflict when an object of the same id already exists in the rflow?
 #' @param verbose logical; print verbose output?
 #' @rdname load_nodes
+#' @method load_nodes rflow
 #' @export
 load_nodes.rflow <- function(
   x,
@@ -285,6 +288,7 @@ add_node <- function(x, ...) {
   UseMethod("add_node", x)
 }
 
+#' @method add_node list
 #' @export
 add_node.list <- function(
   x,
@@ -466,6 +470,7 @@ connect_nodes <- function(x, ...) {
   UseMethod("connect_nodes", x)
 }
 
+#' @method connect_nodes rflow
 #' @export
 connect_nodes.rflow <- function(rflow, ...) {
   lapply(rflow, function(x) x$connect(...))
@@ -504,11 +509,16 @@ make <- function(x, ...){
   } else stop(substitute(x), " cannot be NULL!")
 }
 
+
+#' @method make node
+#' @export
 make.node <- function(x, force = FALSE, verbose = TRUE, verbose_prefix = "") {
   x$make(force = force, verbose = verbose, verbose_prefix = verbose_prefix)
 }
 
 # recurrent procedure
+#' @method make character
+#' @export
 make.character <- function(
   id,
   rflow,
@@ -529,6 +539,8 @@ make.character <- function(
 #' @param leaves_only logical; Option to run make only from ending nodes. Avoids redundant visits on intermediate nodes.
 #' @param force logical; force eval()?
 #' @param verbose logical; Print verbose output?
+#' @method make rflow
+#' @export
 make.rflow <- function(
   rflow,
   tags = NULL,
@@ -580,11 +592,13 @@ get_value <- function(x, ...) {
   UseMethod("get_value", x)
 }
 
+#' @method get_value character
 #' @export
 get_value.character <- function(x, rflow) {
   rflow[[x]]$get()
 }
 
+#' @method get_value node
 #' @export
 get_value.node <- function(x) {
   x$get()
@@ -606,16 +620,19 @@ trigger_manual <- function(x, ...) {
   }
 }
 
+#' @method trigger_manual node
 #' @export
 trigger_manual.node <- function(x) {
   x$trigger_manual <- TRUE
 }
 
+#' @method trigger_manual character
 #' @export
 trigger_manual.character <- function(x, rflow) {
   rflow[[id]]$trigger_manual <- TRUE
 }
 
+#' @method trigger_manual rflow
 #' @export
 trigger_manual.rflow <- function(rflow, x) {
   rflow[[id]]$trigger_manual <- TRUE

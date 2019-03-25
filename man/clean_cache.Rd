@@ -4,7 +4,7 @@
 \alias{clean_cache}
 \title{Clean cache folder}
 \usage{
-clean_cache(x)
+clean_cache(x, ...)
 }
 \arguments{
 \item{...}{}

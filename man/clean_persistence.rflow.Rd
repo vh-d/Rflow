@@ -4,7 +4,7 @@
 \alias{clean_persistence.rflow}
 \title{Clean stored state folder}
 \usage{
-\method{clean_persistence}{rflow}(rflow)
+\method{clean_persistence}{rflow}(x)
 }
 \description{
 Clean stored state folder
