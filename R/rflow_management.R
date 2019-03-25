@@ -504,14 +504,18 @@ make <- function(x, ...){
   } else stop(substitute(x), " cannot be NULL!")
 }
 
-#' @export
 make.node <- function(x, force = FALSE, verbose = TRUE, verbose_prefix = "") {
   x$make(force = force, verbose = verbose, verbose_prefix = verbose_prefix)
 }
 
 # recurrent procedure
-#' @export
-make.character <- function(id, rflow, force = FALSE, verbose = TRUE, verbose_prefix = "") {
+make.character <- function(
+  id,
+  rflow,
+  force = FALSE,
+  verbose = TRUE,
+  verbose_prefix = ""
+) {
   if (length(id) < 2) {
     if (length(id) == 0) return(NULL)
     make(rflow[[id]], force = force, verbose = verbose, verbose_prefix = verbose_prefix)
@@ -525,9 +529,13 @@ make.character <- function(id, rflow, force = FALSE, verbose = TRUE, verbose_pre
 #' @param leaves_only logical; Option to run make only from ending nodes. Avoids redundant visits on intermediate nodes.
 #' @param force logical; force eval()?
 #' @param verbose logical; Print verbose output?
-#'
-#' @export
-make.rflow <- function(rflow, tags = NULL, leaves_only = TRUE, force = FALSE, verbose = TRUE) {
+make.rflow <- function(
+  rflow,
+  tags = NULL,
+  leaves_only = TRUE,
+  force = FALSE,
+  verbose = TRUE
+) {
   if (verbose) cat(rep("\u2500", 3), " Make ", rep("\u2500", 25), "\n\n", sep = "")
 
   E <- edges(rflow)
