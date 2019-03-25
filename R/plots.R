@@ -74,11 +74,13 @@ edges.rflow <- function(rflow) {
 #' visualize Rflow DAGs using visNetwork
 #'
 #' @param rflow an rflow objects
+#' @param tags vector of tags for filtering nodes
+#' @param includeIsolated logical; Switch to filter isolated/lonely nodes.
 #' @param direction see visNetwork docs on hierarchical graphs
 #' @param ... args passed to visNetwork
 #'
 #' @export
-plot.rflow <- function(rflow, direction = "LR", ...) {
+plot.rflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "LR", ...) {
 
   if (!requireNamespace("visNetwork", quietly = TRUE)) stop("visNetwork package required to plot graphs")
   if (!requireNamespace("data.table", quietly = TRUE)) stop("data.table package required to plot graphs")
@@ -90,6 +92,17 @@ plot.rflow <- function(rflow, direction = "LR", ...) {
     return(invisible(NULL))
   }
   # TODO: objects will have their own methods for printing nice hover titles
+
+  if (length(tags)) {
+    query_tags <- tags
+    rm(tags)
+    dtNODES <- dtNODES[stringr::str_detect(tags, stringr::fixed(paste0("|", query_tags, "|")))]
+  }
+
+  # drop isolated/lonely nodes if needed
+  if (isFALSE(includeIsolated)) {
+    dtNODES <- dtNODES[dtEDGES[, .(id = unique(c(from, to)))], on = "id"]
+  }
 
   dtNODES[, label := paste0(env, " / ", name)]
   dtNODES[,

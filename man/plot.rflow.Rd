@@ -4,10 +4,15 @@
 \alias{plot.rflow}
 \title{visualize Rflow DAGs using visNetwork}
 \usage{
-\method{plot}{rflow}(rflow, direction = "LR", ...)
+\method{plot}{rflow}(rflow, tags = NULL, includeIsolated = TRUE,
+  direction = "LR", ...)
 }
 \arguments{
 \item{rflow}{an rflow objects}
+
+\item{tags}{vector of tags for filtering nodes}
+
+\item{includeIsolated}{logical; Switch to filter isolated/lonely nodes.}
 
 \item{direction}{see visNetwork docs on hierarchical graphs}
 

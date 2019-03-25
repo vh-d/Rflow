@@ -110,7 +110,7 @@ add_nodes(
 
 
 ```{r}
-plot(RF)
+plot(RF, includeIsolated = FALSE)
 # View(nodes(RF))
 ```
 
