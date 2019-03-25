@@ -560,10 +560,6 @@ make.rflow <- function(rflow, tags = NULL, leaves_only = TRUE, force = FALSE, ve
   return(invisible(res))
 }
 
-#' @export
-get.rflow <- function(rflow, id) {
-  rflow[[id]]$get()
-}
 
 #' Obtain value/object represented by a node
 #'
@@ -575,7 +571,6 @@ get.rflow <- function(rflow, id) {
 get_value <- function(x, ...) {
   UseMethod("get_value", x)
 }
-
 
 #' @export
 get_value.character <- function(x, rflow) {
