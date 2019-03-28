@@ -1,13 +1,11 @@
 #' Check consistency of identificators and fill missings
 #' @export
 process_obj_defs <- function(obj_defs) {
-  # list_names <- names(obj_defs)
-  env_names <- env_name_from_id(names(obj_defs))
-  
+
   for (obj_ind in seq_along(obj_defs)) {
     obj_name <- names(obj_defs[obj_ind])
-    has_id_outside <- length(obj_name) && obj_name != ""
     
+    has_id_outside  <- length(obj_name) && obj_name != ""
     has_env_inside  <- length(obj_defs[[obj_ind]]$env)
     has_name_inside <- length(obj_defs[[obj_ind]]$name)
     has_id_inside   <- length(obj_defs[[obj_ind]]$id)
@@ -25,8 +23,8 @@ process_obj_defs <- function(obj_defs) {
         obj_id <- obj_id_inside
       }
       
-      node_env  <- env_names[id == obj_id, env]
-      node_name <- env_names[id == obj_id, name]
+      node_env  <- env_name_from_id(obj_name)[, env[1]]
+      node_name <- env_name_from_id(obj_name)[, name[1]]
       
       # node_id   <- env_names[id == "obj_id", id]
       if (!has_env_inside)
