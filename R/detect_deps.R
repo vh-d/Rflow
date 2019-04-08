@@ -32,8 +32,8 @@ verify_dependencies <- function(x) {
 
 #' @export
 verify_dependencies.node <- function(x) {
-  found  <- detect_deps(x$r_expr, node_names = nodes(parent.env(x))$id)
-  stated <- x$depends
+  found  <- if (!length(x$r_expr)) detect_deps(x$r_expr, node_names = nodes(parent.env(x))$id) else character()
+  stated <- if (!length(x$r_expr)) x$depends else character()
   
   lacks <- setdiff(found, stated)
   extra <- setdiff(stated, found)
