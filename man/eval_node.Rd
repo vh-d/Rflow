@@ -2,15 +2,18 @@
 % Please edit documentation in R/node_primitives.R
 \name{eval_node}
 \alias{eval_node}
-\title{Title}
+\title{Evaluates a node}
 \usage{
-eval_node(id, ...)
+eval_node(x, ...)
 }
 \arguments{
-\item{id}{node's id}
+\item{...}{args passed to node's eval() method}
 
-\item{...}{}
+\item{id}{node's id}
 }
 \description{
-Title
+Evaluates a node assuming all its requirements are met
+}
+\details{
+As oposed to \code{make()}, this function is not indended for frequent use by a user.
 }

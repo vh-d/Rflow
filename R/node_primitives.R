@@ -145,20 +145,28 @@ trigger_manual.rflow <- function(rflow, x) {
   rflow[[id]]$trigger_manual <- TRUE
 }
 
-# evaluates/build a single node assuming requirements are ready
-#' Title
-#'
+#' @title Evaluates a node
+#' 
+#' @description Evaluates a node assuming all its requirements are met  
+#' 
 #' @param id node's id
-#' @param ...
+#' @param ... args passed to node's eval() method
+#' 
+#' @details 
+#' As oposed to `make()`, this function is not indended for frequent use by a user.  
 #'
 #' @export
-eval_node <- function(id, ...) {
-  UseMethod("eval_node", id)
+eval_node <- function(x, ...) {
+  UseMethod("eval_node", x)
 }
 
+#' @export
+eval_node.node <- function(x, ...) {
+  x$eval(...)
+}
 
 #' @export
-eval_node.character <- function(id, rflow) {
-  rflow[[id]]$eval()
+eval_node.character <- function(x, rflow) {
+  rflow[[x]]$eval()
 }
 

@@ -12,5 +12,5 @@ in.R6(obj, objs)
 \item{objs}{vector of R6 objects}
 }
 \description{
-\code{\%in\%} equivalent for R6 objects
+Help function for matching R6 objects
 }

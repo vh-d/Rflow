@@ -3,10 +3,10 @@
 \docType{class}
 \name{node}
 \alias{node}
-\title{basic building block of an rflow}
+\title{node class}
 \format{\code{\link{R6Class}} object.}
 \usage{
-node("node1", desc = "This an example")
+node("node1", desc = "This an example node which does nothing")
 }
 \value{
 Object of \code{\link{R6Class}} with basic functionality for rflows.
@@ -43,7 +43,7 @@ Constructing nodes
 \section{Methods}{
 
 \describe{
-\item{\code{new(serveraddress)}}{This method is used to create object of this class with \code{serveraddress} as address of the server object is connecting to.}
+\item{\code{new(node)}}{This method is used to create object of this class.}
 }
 }
 

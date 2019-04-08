@@ -7,7 +7,7 @@
 new_rflow(path = NULL)
 }
 \arguments{
-\item{path}{path to folder with nodes' definitions}
+\item{path}{path to rflow home folder. Nodes' definitions are searched for in this folder, cache and other data is saved into...}
 }
 \value{
 A new rflow object.

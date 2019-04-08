@@ -1,7 +1,7 @@
 
 #' Initialize a new DAG
 #'
-#' @param path path to folder with nodes' definitions
+#' @param path path to rflow home folder. Nodes' definitions are searched for in this folder, cache and other data is saved into...
 #'
 #' @return A new rflow object.
 #' @export
@@ -144,14 +144,15 @@ clean_persistence.rflow <- function(x) {
   }
 }
 
-#' batch load object definitions
+#' @title batch load object definitions
+#' @param x an rflow object
+#' @rdname load_nodes
 #' @export
 load_nodes <- function(x, ...) {
   UseMethod("load_nodes", x)
 }
 
 
-#' @param x an rflow object
 #' @param conflict logical; How to resolve conflict when an object of the same id already exists in the rflow?
 #' @param verbose logical; print verbose output?
 #' @rdname load_nodes
@@ -273,7 +274,7 @@ load_state_of_nodes <- function(path, recursive = FALSE, ignore.case = TRUE, ...
   return(nodes_list)
 }
 
-#' Initialize a node and adds it to an rflow
+#' Initialize a node and add it to an rflow
 #'
 #' @param x
 #' @param rflow an rflow object

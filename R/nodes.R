@@ -1,6 +1,7 @@
 # node --------------------------------------------------------------------
 
-#' basic building block of an rflow
+#' @title node class
+#' @description basic building block of an rflow
 #' @docType class
 #' @importFrom R6 R6Class
 #' @export
@@ -25,10 +26,10 @@
 #' * from lists (comming from TOML, YAML...)
 #'
 #' @usage
-#' node("node1", desc = "This an example")
+#' node("node1", desc = "This an example node which does nothing")
 #' @section Methods:
 #' \describe{
-#'   \item{\code{new(serveraddress)}}{This method is used to create object of this class with \code{serveraddress} as address of the server object is connecting to.}
+#'   \item{\code{new(node)}}{This method is used to create object of this class.}
 #' }
 node <- R6::R6Class(
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/rflow_management.R
 \name{add_node}
 \alias{add_node}
-\title{Initialize a node and adds it to an rflow}
+\title{Initialize a node and add it to an rflow}
 \usage{
 add_node(x, ...)
 }
@@ -18,5 +18,5 @@ add_node(x, ...)
 \item{verbose}{logical; print verbose output?}
 }
 \description{
-Initialize a node and adds it to an rflow
+Initialize a node and add it to an rflow
 }
