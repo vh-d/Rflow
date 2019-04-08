@@ -73,9 +73,9 @@ obj_defs <-
         r_expr  = 
           expression({
             DBI::dbWriteTable(
-              conn = DB1$con, 
-              name = 'tab1', 
-              value = RE1$tab1, 
+              conn = self$connection, 
+              name = self$name, 
+              value = .RFLOW[["RE1.tab1"]]$get(), 
               overwrite = TRUE
             )
           })
@@ -93,11 +93,8 @@ obj_defs <-
 
 # debug(process_obj_defs)
 obj_defs <- process_obj_defs(obj_defs)
-str(obj_defs)
+# str(obj_defs)
 
-```
-
-```{r}
 add_nodes(
   objs        = obj_defs,
   rflow       = RF,
