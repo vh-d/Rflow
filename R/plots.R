@@ -10,6 +10,7 @@ format_tags <- function(tags = NULL) {
   paste0("|", paste0(tags, collapse = "|"), "|")
 }
 
+
 #' list all nodes of an Rflow object
 #'
 #' @param rflow rflow object
@@ -26,15 +27,15 @@ nodes.rflow <- function(rflow) {
   coln <- c("id", "name", "env", "desc", "sql_code", "r_expr", "node_type")
 
   # for empty rflow return empty data.table
-  node_ids <- mget(ls(rflow), envir = rflow)
-  if (!length(node_ids)) {
+  node_objs <- get_nodes(rflow)
+  if (!length(node_objs)) {
     return(setnames(data.table(matrix(character(), 1, length(coln))), coln)[0])
   }
 
   dtNODES <-
     rbindlist(
       lapply(
-        node_ids,
+        node_objs,
         function(x) {
           data.table(
             id    = null2na(x$id),

@@ -1162,3 +1162,41 @@ as_node.list <- function(
 as_node.node <- function(x) {
   x
 }
+
+
+
+#' Make a vector of all nodes' ids
+#'
+#' @param x 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+get_nodes_ids <- function(x) {
+  UseMethod("get_nodes_ids", x)
+}
+
+#' @export
+get_nodes_ids.rflow <- function(x) {
+  node_objs <- get_nodes(x)
+  sapply(node_objs, function(x) x$id)
+}
+
+#' Returns a list with all node objects
+#'
+#' @param x 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+get_nodes <- function(x) {
+  UseMethod("get_nodes", x)
+}
+
+#' @export
+get_nodes.rflow <- function(x) {
+  mget(ls(x), envir = x)
+}
+
