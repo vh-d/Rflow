@@ -17,17 +17,34 @@ detect_deps.expression <- function(x, node_names) {
   detect_deps(paste0(deparse(x), collapse = ""), node_names = node_names)
 }
 
-check_dependencies <- function(x) {
-  UseMethod("check_dependencies", x)
+
+#' Verify consistency of user-declared dependencies with node's behaviour
+#'
+#' @param x 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+verify_dependencies <- function(x) {
+  UseMethod("verify_dependencies", x)
 }
 
-check_dependencies.node <- function(x) {
-  found <- detect_deps(x$r_expr, node_names = Rflow::nodes(parent.env(x))$id)
-  is_ok <- found %in% x$depends
-
-  if (!isTRUE(all(is_ok))) {
-    warning(x$id, " might be dependent on ", paste0(found[!is_ok], collapse = ", "))
-    return(FALSE)
-  } else
+#' @export
+verify_dependencies.node <- function(x) {
+  found  <- detect_deps(x$r_expr, node_names = nodes(parent.env(x))$id)
+  stated <- x$depends
+  
+  lacks <- setdiff(found, stated)
+  extra <- setdiff(stated, found)
+  
+  if (!length(unique(lacks, extra))) {
     return(TRUE)
+  } else {
+    if (length(lacks)) 
+      warning(x$id, ": might be dependent on ", paste0(lacks, collapse = ", "))
+    if (length(extra)) 
+      warning(x$id, ": does not seem to be dependent on ", paste0(extra, collapse = ", "))
+  }
+  return(FALSE)
 }

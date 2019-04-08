@@ -103,6 +103,7 @@ add_nodes(
   verbose     = TRUE
 )
 
+stopifnot(all(sapply(RF, verify_dependencies)))
 ```
 
 
