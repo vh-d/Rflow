@@ -48,3 +48,9 @@ verify_dependencies.node <- function(x) {
   }
   return(FALSE)
 }
+
+
+#' @export
+verify_dependencies.rflow <- function(x) {
+  sapply(get_nodes(x), verify_dependencies.node)
+}
