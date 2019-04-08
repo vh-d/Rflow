@@ -22,8 +22,6 @@ nodes <- function(x) {
 #' @export
 nodes.rflow <- function(rflow) {
 
-  if (!requireNamespace("data.table")) stop("data.table package required to plot graphs")
-
   coln <- c("id", "name", "env", "desc", "sql_code", "r_expr", "node_type")
 
   # for empty rflow return empty data.table
@@ -62,7 +60,6 @@ edges <- function(x) {
 
 #' @export
 edges.rflow <- function(rflow) {
-  if (!requireNamespace("data.table")) stop("data.table package required to plot graphs")
 
   rbindlist(
     lapply(
