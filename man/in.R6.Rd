@@ -2,10 +2,15 @@
 % Please edit documentation in R/utils.R
 \name{in.R6}
 \alias{in.R6}
-\title{%in% equivalent for R6 objects}
+\title{\code{\%in\%} equivalent for R6 objects}
 \usage{
 in.R6(obj, objs)
 }
+\arguments{
+\item{obj}{R6 object}
+
+\item{objs}{vector of R6 objects}
+}
 \description{
-%in% equivalent for R6 objects
+\code{\%in\%} equivalent for R6 objects
 }

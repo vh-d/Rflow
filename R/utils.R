@@ -1,8 +1,9 @@
 
-#' %in% equivalent for R6 objects
+#' @title `%in%` equivalent for R6 objects
 #'
-#' @param obj
-#' @param objs
+#' @param obj R6 object
+#' @param objs vector of R6 objects
+#' @export
 in.R6 <- function(obj, objs) {
   any(sapply(objs, identical, y = obj))
 }
