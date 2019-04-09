@@ -9,6 +9,10 @@ detect_deps <- function(x, ...) {
   UseMethod("detect_deps", x)
 }
 
+detect_deps.NULL <- function(x, node_names) {
+  character()
+}
+
 detect_deps.character <- function(x, node_names) {
   which.name(sapply(node_names, grepl, x = x, fixed = TRUE))
 }
@@ -20,7 +24,7 @@ detect_deps.expression <- function(x, node_names) {
 
 #' Verify consistency of user-declared dependencies with node's behaviour
 #'
-#' @param x 
+#' @param x
 #'
 #' @return
 #' @export
@@ -34,16 +38,16 @@ verify_dependencies <- function(x) {
 verify_dependencies.node <- function(x) {
   found  <- if (!length(x$r_expr)) detect_deps(x$r_expr, node_names = nodes(parent.env(x))$id) else character()
   stated <- if (!length(x$r_expr)) x$depends else character()
-  
+
   lacks <- setdiff(found, stated)
   extra <- setdiff(stated, found)
-  
+
   if (!length(unique(lacks, extra))) {
     return(TRUE)
   } else {
-    if (length(lacks)) 
+    if (length(lacks))
       warning(x$id, ": might be dependent on ", paste0(lacks, collapse = ", "))
-    if (length(extra)) 
+    if (length(extra))
       warning(x$id, ": does not seem to be dependent on ", paste0(extra, collapse = ", "))
   }
   return(FALSE)
