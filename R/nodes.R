@@ -245,13 +245,21 @@ node <- R6::R6Class(
       isTRUE(eval(self$trigger_condition, envir = self))
     },
 
-    check_triggers = function() {
-      return(
-        FALSE ||
-          self$trigger_defchange ||
-          self$trigger_manual ||
-          self$check_trigger_condition() ||
-          !length(self$last_evaluated) || is.na(self$last_evaluated))
+    check_triggers = function(verbose = TRUE, verbose_prefix = "") {
+      if (isNotFALSE(self$trigger_defchange))         {if (verbose) notify_trigger(self$id, "change in eval. expression", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+      if (isNotFALSE(self$trigger_manual))            {if (verbose) notify_trigger(self$id, "manual trigger", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+      if (isNotFALSE(self$check_trigger_condition())) {if (verbose) notify_trigger(self$id, "custom trigger condition", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+
+      if (isNotFALSE(!length(self$last_evaluated))) {if (verbose) notify_trigger(self$id, "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+      if (isNotFALSE(is.na(self$last_evaluated)))   {if (verbose) notify_trigger(self$id, "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+
+      return(FALSE)
+      # return(
+      #   FALSE ||
+      #     self$trigger_defchange ||
+      #     self$trigger_manual ||
+      #     self$check_trigger_condition() ||
+      #     !length(self$last_evaluated) || is.na(self$last_evaluated))
     },
 
     reset_triggers = function() {
@@ -280,7 +288,7 @@ node <- R6::R6Class(
           y$make(force = force, verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  "))
       }
 
-      triggered <- isTRUE(force) || isNotFALSE(results) || isNotFALSE(self$check_triggers())
+      triggered <- isTRUE(force) || isNotFALSE(results) || isNotFALSE(self$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))
 
       if (!triggered) {
         if (verbose) cat(verbose_prefix, "\u2514 ", crayon::silver(self$id, " not triggered.", sep = ""), "\n", sep = "")
@@ -455,6 +463,10 @@ r_node <- R6::R6Class(
       # checking hash before signalling change to parent
       changed <- self$check_hash()
 
+      if (verbose) {
+        cat(verbose_prefix, crayon::red(self$id), ": done", if (changed) crayon::yellow(" (value has changed)"), ".\n", sep = "")
+      }
+
       if (changed && self$cache$enabled)
         saveRDS(object = self$get(), file = file.path(self$cache$path, self$cache$file))
 
@@ -482,8 +494,8 @@ r_node <- R6::R6Class(
       return(changed)
     },
 
-    check_triggers = function() {
-      return(super$check_triggers() || !self$exists())
+    check_triggers = function(verbose = TRUE, verbose_prefix = "") {
+      return(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix) || !self$exists())
     },
 
     get = function() {
@@ -667,8 +679,8 @@ db_node <- R6::R6Class(
       DBI::dbExistsTable(conn = self$connection, name = self$name)
     },
 
-    check_triggers = function() {
-      return(super$check_triggers() || !self$exists())
+    check_triggers = function(verbose = TRUE, verbose_prefix = "") {
+      return(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix) || !self$exists())
     },
 
     print = function(...) {
@@ -888,8 +900,8 @@ excel_sheet <- R6::R6Class(
       return(changed)
     },
 
-    check_triggers = function() {
-      return(super$check_triggers() || !self$exists())
+    check_triggers = function(verbose = TRUE, verbose_prefix = "") {
+      return(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix) || !self$exists())
     },
 
     get = function() {
@@ -1055,8 +1067,8 @@ file_node <- R6::R6Class(
       file.exists(self$path)
     },
 
-    check_triggers = function() {
-      return(super$check_triggers() || !self$exists())
+    check_triggers = function(verbose = TRUE, verbose_prefix = "") {
+      return(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix) || !self$exists())
     },
 
     remove = function() {

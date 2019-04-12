@@ -1,6 +1,6 @@
 
 #' @title `%in%` equivalent for R6 objects
-#' 
+#'
 #' @description Help function for matching R6 objects
 #'
 #' @param obj R6 object
@@ -72,6 +72,11 @@ cat_r_expr <- function(r_expr, verbose_prefix = "") {
 # Print a nice notifications
 notify_update <- function(id, property) {
   cat(crayon::yellow("Definition of "), crayon::red(id), crayon::yellow(" has changed (", property, ")", sep = ""), "\n", sep = "")
+}
+
+# Print a nice notifications
+notify_trigger <- function(id, trigger, verbose_prefix = "") {
+  cat(verbose_prefix, crayon::red(id), crayon::yellow(" triggered by ", trigger, sep = ""), "\n", sep = "")
 }
 
 
