@@ -33,8 +33,7 @@ Rflow is an R package providing R users a general-purpose workflow system.
 
 * R/SQL code in standalone R scripts (outside of TOML file)
 * more nuanced `verbose` option
-* better logging
-  * show result of each trigger
+* logging into rflow object
 * handling of obsolete nodes
   * removing objects from DAG
   * removing cache
@@ -45,9 +44,8 @@ Rflow is an R package providing R users a general-purpose workflow system.
 * query function to set or get fields of multiple objects
 * documentation
 * quick start guide
+* allow Python and Julia code
 * new node types:
-  * Python nodes
-  * Julia nodes
   * test node
 * Rflow manager as a Shiny app
 
@@ -57,7 +55,6 @@ Rflow is an R package providing R users a general-purpose workflow system.
 * SQL execution by a generic R function instead of metaprogramming
   * solves potential problems with escaping quotes in SQL code
 * environments as R6 classes
-* add check that Rflow is not empty before plotting etc...
 * generic methods in node class for initializing and updating properties
 * more unit tests
 * make all public properties active (trigger persistence storage)
