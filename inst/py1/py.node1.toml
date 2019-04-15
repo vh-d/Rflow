@@ -1,6 +1,0 @@
-name = "node1"
-env  = "py"
-
-py_code = '''
-1+1
-'''

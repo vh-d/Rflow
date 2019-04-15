@@ -1,7 +1,0 @@
-env  = "files"
-name = "iris_sheet"
-path = "./inst/db2/data/iris_aggr.xlsx"
-type = "excel_sheet"
-sheet = 2
-
-depends = ["files.iris_aggr_excel"]
