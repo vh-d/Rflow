@@ -416,7 +416,7 @@ r_node <- R6::R6Class(
               error = function(e) warning("Cache for self$id could not be recovered.")
             )
           } else {
-            if (verbose) cat(verbose_prefix, crayon::red(self$id), ": no cache found", sep = "")
+            if (verbose) cat(crayon::red(self$id), ": no cache found", sep = "")
           }
 
         if (self$persistence$enabled && store) self$store_state()
