@@ -413,7 +413,7 @@ r_node <- R6::R6Class(
                 assign(self$name, value, pos = self$r_env)
                 self$check_hash()
               },
-              error = function(e) warning("Cache for self$id could not be recovered.")
+              error = function(e) warning("Cache for self$id could not be recovered.\n")
             )
           } else {
             if (verbose) cat(crayon::red(self$id), ": no cache found", sep = "")
