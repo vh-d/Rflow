@@ -379,7 +379,9 @@ r_node <- R6::R6Class(
         r_expr  = NULL,
         type    = NULL,
         store   = TRUE,
-        cache   = list(enabled = FALSE)
+        cache   = list(enabled = FALSE), 
+        
+        verbose = TRUE
       ) {
         super$initialize(..., store = FALSE)
 
@@ -404,15 +406,18 @@ r_node <- R6::R6Class(
 
         # try restoring the object from cache
         if (self$cache$enabled)
-          if (file.exists(file.path(self$cache$path, self$cache$file)))
-            try(
+          if (file.exists(file.path(self$cache$path, self$cache$file))) {
+            tryCatch(
               {
                 value <- readRDS(file.path(self$cache$path, self$cache$file))
                 assign(self$name, value, pos = self$r_env)
                 self$check_hash()
               },
-              silent = TRUE
+              error = function(e) warning("Cache for self$id could not be recovered.")
             )
+          } else {
+            if (verbose) cat(verbose_prefix, crayon::red(self$id), ": no cache found", sep = "")
+          }
 
         if (self$persistence$enabled && store) self$store_state()
 
