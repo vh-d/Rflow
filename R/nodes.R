@@ -500,7 +500,10 @@ r_node <- R6::R6Class(
     },
 
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
-      return(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix) || !self$exists())
+      if (isNotFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
+      if (isNotTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+      
+      return(FALSE)
     },
 
     get = function() {
@@ -685,7 +688,10 @@ db_node <- R6::R6Class(
     },
 
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
-      return(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix) || !self$exists())
+      if (isNotFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
+      if (isNotTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+      
+      return(FALSE)
     },
 
     print = function(...) {
@@ -906,7 +912,10 @@ excel_sheet <- R6::R6Class(
     },
 
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
-      return(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix) || !self$exists())
+      if (isNotFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
+      if (isNotTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+      
+      return(FALSE)
     },
 
     get = function() {
@@ -1073,9 +1082,12 @@ file_node <- R6::R6Class(
     },
 
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
-      return(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix) || !self$exists())
+      if (isNotFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
+      if (isNotTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+      
+      return(FALSE)
     },
-
+    
     remove = function() {
       if (self$exists()) {
         warning("Deleting file represented by ", crayon::red(self$id), " !")
