@@ -432,7 +432,7 @@ r_node <- R6::R6Class(
 
     store_state = function() {
       super$store_state(
-        public_fields  = c("r_code", "r_expr")
+        public_fields  = c("r_code", "r_expr", "hash")
       )
     },
 
@@ -546,7 +546,8 @@ r_node <- R6::R6Class(
       if (missing(value)) {
         # file might have been modified but the content stayed the same
         self$check_hash()
-        return(self$hash$time)
+        private$.last_changed <- self$hash$time
+        return(private$.last_changed)
       } else {
         stop("Can't set `$last_changed")
       }
