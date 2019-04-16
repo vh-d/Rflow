@@ -386,6 +386,7 @@ r_node <- R6::R6Class(
         type    = NULL,
         store   = TRUE,
         cache   = list(enabled = FALSE),
+        hash    = NULL,
 
         verbose = TRUE
       ) {
@@ -399,9 +400,13 @@ r_node <- R6::R6Class(
 
         # caching properties
         self$set_cache(cache)
+        
+        # hash 
+        if (length(hash) && self$cache$enabled) {
+          self$hash <- hash
+        }
 
-        # from deprecated setup()
-        # connect to specified R environment
+        # connect to R environment (.GlobalEnv if not specified)
         if (is.null(self$env)) {
           self$r_env <- .GlobalEnv
         } else {
@@ -419,7 +424,10 @@ r_node <- R6::R6Class(
                 assign(self$name, value, pos = self$r_env)
                 self$check_hash()
               },
-              error = function(e) warning("Cache for self$id could not be recovered.\n")
+              error = function(e) {
+                warning("Cache for self$id could not be recovered.\n")
+                self$hash <- NULL # any hash loaded from stored state is meaningless now
+              }
             )
           } else {
             if (verbose) cat(crayon::red(self$id), ": no cache found\n", sep = "")
