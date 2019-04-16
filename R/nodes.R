@@ -36,21 +36,21 @@ node <- R6::R6Class(
   classname = "node",
 
   private = list(
-    .last_evaluated  = NULL,
-    .last_changed   = NULL
+    .last_evaluated = NULL, # datetime when target value was last evaluated/made
+    .last_changed   = NULL  # datetime when target value changed the last time (it might be evaluated without any change)
   ),
 
   public    = list(
-    id         = NULL,
-    env        = NULL,
-    name       = NULL,
-    desc       = NULL,
+    id         = NULL, # unique withing an rflow
+    env        = NULL, # name of container (real such as R env or datebase schema, or abstract such as group of files)
+    name       = NULL, # name is unique withing its env
+    desc       = NULL, # brief describtion of the object
 
-    tags       = NULL,
+    tags       = NULL, # character vector of tags
 
-    depends    = NULL,
-    upstream   = NULL,
-    downstream = NULL,
+    depends    = NULL, # character vector of dependencies (upstream nodes)
+    upstream   = NULL, # vector of references to depencies
+    downstream = NULL, # vector of references to dependants
 
     persistence        = NULL,
     trigger_defchange  = FALSE,
