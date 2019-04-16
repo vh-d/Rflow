@@ -67,7 +67,7 @@ test_that("nodes can be initiated with persistence", {
 
 test_that("nodes can be initiated with caching", {
   tmp_rflow_dir <- tempdir()
-  node3 <- Rflow::r_node$new(id = "node3", cache = list(path = tmp_rflow_dir))
+  node3 <- Rflow::r_node$new(id = "node3", cache = list(path = tmp_rflow_dir), verbose = FALSE)
   expect_true(node3$cache$enabled)
   expect_equal(node3$cache$path, tmp_rflow_dir)
   expect_equal(node3$cache$file, "node3.rds")
