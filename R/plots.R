@@ -292,7 +292,7 @@ visRflow2 <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "U
       navigationButtons = TRUE,
       dragNodes         = TRUE) %>%
     visNetwork::visPhysics(
-      enabled = FALSE,
+      enabled = TRUE,
       stabilization = FALSE,
       hierarchicalRepulsion = list(
         nodeDistance = 200
