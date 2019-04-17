@@ -175,7 +175,7 @@ load_nodes.rflow <- function(
       objs        = obj_defs,
       rflow       = x,
       conflict    = conflict,
-      cache       = x$.cache$path,
+      cache       = list(path = x$.cache$path),
       verbose     = verbose
     )
   } else {
