@@ -417,7 +417,7 @@ r_node <- R6::R6Class(
 
         # try restoring the object from cache
         if (self$cache$enabled)
-          if (file.exists(file.path(self$cache$path, self$cache$file))) {
+          if (file.exists(file.path(self$cache$path, self$cache$file)) & length(list.files(self$cache$path, self$cache$file, ignore.case = FALSE))) {
             tryCatch(
               {
                 value <- readRDS(file.path(self$cache$path, self$cache$file))

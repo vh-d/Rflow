@@ -331,7 +331,9 @@ add_node.list <- function(
     if (rflow$.persistence$enabled) {
       fp <- file.path(rflow$.persistence$path, paste0(id, ".rds"))
 
-      if (file.exists(fp)) {
+      # list.files is needed because of case-insensitve file systems
+      # TODO: prevent creating ambigous object names on Windows (and Mac?)
+      if (file.exists(fp) && length(list.files(path = rflow$.persistence$path, paste0(id, ".rds")))) {
         saved_state   <- load_state_of_node(path = fp)
         initiated_obj <- as_node(saved_state, persistence = rflow$.persistence, ...)
         recovered     <- TRUE
