@@ -274,11 +274,13 @@ node <- R6::R6Class(
       if (length(self$upstream) != length(self$depends)) self$connect() # check that it's connected to upstream
       
       results <- FALSE
+      upstream_changed_ids <- ""
       for (y in self[["upstream"]]) {
-        results <-
-          results |
-          y$last_changed > self$last_evaluated |
-          y$make(force = force, verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  "))
+        trigger_upstream_newer   <- y$last_changed > self$last_evaluated
+        trigger_upstream_changed <- y$make(force = force, verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  "))
+        results <- results | trigger_upstream_newer | trigger_upstream_changed
+        
+        upstream_changed_ids <- paste0(upstream_changed_ids, y$id, sep = ", ")
       }
       
       triggered <-
@@ -289,7 +291,7 @@ node <- R6::R6Class(
           if (verbose) notify_trigger(self$id, "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u2514 "))
           TRUE
         } else if (isNotFALSE(results)) {
-          if (verbose) notify_trigger(self$id, "upstream update", verbose_prefix = paste0(verbose_prefix, "\u2514 "))
+          if (verbose) notify_trigger(self$id, paste0("changes in upstream nodes (", upstream_changed_ids, ")"), verbose_prefix = paste0(verbose_prefix, "\u2514 "))
           TRUE
         } else if (isNotFALSE(self$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) {
           TRUE
