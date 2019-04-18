@@ -250,16 +250,9 @@ node <- R6::R6Class(
       if (isNotFALSE(self$trigger_manual))            {if (verbose) notify_trigger(self$id, "manual trigger", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
       if (isNotFALSE(self$check_trigger_condition())) {if (verbose) notify_trigger(self$id, "custom trigger condition", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
       
-      if (isNotFALSE(!length(self$last_evaluated))) {if (verbose) notify_trigger(self$id, "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
-      if (isNotFALSE(is.na(self$last_evaluated)))   {if (verbose) notify_trigger(self$id, "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
-      
+      if (!length(self$last_evaluated) || is.na(self$last_evaluated)) {if (verbose) notify_trigger(self$id, "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+
       return(FALSE)
-      # return(
-      #   FALSE ||
-      #     self$trigger_defchange ||
-      #     self$trigger_manual ||
-      #     self$check_trigger_condition() ||
-      #     !length(self$last_evaluated) || is.na(self$last_evaluated))
     },
     
     reset_triggers = function() {
@@ -291,6 +284,9 @@ node <- R6::R6Class(
       triggered <-
         if (isTRUE(force)) {
           if (verbose) notify_trigger(self$id, "manual trigger", verbose_prefix = paste0(verbose_prefix, "\u2514 "))
+          TRUE
+        } else if (!length(self$last_evaluated) || is.na(self$last_evaluated)) {
+          if (verbose) notify_trigger(self$id, "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u2514 "))
           TRUE
         } else if (isNotFALSE(results)) {
           if (verbose) notify_trigger(self$id, "upstream update", verbose_prefix = paste0(verbose_prefix, "\u2514 "))
