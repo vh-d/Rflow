@@ -276,14 +276,15 @@ node <- R6::R6Class(
       results <- FALSE
       upstream_changed_ids <- character()
       for (y in self[["upstream"]]) {
-        trigger_upstream_newer   <- y$last_changed > self$last_evaluated
         trigger_upstream_changed <- y$make(force = force, verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  "))
+        trigger_upstream_newer   <- y$last_changed > self$last_evaluated
         
         # increment list of changed nodes in upstream
-        if (trigger_upstream_newer || trigger_upstream_changed)
+        # there is another trigger for cases when self$last_evaluated in NULL/NA, therefore isTRUE() should be safe and is better for logging 
+        if (isNotFALSE(trigger_upstream_newer) || isTRUE(trigger_upstream_changed))
           upstream_changed_ids <- c(upstream_changed_ids, y$id)
         
-        results <- results | trigger_upstream_newer | trigger_upstream_changed
+        results <- results || trigger_upstream_newer || trigger_upstream_changed
       }
       
       triggered <-
