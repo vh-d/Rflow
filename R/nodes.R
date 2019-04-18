@@ -356,7 +356,7 @@ r_node <- R6::R6Class(
     
     # triggers  = NULL, # every node has a list of triggers that are checked before evaluation
     
-    set_cache = function(cache) {
+    cache_setup = function(cache) {
       self$cache <-
         if (is.list(cache) && length(cache$path)) {
           if (dir.exists(cache$path)) {
@@ -382,6 +382,19 @@ r_node <- R6::R6Class(
       
       invisible(TRUE)
     },
+    
+    cache_exists = function() {
+      file.exists(file.path(self$cache$path, self$cache$file))
+    },
+    
+    cache_write = function() {
+      saveRDS(object = self$get(), file = file.path(self$cache$path, self$cache$file))
+    }, 
+    
+    cache_restore = function() {
+      value <- readRDS(file.path(self$cache$path, self$cache$file))
+      assign(self$name, value, pos = self$r_env)
+    }, 
     
     print = function(...) {
       super$print()
@@ -409,7 +422,7 @@ r_node <- R6::R6Class(
           warning(self$id, " is not a leaf node but has no R expression to evaluate")
         
         # caching properties
-        self$set_cache(cache)
+        self$cache_setup(cache)
         
         # hash 
         if (length(hash) && self$cache$enabled) {
@@ -427,11 +440,10 @@ r_node <- R6::R6Class(
         
         # try restoring the object from cache
         if (self$cache$enabled)
-          if (file.exists(file.path(self$cache$path, self$cache$file))) {
+          if (self$cache_exists()) {
             tryCatch(
               {
-                value <- readRDS(file.path(self$cache$path, self$cache$file))
-                assign(self$name, value, pos = self$r_env)
+                self$cache_restore()
                 self$check_hash()
               },
               error = function(e) {
@@ -496,9 +508,7 @@ r_node <- R6::R6Class(
         cat(verbose_prefix, crayon::red(self$id), ": done", if (changed) crayon::yellow(" (value has changed)"), ".\n", sep = "")
       }
       
-      if (changed && self$cache$enabled)
-        saveRDS(object = self$get(), file = file.path(self$cache$path, self$cache$file))
-      
+      if (self$cache$enabled && (changed || isNotTRUE(self$cache_exist()))) self$cache_write()
       if (self$persistence$enabled) self$store_state()
       
       return(changed)
