@@ -71,7 +71,7 @@ node <- R6::R6Class(
             list(
               enabled = TRUE,
               path    = persistence$path,
-              file    = paste0(self$id, ".rds")
+              file    = paste0(self$id, "_", digest::digest(self$id, algo = "md5", serialize = FALSE), ".rds")
             )
           } else stop(persistence$path, " does not exist.")
         } else {
@@ -363,7 +363,7 @@ r_node <- R6::R6Class(
             list(
               enabled = TRUE,
               path    = cache$path,
-              file    = paste0(self$id, ".rds")
+              file    = paste0(self$id, "_", digest::digest(self$id, algo = "md5", serialize = FALSE), ".rds")
             )
           } else stop(cache$path, " does not exist.")
         } else if (is.character(cache)) {
@@ -427,7 +427,7 @@ r_node <- R6::R6Class(
         
         # try restoring the object from cache
         if (self$cache$enabled)
-          if (file.exists(file.path(self$cache$path, self$cache$file)) & length(list.files(self$cache$path, self$cache$file, ignore.case = FALSE))) {
+          if (file.exists(file.path(self$cache$path, self$cache$file))) {
             tryCatch(
               {
                 value <- readRDS(file.path(self$cache$path, self$cache$file))
