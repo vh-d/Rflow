@@ -251,7 +251,7 @@ node <- R6::R6Class(
       if (isNotFALSE(self$check_trigger_condition())) {if (verbose) notify_trigger(self$id, "custom trigger condition", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
       
       if (!length(self$last_evaluated) || is.na(self$last_evaluated)) {if (verbose) notify_trigger(self$id, "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
-
+      
       return(FALSE)
     },
     
@@ -278,9 +278,12 @@ node <- R6::R6Class(
       for (y in self[["upstream"]]) {
         trigger_upstream_newer   <- y$last_changed > self$last_evaluated
         trigger_upstream_changed <- y$make(force = force, verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  "))
-        results <- results | trigger_upstream_newer | trigger_upstream_changed
         
-        upstream_changed_ids <- paste0(upstream_changed_ids, y$id, sep = ", ")
+        # increment list of changed nodes in upstream
+        if (trigger_upstream_newer || trigger_upstream_changed)
+          upstream_changed_ids <- paste0(upstream_changed_ids, y$id, sep = ", ")
+        
+        results <- results | trigger_upstream_newer | trigger_upstream_changed
       }
       
       triggered <-
