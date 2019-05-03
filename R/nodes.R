@@ -508,7 +508,7 @@ r_node <- R6::R6Class(
         cat(verbose_prefix, crayon::red(self$id), ": done", if (changed) crayon::yellow(" (value has changed)"), ".\n", sep = "")
       }
       
-      if (self$cache$enabled && (changed || isNotTRUE(self$cache_exist()))) self$cache_write()
+      if (self$cache$enabled && (changed || isNotTRUE(self$cache_exists()))) self$cache_write()
       if (self$persistence$enabled) self$store_state()
       
       return(changed)
