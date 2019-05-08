@@ -11,6 +11,24 @@ in.R6 <- function(obj, objs) {
 }
 
 
+union.list <- function(
+  x, y, ...
+)
+{
+  if (length(x) == 0)
+    return(y)
+  if (length(y) == 0)
+    return(x)
+  i  = intersect(names(x), names(y))
+  ii = setdiff(  names(y), names(x))
+  # i = is.na(i)
+  if (length(i))  x[i]  <- y[i]
+  if (length(ii)) x[ii] <- y[ii]
+
+  x
+}
+
+
 #' companion to `isTRUE()``
 #' @rdname isNotTRUE
 isNotTRUE  <- function(x) (!length(x) || is.na(x) || x == FALSE)
@@ -92,6 +110,19 @@ deescape_quotes <- function(x) {
   x <- stringr::str_replace_all(string = x, pattern = stringr::fixed("\\'"),   replacement = "'")
 
   return(x)
+}
+
+
+sql_structure <- function(x, ...) {
+  UseMethod("sql_structure", x)
+}
+
+sql_structure.list <- function(x, ignoreErrors = FALSE, ...) {
+  lapply(x, union.list, x = list(ignoreErrors = ignoreErrors, ...))
+}
+
+sql_structure.character <- function(x, ignoreErrors = FALSE, ...) {
+  sql_structure(lapply(x, function(y) list(list(code = y))), ...)
 }
 
 paste_sql <- function(x) {
