@@ -593,16 +593,23 @@ db_node <- R6::R6Class(
 
   public    = list(
 
-    env   = NULL,
+    env        = NULL,
+    
+    mode       = NULL,
     driver     = NULL,
     con_code   = NULL,
     connection = NULL,
     sql        = NULL,
+    
+    r_code     = NULL,
     r_expr     = NULL,
-
+    
+    auto_remove = NULL,
+      
     initialize =
       function(
         ...,
+        auto_remove = TRUE,
         sql_code = NULL,
         sql      = NULL,
         mode     = NULL,
@@ -622,22 +629,24 @@ db_node <- R6::R6Class(
         self$con_code   <- con_code
         self$connection <- if (is.null(connection) & length(self$con_code)) eval(parse(text = self$con_code)) else connection
 
+        self$auto_remove <- auto_remove
+        
         # TODO: we need to handle situations when node is modified from R job to SQL job
         if (length(r_expr)) {
           self$mode <- "R"
           self$r_expr <- r_expr
         } else if (length(r_code)) {
           self$mode <- "R"
+          self$r_code <- r_code
           self$r_expr <- parse(text = r_code)
         } else if (length(sql)) {
           self$sql <- sql_structure(sql)
           self$mode <- "SQL"
-          self$r_expr <- expression(self$execute_sql())
         } else if (length(sql_code)) {
           self$sql <- sql_structure(sql_code)
           self$mode <- "SQL"
-          self$r_expr <- expression(self$execute_sql())
-        } warning(id, ": no R expression/code or SQL code!")
+        } else 
+          warning(id, ": no R expression/code or SQL code!")
 
         private$.last_evaluated <- if (length(.last_evaluated)) .last_evaluated else as.POSIXct(NA)
 
@@ -648,13 +657,14 @@ db_node <- R6::R6Class(
 
     store_state = function() {
       super$store_state(
-        public_fields  = c("con_code", "r_expr", "sql")
+        public_fields  = c("con_code", "r_expr", "r_code", "sql", "mode", "auto_remove")
       )
     },
 
     update_definition =
       function(
         ...,
+        auto_remove = NULL,
         con_code = NULL,
         sql_code = NULL,
         sql      = NULL,
@@ -670,7 +680,12 @@ db_node <- R6::R6Class(
           self$trigger_defchange <- TRUE
           self$connection <- if (length(self$con_code)) eval(parse(text = self$con_code)) else connection
         }
-
+        
+        if (length(auto_remove) && !identical(self$auto_remove, auto_remove)) {
+          self$auto_remove <- auto_remove
+          self$trigger_defchange <- TRUE
+        }
+        
         # TODO: we need to handle situations when node is modified from R job to SQL job
         if (length(r_expr)) {
           mode <- "R"
@@ -686,7 +701,8 @@ db_node <- R6::R6Class(
           sql <- sql_structure(sql_code)
           mode <- "SQL"
           r_expr <- expression(self$execute_sql())
-        } warning(id, ": no R expression/code or SQL code!")
+        } else 
+          warning(id, ": no R expression/code or SQL code!")
 
        if (!identical(self$mode, mode)) {
           if (verbose) notify_update(self$id, "R/SQL mode")
@@ -711,11 +727,15 @@ db_node <- R6::R6Class(
         return(invisible(TRUE))
       },
 
-    execute_sql = function() {
+    execute_sql = function(sql, verbose = FALSE, verbose_prefix = "") {
       sapply(sql,
-             function(sql) {
-               tryCatch(DBI::dbExecute(self$connection, sql$code),
-                        error = function(e) if (isTRUE(sql$ignoreErrors)) return(NULL) else stop(e))
+             function(sql_statement) {
+               if (verbose) {
+                 cat(verbose_prefix, crayon::red(self$id), ": Evaluating SQL statements:\n", sep = "")
+                 cat_r_expr(sql_statement$code, verbose_prefix = verbose_prefix)
+               }
+               tryCatch(DBI::dbExecute(self$connection, sql_statement$code),
+                        error = function(e) if (isTRUE(sql_statement$ignoreErrors)) return(NULL) else stop(e))
              }
       )
     },
@@ -723,21 +743,27 @@ db_node <- R6::R6Class(
     eval = function(verbose = TRUE, verbose_prefix = "") {
       exists_check <- self$exists()
 
-      if (verbose) {
-        # if (!is.null(self$sql_code)) cat(verbose_prefix, "SQL: ", self$sql_code, sep = "")
-        cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
-        cat_r_expr(self$r_expr, paste0(verbose_prefix, "  "))
-      }
-
       # for referencing other objects in rflow
       .RFLOW <- parent.env(self)
 
-      eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
-
+      # remove target object before rebuilding it
+      if (self$auto_remove) self$remove()
+      
+      if (self$mode == "SQL") {
+        self$execute_sql(self$sql, verbose = verbose, verbose_prefix = paste0(verbose_prefix, "  "))
+      } else {
+        if (verbose) {
+          # if (!is.null(self$sql_code)) cat(verbose_prefix, "SQL: ", self$sql_code, sep = "")
+          cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
+          cat_r_expr(self$r_expr, paste0(verbose_prefix, "  "))
+        }
+        eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?        
+      }
+      
       private$.last_evaluated <- Sys.time()
-
+      
       if (self$persistence$enabled) self$store_state()
-
+      
       return(TRUE)
     },
 
@@ -828,7 +854,7 @@ accdb_node <- R6::R6Class(
                         error = function(e) if (isTRUE(sql$ignoreErrors)) return(NULL) else stop(e))
              }
       )
-    },
+    }
   )
 )
 

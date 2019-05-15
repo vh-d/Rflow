@@ -122,7 +122,7 @@ sql_structure.list <- function(x, ignoreErrors = FALSE, ...) {
 }
 
 sql_structure.character <- function(x, ignoreErrors = FALSE, ...) {
-  sql_structure(lapply(x, function(y) list(list(code = y))), ...)
+  sql_structure(lapply(x, function(y) list(code = y)), ...)
 }
 
 paste_sql <- function(x) {
