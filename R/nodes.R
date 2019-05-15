@@ -548,10 +548,12 @@ r_node <- R6::R6Class(
         return(NULL)
       }
     },
-
-    remove = function() {
+    
+    remove = function(verbose = FALSE, verbose_prefix = "") {
       if (self$exists()) {
-        warning("Deleting R object represented by ", crayon::red(self$id), " !")
+        if (verbose) {
+          cat(verbose_prefix, crayon::red(self$id), ": Removing the target R object!\n", sep = "")
+        }
         return(invisible(rm(list = self$name, pos = self$r_env)))
       } else {
         warning("Object ", self$id, " (", self$name, ")", " does not exist.")
@@ -559,9 +561,9 @@ r_node <- R6::R6Class(
       }
     }
   ),
-
+  
   active = list(
-
+    
     last_evaluated = function(value) {
       if (missing(value)) {
         return(private$.last_evaluated)
@@ -728,34 +730,39 @@ db_node <- R6::R6Class(
       },
 
     execute_sql = function(sql, verbose = FALSE, verbose_prefix = "") {
+      if (verbose) {
+        cat(verbose_prefix, crayon::red(self$id), ": Evaluating SQL statements:\n", sep = "")
+      }
       sapply(sql,
              function(sql_statement) {
                if (verbose) {
-                 cat(verbose_prefix, crayon::red(self$id), ": Evaluating SQL statements:\n", sep = "")
-                 cat_r_expr(sql_statement$code, verbose_prefix = verbose_prefix)
+                 cat_r_expr(sql_statement$code, verbose_prefix = paste0(verbose_prefix, "  "))
                }
-               tryCatch(DBI::dbExecute(self$connection, sql_statement$code),
-                        error = function(e) if (isTRUE(sql_statement$ignoreErrors)) return(NULL) else stop(e))
+               tryCatch(
+                 DBI::dbExecute(self$connection, sql_statement$code),
+                 error = function(e) if (isTRUE(sql_statement$ignoreErrors)) return(NULL) else stop(e))
              }
       )
     },
-
+    
     eval = function(verbose = TRUE, verbose_prefix = "") {
+      verbose_prefix_inc <- paste0(verbose_prefix, "  ")
+      
       exists_check <- self$exists()
 
       # for referencing other objects in rflow
       .RFLOW <- parent.env(self)
 
       # remove target object before rebuilding it
-      if (self$auto_remove) self$remove()
+      if (self$auto_remove) self$remove(verbose = verbose, verbose_prefix = verbose_prefix_inc)
       
       if (self$mode == "SQL") {
-        self$execute_sql(self$sql, verbose = verbose, verbose_prefix = paste0(verbose_prefix, "  "))
+        self$execute_sql(self$sql, verbose = verbose, verbose_prefix = verbose_prefix_inc)
       } else {
         if (verbose) {
           # if (!is.null(self$sql_code)) cat(verbose_prefix, "SQL: ", self$sql_code, sep = "")
           cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
-          cat_r_expr(self$r_expr, paste0(verbose_prefix, "  "))
+          cat_r_expr(self$r_expr, verbose_prefix = verbose_prefix_inc)
         }
         eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?        
       }
@@ -801,9 +808,11 @@ db_node <- R6::R6Class(
       }
     },
 
-    remove = function() {
+    remove = function(verbose = FALSE, verbose_prefix = "") {
       if (self$exists()) {
-        warning("Deleting DB object represented by ", crayon::red(self$id), " !")
+        if (verbose) {
+          cat(verbose_prefix, crayon::red(self$id), ": Dropping the target DB object!\n", sep = "")
+        }
         return(invisible(DBI::dbRemoveTable(conn = self$connection, name = self$name)))
       } else {
         warning("Object ", self$id, " (", self$name, ")", " does not exist.")
@@ -837,9 +846,11 @@ accdb_node <- R6::R6Class(
       }
     },
 
-    remove = function() {
+    remove = function(verbose = FALSE, verbose_prefix = "") {
       if (self$exists()) {
-        warning("Deleting DB object represented by ", crayon::red(self$id), " !")
+        if (verbose) {
+          cat(verbose_prefix, crayon::red(self$id), ": Dropping the target DB object!\n", sep = "")
+        }
         return(invisible(odbc32::sqlDrop(con = self$connection, name = self$name)))
       } else {
         warning("Object ", self$id, " (", self$name, ")", " does not exist.")
@@ -847,11 +858,17 @@ accdb_node <- R6::R6Class(
       }
     },
 
-    execute_sql = function() {
+    execute_sql = function(verbose = FALSE, verbose_prefix = "") {
+      if (verbose) {
+        cat(verbose_prefix, crayon::red(self$id), ": Evaluating SQL statements:\n", sep = "")
+      }
       sapply(sql,
-             function(sql) {
-               tryCatch(odbc32::sqlQuery(con = self$connection, query = sql$code),
-                        error = function(e) if (isTRUE(sql$ignoreErrors)) return(NULL) else stop(e))
+             function(sql_statement) {
+               if (verbose) {
+                 cat_r_expr(sql_statement$code, verbose_prefix = paste0(verbose_prefix, "  "))
+               }
+               tryCatch(odbc32::sqlQuery(con = self$connection, query = sql_statement$code),
+                        error = function(e) if (isTRUE(sql_statement$ignoreErrors)) return(NULL) else stop(e))
              }
       )
     }
@@ -1147,9 +1164,11 @@ file_node <- R6::R6Class(
       return(FALSE)
     },
 
-    remove = function() {
+    remove = function(verbose = FALSE, verbose_prefix = "") {
       if (self$exists()) {
-        warning("Deleting file represented by ", crayon::red(self$id), " !")
+        if (verbose) {
+          cat(verbose_prefix, crayon::red(self$id), ": Removing the target file!\n", sep = "")
+        }
         return(invisible(file.remove(self$path)))
       } else {
         warning("Object ", self$id, " (", self$name, ")", " does not exist.")

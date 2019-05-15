@@ -83,7 +83,7 @@ cat_r_expr <- function(r_expr, verbose_prefix = "") {
       replacement = eol
     )
 
-  cat(verbose_prefix, crayon::cyan(r_expr_s2),"\n", sep = eol)
+  cat(verbose_prefix, crayon::cyan(r_expr_s2), "\n", sep = "")
 }
 
 
