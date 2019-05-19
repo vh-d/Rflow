@@ -114,7 +114,7 @@ node <- R6::R6Class(
 
         self$set_persistence(persistence)
 
-        self$tags    <- tags
+        self$tags    <- as.character(tags)
 
         depends_char <- if (is.character(depends)) depends else names(depends)
         self$depends <- depends_char
@@ -179,8 +179,7 @@ node <- R6::R6Class(
 
         if (!identical(as.character(self$tags), as.character(tags))) {
           if (verbose) notify_update(self$id, "tags")
-          self$tags <- tags
-          # self$trigger_defchange <- TRUE
+          self$tags <- as.character(tags)
         }
 
         trigger_condition <- suppressWarnings(as_r_expr(r_code = trigger_condition))
