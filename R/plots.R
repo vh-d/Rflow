@@ -175,15 +175,20 @@ plot.rflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "
 #' @export
 #'
 #' @examples
-visRflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD", ...) {
+visRflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD", orderBy = "id", ...) {
 
   if (!requireNamespace("visNetwork", quietly = TRUE)) stop("visNetwork package required to plot graphs")
 
   l <- visData(rflow = rflow, tags = tags, includeIsolated = includeIsolated)
 
+  nodes <- l$dtNODES
+  edges <- l$dtEDGES
+
+  if (length(orderBy)) setorderv(nodes, orderBy)
+
   visNetwork::visNetwork(
-    nodes = l$dtNODES,
-    edges = l$dtEDGES,
+    nodes = nodes,
+    edges = edges,
     ...
   ) %>%
     visNetwork::visIgraphLayout(
@@ -244,15 +249,20 @@ visRflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD
 #' @export
 #'
 #' @examples
-visRflow2 <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD", ...) {
+visRflow2 <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD", orderBy = "id", ...) {
 
   if (!requireNamespace("visNetwork", quietly = TRUE)) stop("visNetwork package required to plot graphs")
 
   l <- visData(rflow = rflow, tags = tags, includeIsolated = includeIsolated)
 
+  nodes  <- l$dtNODES
+  edges  <- l$dtEDGES
+
+  if (length(orderBy)) setorderv(nodes, orderBy)
+
   visNetwork::visNetwork(
-    nodes = l$dtNODES,
-    edges = l$dtEDGES,
+    nodes = nodes,
+    edges = edges,
     ...
   ) %>%
     visNetwork::visHierarchicalLayout(

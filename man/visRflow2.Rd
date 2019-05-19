@@ -5,17 +5,9 @@
 \title{visualize workflow DAG}
 \usage{
 visRflow2(rflow, tags = NULL, includeIsolated = TRUE,
-  direction = "UD", ...)
+  direction = "UD", orderBy = "id", ...)
 }
 \arguments{
-\item{rflow}{}
-
-\item{tags}{}
-
-\item{includeIsolated}{}
-
-\item{direction}{}
-
 \item{...}{}
 }
 \description{
