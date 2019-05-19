@@ -71,7 +71,7 @@ node <- R6::R6Class(
             list(
               enabled = TRUE,
               path    = persistence$path,
-              file    = paste0(self$id, "_", digest::digest(self$id, algo = "md5", serialize = FALSE), ".rds")
+              file    = filename_from_id(self$id)
             )
           } else stop(persistence$path, " does not exist.")
         } else {
@@ -362,7 +362,7 @@ r_node <- R6::R6Class(
             list(
               enabled = TRUE,
               path    = cache$path,
-              file    = paste0(self$id, "_", digest::digest(self$id, algo = "md5", serialize = FALSE), ".rds")
+              file    = filename_from_id(self$id)
             )
           } else stop(cache$path, " does not exist.")
         } else if (is.character(cache)) {
@@ -370,7 +370,7 @@ r_node <- R6::R6Class(
             list(
               enabled = TRUE,
               path    = cache,
-              file    = paste0(self$id, ".rds")
+              file    = filename_from_id(self$id)
             )
           } else stop(cache, " does not exist.")
         } else {

@@ -55,7 +55,7 @@ set_id.node <- function(x, id_new, ...) {
 
 #' Make a vector of all nodes' ids
 #'
-#' @param x 
+#' @param x
 #'
 #' @return
 #' @export
@@ -73,7 +73,7 @@ get_nodes_ids.rflow <- function(x) {
 
 #' Returns a list with all node objects
 #'
-#' @param x 
+#' @param x
 #'
 #' @return
 #' @export
@@ -146,14 +146,14 @@ trigger_manual.rflow <- function(rflow, x) {
 }
 
 #' @title Evaluates a node
-#' 
-#' @description Evaluates a node assuming all its requirements are met  
-#' 
+#'
+#' @description Evaluates a node assuming all its requirements are met
+#'
 #' @param id node's id
 #' @param ... args passed to node's eval() method
-#' 
-#' @details 
-#' As oposed to `make()`, this function is not indended for frequent use by a user.  
+#'
+#' @details
+#' As oposed to `make()`, this function is not indended for frequent use by a user.
 #'
 #' @export
 eval_node <- function(x, ...) {
@@ -170,3 +170,6 @@ eval_node.character <- function(x, rflow) {
   rflow[[x]]$eval()
 }
 
+filename_from_id <- function(id, hash = NULL) {
+  paste0(id, "_", if (length(hash)) hash else digest::digest(id, algo = "md5", serialize = FALSE), ".rds")
+}

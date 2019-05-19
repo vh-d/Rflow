@@ -329,7 +329,7 @@ add_node.list <- function(
   if (!updated) {
 
     if (rflow$.persistence$enabled) {
-      fp <- file.path(rflow$.persistence$path, paste0(id, ".rds"))
+      fp <- file.path(rflow$.persistence$path, filename_from_id(id))
 
       if (file.exists(fp)) {
         saved_state   <- load_state_of_node(path = fp)
