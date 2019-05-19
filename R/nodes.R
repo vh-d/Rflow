@@ -164,7 +164,7 @@ node <- R6::R6Class(
 
         ...,
         store  = TRUE,
-        verbose = FALSE
+        verbose = TRUE
       ) {
         depends_char <- if (is.character(depends)) depends else names(depends)
         if (!setequal(self$depends, depends_char)) {
@@ -472,7 +472,7 @@ r_node <- R6::R6Class(
         r_code  = NULL,
         r_expr  = NULL,
         store   = TRUE,
-        verbose = FALSE
+        verbose = TRUE
       ) {
         super$update_definition(..., verbose = verbose, store = FALSE)
 
@@ -549,14 +549,12 @@ r_node <- R6::R6Class(
       }
     },
 
-    remove = function(verbose = FALSE, verbose_prefix = "") {
+    remove = function(verbose = TRUE, verbose_prefix = "") {
       if (self$exists()) {
-        if (verbose) {
-          cat(verbose_prefix, crayon::red(self$id), ": Removing the target R object!\n", sep = "")
-        }
+        if (verbose) notify_removal(self$id, verbose_prefix = verbose_prefix)
         return(invisible(rm(list = self$name, pos = self$r_env)))
       } else {
-        warning("Object ", self$id, " (", self$name, ")", " does not exist.")
+        if (verbose) notify_nonexistence(self$id, verbose_prefix = verbose_prefix)
         return(invisible(FALSE))
       }
     }
@@ -729,7 +727,7 @@ db_node <- R6::R6Class(
         return(invisible(TRUE))
       },
 
-    execute_sql = function(sql, verbose = FALSE, verbose_prefix = "") {
+    execute_sql = function(sql, verbose = TRUE, verbose_prefix = "") {
       if (verbose) {
         cat(verbose_prefix, crayon::red(self$id), ": Evaluating SQL statements:\n", sep = "")
       }
@@ -761,7 +759,7 @@ db_node <- R6::R6Class(
       } else {
         if (verbose) {
           # if (!is.null(self$sql_code)) cat(verbose_prefix, "SQL: ", self$sql_code, sep = "")
-          cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
+          cat(verbose_prefix_inc, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
           cat_r_expr(self$r_expr, verbose_prefix = verbose_prefix_inc)
         }
         eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
@@ -808,14 +806,12 @@ db_node <- R6::R6Class(
       }
     },
 
-    remove = function(verbose = FALSE, verbose_prefix = "") {
+    remove = function(verbose = TRUE, verbose_prefix = "") {
       if (self$exists()) {
-        if (verbose) {
-          cat(verbose_prefix, crayon::red(self$id), ": Dropping the target DB object!\n", sep = "")
-        }
+        if (verbose) notify_removal(self$id, verbose_prefix = verbose_prefix)
         return(invisible(DBI::dbRemoveTable(conn = self$connection, name = self$name)))
       } else {
-        warning("Object ", self$id, " (", self$name, ")", " does not exist.")
+        if (verbose) notify_nonexistence(self$id, verbose_prefix = verbose_prefix)
         return(invisible(FALSE))
       }
     }
@@ -846,19 +842,17 @@ accdb_node <- R6::R6Class(
       }
     },
 
-    remove = function(verbose = FALSE, verbose_prefix = "") {
+    remove = function(verbose = TRUE, verbose_prefix = "") {
       if (self$exists()) {
-        if (verbose) {
-          cat(verbose_prefix, crayon::red(self$id), ": Dropping the target DB object!\n", sep = "")
-        }
+        if (verbose) notify_removal(self$id, verbose_prefix = verbose_prefix)
         return(invisible(odbc32::sqlDrop(con = self$connection, name = self$name)))
       } else {
-        warning("Object ", self$id, " (", self$name, ")", " does not exist.")
+        if (verbose) notify_nonexistence(self$id, verbose_prefix = verbose_prefix)
         return(invisible(FALSE))
       }
     },
 
-    execute_sql = function(verbose = FALSE, verbose_prefix = "") {
+    execute_sql = function(verbose = TRUE, verbose_prefix = "") {
       if (verbose) {
         cat(verbose_prefix, crayon::red(self$id), ": Evaluating SQL statements:\n", sep = "")
       }
@@ -928,7 +922,7 @@ excel_sheet <- R6::R6Class(
         sheet   = 1L, # not in file_node
         hash    = NULL,
         store   = TRUE,
-        verbose = FALSE
+        verbose = TRUE
       ) {
         super$update_definition(..., verbose = verbose, store = FALSE)
 
@@ -1083,7 +1077,7 @@ file_node <- R6::R6Class(
         r_expr  = NULL,
         hash    = NULL,
         store   = TRUE,
-        verbose = FALSE
+        verbose = TRUE
       ) {
         super$update_definition(..., verbose = verbose, store = FALSE)
 
@@ -1164,14 +1158,12 @@ file_node <- R6::R6Class(
       return(FALSE)
     },
 
-    remove = function(verbose = FALSE, verbose_prefix = "") {
+    remove = function(verbose = TRUE, verbose_prefix = "") {
       if (self$exists()) {
-        if (verbose) {
-          cat(verbose_prefix, crayon::red(self$id), ": Removing the target file!\n", sep = "")
-        }
+        if (verbose) notify_removal(self$id, verbose_prefix = verbose_prefix)
         return(invisible(file.remove(self$path)))
       } else {
-        warning("Object ", self$id, " (", self$name, ")", " does not exist.")
+        if (verbose) notify_nonexistence(self$id, verbose_prefix = verbose_prefix)
         return(invisible(FALSE))
       }
     }

@@ -92,6 +92,14 @@ notify_update <- function(id, property) {
   cat(crayon::yellow("Definition of "), crayon::red(id), crayon::yellow(" has changed (", property, ")", sep = ""), "\n", sep = "")
 }
 
+notify_removal <- function(id, verbose_prefix = "") {
+  cat(verbose_prefix, crayon::red(id), ": removing the target!\n", sep = "")
+}
+
+notify_nonexistence <- function(id, verbose_prefix = "") {
+  cat(verbose_prefix, crayon::red(id), ": the target does not exist!\n", sep = "")
+}
+
 # Print a nice notifications
 notify_trigger <- function(id, trigger, verbose_prefix = "") {
   cat(verbose_prefix, crayon::red(id), crayon::yellow(" triggered by ", trigger, sep = ""), "\n", sep = "")
