@@ -202,7 +202,7 @@ visRflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD
     ) %>%
     visNetwork::visEdges(
       arrows = "to",
-      smooth = TRUE
+      smooth = FALSE
     ) %>%
     visNetwork::visOptions(
 
