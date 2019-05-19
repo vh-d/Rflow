@@ -611,7 +611,6 @@ db_node <- R6::R6Class(
         auto_remove = TRUE,
         sql_code = NULL,
         sql      = NULL,
-        mode     = NULL,
         r_code   = NULL,
         r_expr   = NULL,  # R expression (from r_code)
         con_code = NULL,
@@ -695,11 +694,9 @@ db_node <- R6::R6Class(
         } else if (length(sql)) {
           sql <- sql_structure(sql)
           mode <- "SQL"
-          r_expr <- expression(self$execute_sql())
         } else if (length(sql_code)) {
           sql <- sql_structure(sql_code)
           mode <- "SQL"
-          r_expr <- expression(self$execute_sql())
         } else
           warning(id, ": no R expression/code or SQL code!")
 
@@ -726,11 +723,11 @@ db_node <- R6::R6Class(
         return(invisible(TRUE))
       },
 
-    execute_sql = function(sql, verbose = TRUE, verbose_prefix = "") {
+    execute_sql = function(verbose = TRUE, verbose_prefix = "") {
       if (verbose) {
         cat(verbose_prefix, crayon::red(self$id), ": Evaluating SQL statements:\n", sep = "")
       }
-      sapply(sql,
+      sapply(self$sql,
              function(sql_statement) {
                if (verbose) {
                  cat_r_expr(sql_statement$code, verbose_prefix = paste0(verbose_prefix, "  "))
@@ -754,7 +751,7 @@ db_node <- R6::R6Class(
       if (self$auto_remove) self$remove(verbose = verbose, verbose_prefix = verbose_prefix_inc)
 
       if (self$mode == "SQL") {
-        self$execute_sql(self$sql, verbose = verbose, verbose_prefix = verbose_prefix_inc)
+        self$execute_sql(verbose = verbose, verbose_prefix = verbose_prefix_inc)
       } else {
         if (verbose) {
           # if (!is.null(self$sql_code)) cat(verbose_prefix, "SQL: ", self$sql_code, sep = "")
@@ -855,7 +852,7 @@ accdb_node <- R6::R6Class(
       if (verbose) {
         cat(verbose_prefix, crayon::red(self$id), ": Evaluating SQL statements:\n", sep = "")
       }
-      sapply(sql,
+      sapply(self$sql,
              function(sql_statement) {
                if (verbose) {
                  cat_r_expr(sql_statement$code, verbose_prefix = paste0(verbose_prefix, "  "))
