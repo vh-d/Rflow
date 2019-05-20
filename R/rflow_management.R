@@ -302,7 +302,7 @@ add_node.list <- function(
   # extract object's id
   id <- get_id(x)
 
-  if (verbose) cat("Adding/updating  ", crayon::red(id), "\n", sep = "")
+  if (verbose) cat(crayon::red(id), "\n", sep = "")
 
   # default behaviour
   updated   <- FALSE # when object already exists and is only going to be updated
@@ -328,16 +328,21 @@ add_node.list <- function(
   # either completely new objects or objects being recovered
   if (!updated) {
 
+    if (verbose) cat("  * initializing")
+
     if (rflow$.persistence$enabled) {
       fp <- file.path(rflow$.persistence$path, filename_from_id(id))
 
       if (file.exists(fp)) {
+        if (verbose) cat(" from a saved state (previous sessions)...\n")
         saved_state   <- load_state_of_node(path = fp)
         initiated_obj <- as_node(saved_state, persistence = rflow$.persistence, ...)
         recovered     <- TRUE
       } else
+        if (verbose) cat(" as a new object...\n")
         initiated_obj <- as_node(x, persistence = rflow$.persistence, ...)
     } else {
+        if (verbose) cat(" as a new object...\n")
       initiated_obj <- as_node(x, persistence = rflow$.persistence, ...)
     }
 
@@ -351,7 +356,10 @@ add_node.list <- function(
     parent.env(rflow[[id]]) <- rflow
   }
 
-  if (recovered || updated) update_node(x, rflow = rflow, verbose = verbose)
+  if (recovered || updated) {
+    if (verbose) cat("  * updating...\n")
+    update_node(x, rflow = rflow, verbose = verbose)
+  }
 
   # connect to required objects
   if (connect) rflow[[id]]$connect()
