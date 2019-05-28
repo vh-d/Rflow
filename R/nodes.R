@@ -797,7 +797,7 @@ db_node <- R6::R6Class(
     },
 
     print_sql = function(prefix = "") {
-      cat(prefix, crayon::cyan(paste_sql(self$sql_code)), sep = "")
+      cat(prefix, crayon::cyan(paste_sql(self$sql)), sep = "")
     },
 
     get = function() {

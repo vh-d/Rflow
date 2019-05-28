@@ -34,8 +34,8 @@ nodes.rflow <- function(rflow) {
             env   = null2na(x$env),
             desc  = null2na(x$desc),
             tags  = format_tags(x$tags),
-            sql_code  = deescape_quotes(paste_sql(x$sql_code)),
-            r_expr    = paste_sql(as.character(x$r_expr)),
+            sql_code  = deescape_quotes(paste_sql(x$sql)),
+            r_expr    = paste0(as.character(x$r_expr), collapse = ";\n\n"),
             node_type = class(x)[1])
         }
       )

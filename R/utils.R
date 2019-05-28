@@ -134,7 +134,7 @@ sql_structure.character <- function(x, ignoreErrors = FALSE, ...) {
 }
 
 paste_sql <- function(x) {
-  paste0(x, collapse = ";\n\n")
+  paste0(sapply(x, `[[`, "code"), collapse = ";\n\n")
 }
 
 
