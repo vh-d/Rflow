@@ -99,6 +99,7 @@ node <- R6::R6Class(
         desc    = NULL,
         tags    = NULL,
         depends = NULL,
+        trigger_defchange = NULL,
         trigger_condition = NULL,
         persistence = list(enabled = FALSE),
         .last_evaluated = NULL,
@@ -119,7 +120,9 @@ node <- R6::R6Class(
         depends_char <- if (is.character(depends)) depends else names(depends)
         self$depends <- depends_char
 
-        # self$trigger_defchange <- TRUE # WHY???
+        if (length(trigger_defchange))
+          self$trigger_defchange <- as.logical(trigger_defchange)
+
         if (!is.null(trigger_condition))
           self$trigger_condition <- as_r_expr(r_code = trigger_condition)
 
@@ -160,12 +163,16 @@ node <- R6::R6Class(
         desc    = NULL,
         tags    = NULL,
         depends = NULL,
+        trigger_defchange = NULL,
         trigger_condition = NULL,
 
         ...,
         store  = TRUE,
         verbose = TRUE
       ) {
+        if (!is.null(trigger_defchange))
+          self$trigger_defchange <- trigger_defchange
+
         depends_char <- if (is.character(depends)) depends else names(depends)
         if (!setequal(self$depends, depends_char)) {
 
