@@ -58,12 +58,14 @@ node <- R6::R6Class(
     trigger_condition  = NULL,
     # last_evaluated = NULL,
 
+    # derive object's ID from given identificators
     set_id = function(id, name, env) {
       if (is.null(id) & (is.null(name) | is.null(env))) stop("Missing id or (env + name)!") # either 'id' or 'name' + 'env' arguments have to be provided
       self$id <- if (is.null(id)) paste0(env, ".", name) else id
       # set_persistence(self$persistence)
     },
 
+    # set up persistency
     set_persistence = function(persistence) {
       self$persistence <-
         if (is.list(persistence) && length(persistence$path)) {
@@ -139,6 +141,8 @@ node <- R6::R6Class(
         return(invisible(TRUE))
       },
 
+    # save function for state persistency
+    # currently only file-based store backend is supported
     store_state = function(
       public_fields  = NULL,
       private_fields = NULL) {
@@ -156,6 +160,7 @@ node <- R6::R6Class(
       )
     },
 
+    # allows to change properties of existing objects/instances 
     update_definition =
       function(
         id      = NULL,
@@ -173,6 +178,7 @@ node <- R6::R6Class(
         if (!is.null(trigger_defchange))
           self$trigger_defchange <- trigger_defchange
 
+        # changes in dependencies
         depends_char <- if (is.character(depends)) depends else names(depends)
         if (!setequal(self$depends, depends_char)) {
 
@@ -182,13 +188,16 @@ node <- R6::R6Class(
           self$trigger_defchange <- TRUE
         }
 
+        # changes in description
         if (!is.null(desc)) self$desc <- desc
 
+        # changes in tags
         if (!identical(as.character(self$tags), as.character(tags))) {
           if (verbose) notify_update(self$id, "tags")
           self$tags <- as.character(tags)
         }
 
+        # changes in user defined trigger
         trigger_condition <- suppressWarnings(as_r_expr(r_code = trigger_condition))
         if (!identical(as.character(self$trigger_condition), as.character(trigger_condition))) {
           if (verbose) notify_update(self$id, "trigger condition")
@@ -196,6 +205,7 @@ node <- R6::R6Class(
           self$trigger_defchange <- TRUE
         }
 
+        # currently all the remaingn arguments are ifnored, TODO ?
         # other_args <- list(...)
         # if (length(other_args)) warning("Not updating ", paste(names(other_args), collapse = ", "), " properties.\n")
 
@@ -206,19 +216,24 @@ node <- R6::R6Class(
         return(invisible(TRUE))
       },
 
+    # connect object to upstream 
     set_upstream = function(obj) {
       if (!in.R6(obj, self$upstream)) {
         self$upstream <- c(self$upstream, obj)
       }
     },
 
+    # connect this object to its upsream (currently not used) 
     set_downstream = function(obj) {
       if (!in.R6(self, obj$downstream)) {
         obj$downstream <- c(obj$downstream, self)
       }
     },
 
+    # make the references to both upstream and downstream
     connect_to = function(id) {
+    # connect object to upstream 
+
       if (exists(id, where = parent.env(self))) {
 
         obj <- get(x = id, envir = parent.env(self))
@@ -234,6 +249,7 @@ node <- R6::R6Class(
       return(TRUE)
     },
 
+    # make the references to all relevant upstream objects
     connect = function(verbose = TRUE) {
       if (verbose) cat("Connecting ", crayon::red(self$id), " to: ", crayon::red(self$depends, collapse = " "), "\n", sep = "")
       sapply(self$depends, self$connect_to)
@@ -251,6 +267,8 @@ node <- R6::R6Class(
       isTRUE(eval(self$trigger_condition, envir = self))
     },
 
+    # run checks that triggers evaluation
+    # note that the order of checking the triggers is important (short circuit)
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
       if (isNotFALSE(self$trigger_defchange))         {if (verbose) notify_trigger(self$id, "change in eval. expression", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
       if (isNotFALSE(self$trigger_manual))            {if (verbose) notify_trigger(self$id, "manual trigger", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
@@ -261,15 +279,19 @@ node <- R6::R6Class(
       return(FALSE)
     },
 
+    # for resetting triggers after successfull evaluation
     reset_triggers = function() {
       self$trigger_defchange <- FALSE
       self$trigger_manual <- FALSE
     },
 
+    # main evaluation function
     eval = function() {
 
     },
 
+    # generic make function that recursivelly solves all dependencies
+    # in most cases, this is not supposed to be overloaded in custom subclasses
     make = function(force = FALSE, verbose = TRUE, verbose_prefix = "") {
 
       if (verbose) {
@@ -324,6 +346,7 @@ node <- R6::R6Class(
 
   active = list(
 
+    # datetime of last evaluation
     last_evaluated = function(value) {
       if (missing(value)) {
         return(private$.last_evaluated)
@@ -333,6 +356,7 @@ node <- R6::R6Class(
       }
     },
 
+    # datetime of last change (does not have to equal to last evaluation unless the target value really changes)
     last_changed = function(value) {
       if (missing(value)) {
         return(private$.last_evaluated)
