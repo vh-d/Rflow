@@ -338,11 +338,12 @@ add_node.list <- function(
         saved_state   <- load_state_of_node(path = fp)
         initiated_obj <- as_node(saved_state, persistence = rflow$.persistence, ...)
         recovered     <- TRUE
-      } else
+      } else {
         if (verbose) cat(" as a new object...\n")
         initiated_obj <- as_node(x, persistence = rflow$.persistence, ...)
+      }
     } else {
-        if (verbose) cat(" as a new object...\n")
+      if (verbose) cat(" as a new object...\n")
       initiated_obj <- as_node(x, persistence = rflow$.persistence, ...)
     }
 
