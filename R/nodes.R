@@ -37,7 +37,11 @@ node <- R6::R6Class(
 
   private = list(
     .last_evaluated = NULL, # datetime when target value was last evaluated/made
-    .last_changed   = NULL  # datetime when target value changed the last time (it might be evaluated without any change)
+    .last_changed   = NULL, # datetime when target value changed the last time (it might be evaluated without any change)
+
+    .vis_params_default = list(
+      shape = "circle"
+    )
   ),
 
   public    = list(
@@ -56,7 +60,16 @@ node <- R6::R6Class(
     trigger_defchange  = FALSE,
     trigger_manual     = FALSE,
     trigger_condition  = NULL,
+
+    vis_params = NULL,
     # last_evaluated = NULL,
+
+    vis_params_process = function(params) {
+      union.list(
+        private$.vis_params_default,
+        params
+      )
+    },
 
     # derive object's ID from given identificators
     set_id = function(id, name, env) {
@@ -111,6 +124,9 @@ node <- R6::R6Class(
         persistence = list(enabled = FALSE),
         .last_evaluated = NULL,
         .last_changed   = NULL,
+
+        vis_params = NULL,
+
         store   = TRUE,
         ...
       ) {
@@ -123,6 +139,8 @@ node <- R6::R6Class(
         self$set_persistence(persistence)
 
         self$tags    <- as.character(tags)
+
+        self$vis_params <- self$vis_params_process(vis_params)
 
         depends_char <- if (is.character(depends)) depends else names(depends)
         self$depends <- depends_char
@@ -182,6 +200,12 @@ node <- R6::R6Class(
       ) {
         if (!is.null(trigger_defchange))
           self$trigger_defchange <- trigger_defchange
+
+        # graphics params need to be processed before checking
+        vis_params <- self$vis_params_process(vis_params)
+        if (!identical(vis_params, self$vis_params)) {
+          self$vis_params <- vis_params
+        }
 
         # changes in dependencies
         depends_char <- if (is.character(depends)) depends else names(depends)
@@ -379,6 +403,12 @@ node <- R6::R6Class(
 r_node <- R6::R6Class(
   classname = "r_node",
   inherit = node,
+
+  private = list(
+    .vis_params_default = list(
+      shape = "triangle"
+    )
+  ),
 
   public = list(
 
@@ -578,6 +608,7 @@ r_node <- R6::R6Class(
     },
 
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
+      
       if (!isFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
       if (!isTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
 
@@ -645,6 +676,12 @@ solve_connection.DBIConnection <- function(con) {
 db_node <- R6::R6Class(
   classname = "db_node",
   inherit   = node,
+
+  private = list(
+    .vis_params_default = list(
+      shape = "square"
+    )
+  ),
 
   public    = list(
 
@@ -839,6 +876,7 @@ db_node <- R6::R6Class(
     },
 
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
+      
       if (!isFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
       if (!isTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
 
@@ -1047,6 +1085,7 @@ excel_sheet <- R6::R6Class(
     },
 
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
+      
       if (!isFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
       if (!isTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
 
@@ -1093,6 +1132,12 @@ file_node <- R6::R6Class(
 
   classname = "file_node",
   inherit   = node,
+
+  private = list(
+    .vis_params_default = list(
+      shape = "star"
+    )
+  ),
 
   public    = list(
 
@@ -1221,6 +1266,7 @@ file_node <- R6::R6Class(
     },
 
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
+      
       if (!isFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
       if (!isTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
 
