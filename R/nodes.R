@@ -292,7 +292,10 @@ node <- R6::R6Class(
 
     # main evaluation function
     eval = function() {
-
+      # all triggers should be resetted now
+      self$reset_triggers()
+      # make changes persistent
+      if (self$persistence$enabled) self$store_state()
     },
 
     # generic make function that recursivelly solves all dependencies
@@ -340,9 +343,6 @@ node <- R6::R6Class(
       # then make the object itself
       # eval should return if the object was evaluated/changed etc...
       trigger_downstream <- isNotFALSE(self$eval(verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  ")))
-
-      # all triggers should be resetted now
-      self$reset_triggers()
 
       # return whether dependants should be triggered or not
       return(invisible(trigger_downstream))
@@ -548,6 +548,11 @@ r_node <- R6::R6Class(
       }
 
       if (self$cache$enabled && (changed || isNotTRUE(self$cache_exists()))) self$cache_write()
+
+      # all triggers should be resetted now
+      self$reset_triggers()
+      
+      # make changes persistent
       if (self$persistence$enabled) self$store_state()
 
       return(changed)
@@ -820,6 +825,10 @@ db_node <- R6::R6Class(
 
       private$.last_evaluated <- Sys.time()
 
+      # all triggers should be resetted now
+      self$reset_triggers()
+      
+      # make changes persistent
       if (self$persistence$enabled) self$store_state()
 
       return(TRUE)
@@ -1198,6 +1207,10 @@ file_node <- R6::R6Class(
 
       private$.last_evaluated <- Sys.time()
 
+      # all triggers should be resetted now
+      self$reset_triggers()
+      
+      # make changes persistent
       if (self$persistence$enabled) self$store_state()
 
       return(changed)
