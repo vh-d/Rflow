@@ -873,6 +873,11 @@ db_node <- R6::R6Class(
 
 # accdb_node --------------------------------------------------------------
 
+solve_connection.odbc32 <- function(con) {
+  return(con)
+}
+
+
 #' @export
 accdb_node <- R6::R6Class(
   classname = "accdb_node",
