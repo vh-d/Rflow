@@ -724,6 +724,7 @@ db_node <- R6::R6Class(
         sql      = NULL,
         r_code   = NULL,
         r_expr   = NULL,  # R expression (from r_code)
+        connection = NULL,
         store    = TRUE,
         verbose  = FALSE
       ) {
