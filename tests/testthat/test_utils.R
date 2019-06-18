@@ -17,3 +17,17 @@ test_that("SQL code can be converted in a list object", {
   
   expect_equal(tmp[[1]]$code, sql_statements[1])
 })
+
+
+test_that("in.R6 behaves similarly as %in% for R6 objects", {
+  n1 <- Rflow::node$new("Node1")
+  n2 <- Rflow::node$new("Node2")
+  n3 <- Rflow::node$new("Node3")
+  
+  expect_true(in.R6(n1, c(n1, n2)))
+  expect_false(in.R6(n3, c(n1, n2)))
+  expect_false(in.R6(n3, c()))
+  expect_false(in.R6(n3, NULL))
+  
+})
+

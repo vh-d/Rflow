@@ -29,12 +29,6 @@ union.list <- function(
 }
 
 
-#' companion to `isTRUE()``
-#' @rdname isNotTRUE
-isNotTRUE  <- function(x) (!length(x) || is.na(x) || x == FALSE)
-#' @rdname isNotTRUE
-isNotFALSE <- function(x) (!length(x) || is.na(x) || x == TRUE)
-
 #' Returns R expression from either R expression or parsed R code
 #'
 #' @param r_code character vector of R code; ignored when R expression is not NULL

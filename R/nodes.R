@@ -275,9 +275,9 @@ node <- R6::R6Class(
     # run checks that triggers evaluation
     # note that the order of checking the triggers is important (short circuit)
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
-      if (isNotFALSE(self$trigger_defchange))         {if (verbose) notify_trigger(self$id, "change in eval. expression", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
-      if (isNotFALSE(self$trigger_manual))            {if (verbose) notify_trigger(self$id, "manual trigger", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
-      if (isNotFALSE(self$check_trigger_condition())) {if (verbose) notify_trigger(self$id, "custom trigger condition", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+      if (!isFALSE(self$trigger_defchange))         {if (verbose) notify_trigger(self$id, "change in eval. expression", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+      if (!isFALSE(self$trigger_manual))            {if (verbose) notify_trigger(self$id, "manual trigger", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+      if (!isFALSE(self$check_trigger_condition())) {if (verbose) notify_trigger(self$id, "custom trigger condition", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
 
       if (!length(self$last_evaluated) || is.na(self$last_evaluated)) {if (verbose) notify_trigger(self$id, "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
 
@@ -317,7 +317,7 @@ node <- R6::R6Class(
 
         # increment list of changed nodes in upstream
         # there is another trigger for cases when self$last_evaluated in NULL/NA, therefore isTRUE() should be safe and is better for logging
-        if (isNotFALSE(trigger_upstream_newer) || isTRUE(trigger_upstream_changed))
+        if (!isFALSE(trigger_upstream_newer) || isTRUE(trigger_upstream_changed))
           upstream_changed_ids <- c(upstream_changed_ids, y$id)
 
         results <- results || trigger_upstream_newer || trigger_upstream_changed
@@ -330,10 +330,10 @@ node <- R6::R6Class(
         } else if (!length(self$last_evaluated) || is.na(self$last_evaluated)) {
           if (verbose) notify_trigger(self$id, "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u2514 "))
           TRUE
-        } else if (isNotFALSE(results)) {
+        } else if (!isFALSE(results)) {
           if (verbose) notify_trigger(self$id, paste0("changes in upstream nodes (", paste0(upstream_changed_ids, collapse = ", "), ")"), verbose_prefix = paste0(verbose_prefix, "\u2514 "))
           TRUE
-        } else if (isNotFALSE(self$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) {
+        } else if (!isFALSE(self$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) {
           TRUE
         } else {
           if (verbose) cat(verbose_prefix, "\u2514 ", crayon::silver(self$id, " not triggered.", sep = ""), "\n", sep = "")
@@ -342,7 +342,7 @@ node <- R6::R6Class(
 
       # then make the object itself
       # eval should return if the object was evaluated/changed etc...
-      trigger_downstream <- isNotFALSE(self$eval(verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  ")))
+      trigger_downstream <- !isFALSE(self$eval(verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  ")))
 
       # return whether dependants should be triggered or not
       return(invisible(trigger_downstream))
@@ -547,7 +547,7 @@ r_node <- R6::R6Class(
         cat(verbose_prefix, crayon::red(self$id), ": done", if (changed) crayon::yellow(" (value has changed)"), ".\n", sep = "")
       }
 
-      if (self$cache$enabled && (changed || isNotTRUE(self$cache_exists()))) self$cache_write()
+      if (self$cache$enabled && (changed || !isTRUE(self$cache_exists()))) self$cache_write()
 
       # all triggers should be resetted now
       self$reset_triggers()
@@ -566,7 +566,7 @@ r_node <- R6::R6Class(
       if (!self$exists()) return(NA) # TODO: or NULL?
 
       hash <- digest::digest(object = self$get(), file = FALSE, algo = "md5")
-      changed <- isNotTRUE(self$hash$hash == hash)
+      changed <- !isTRUE(self$hash$hash == hash)
 
       if (changed)
         self$hash <- list(
@@ -578,8 +578,8 @@ r_node <- R6::R6Class(
     },
 
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
-      if (isNotFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
-      if (isNotTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+      if (!isFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
+      if (!isTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
 
       return(FALSE)
     },
@@ -839,8 +839,8 @@ db_node <- R6::R6Class(
     },
 
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
-      if (isNotFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
-      if (isNotTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+      if (!isFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
+      if (!isTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
 
       return(FALSE)
     },
@@ -1035,7 +1035,7 @@ excel_sheet <- R6::R6Class(
       if (!self$exists()) return(NA) # TODO: or NULL?
 
       hash <- digest::digest(object = self$get(), algo = "md5")
-      changed <- isNotTRUE(self$hash$hash == hash)
+      changed <- !isTRUE(self$hash$hash == hash)
 
       if (changed)
         self$hash <- list(
@@ -1047,8 +1047,8 @@ excel_sheet <- R6::R6Class(
     },
 
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
-      if (isNotFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
-      if (isNotTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+      if (!isFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
+      if (!isTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
 
       return(FALSE)
     },
@@ -1178,7 +1178,7 @@ file_node <- R6::R6Class(
       if (!self$exists()) return(NA) # TODO: or NULL?
 
       hash <- digest::digest(object = self$path, file = TRUE, algo = "md5")
-      changed <- isNotTRUE(self$hash$hash == hash)
+      changed <- !isTRUE(self$hash$hash == hash)
 
       if (changed)
         self$hash <- list(
@@ -1221,8 +1221,8 @@ file_node <- R6::R6Class(
     },
 
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
-      if (isNotFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
-      if (isNotTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
+      if (!isFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
+      if (!isTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
 
       return(FALSE)
     },
