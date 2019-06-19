@@ -368,6 +368,9 @@ node <- R6::R6Class(
       # eval should return if the object was evaluated/changed etc...
       trigger_downstream <- !isFALSE(self$eval(verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  ")))
 
+      # all triggers should be resetted now
+      self$reset_triggers()
+
       # return whether dependants should be triggered or not
       return(invisible(trigger_downstream))
     }
