@@ -110,7 +110,28 @@ node <- R6::R6Class(
       cat("    manual:     ", self$trigger_manual,    "\n", sep = "")
       if (length(self$trigger_condition)) cat("    condition:  ", self$check_trigger_condition(), "\n", sep = "")
     },
-
+    
+    label = function() {
+      label <- paste0(self$env, "\n", self$name)
+      
+      return(label)
+    },
+    
+    title = function() {
+      title <- 
+        paste0("<b>", self$id, "</b>",
+               " &lt;", class(self)[1], "&gt;", "<br>")
+      
+      if (length(self$desc) && !is.na(self$desc))
+        title <- paste0(title,
+                        "<p><em>",
+                        stringr::str_replace_all(
+                          stringr::str_wrap(self$desc, width = 40), stringr::fixed("\n"), "<br>"),
+                        "</em></p>")
+      
+      return(title)
+    },
+    
     initialize =
       function(
         id      = NULL,
@@ -170,9 +191,19 @@ node <- R6::R6Class(
       public_fields  = NULL,
       private_fields = NULL) {
 
-      public_fields  <- unique(c("id", "name", "env", "desc", "tags", "depends", "trigger_condition", "trigger_defchange", public_fields))
-      private_fields <- unique(c(".last_evaluated", ".last_changed", private_fields))
-
+      public_fields  <- 
+        unique(
+          c("id", "name", "env", 
+            "desc", "tags", 
+            "depends", 
+            "trigger_condition", "trigger_defchange", 
+            "vis_params",
+            public_fields))
+      private_fields <- 
+        unique(
+          c(".last_evaluated", ".last_changed", 
+            private_fields))
+      
       saveRDS(
         object = list(
           self    = c(type = class(self)[1],
@@ -194,6 +225,8 @@ node <- R6::R6Class(
         trigger_defchange = NULL,
         trigger_condition = NULL,
 
+        vis_params = NULL,
+        
         ...,
         store  = TRUE,
         verbose = TRUE
@@ -472,7 +505,25 @@ r_node <- R6::R6Class(
       cat("  expression: \n")
       cat_r_expr(head(self$r_expr), verbose_prefix = "    ")
     },
-
+    
+    title = function() {
+      title <- super$title()
+      
+      title <- paste0(
+        title,
+        "<p>",
+        "R:<br><font size=\"-2\" face = \"monospace\">",
+        stringr::str_replace_all(
+          stringr::str_replace_all(
+            as.character(self$r_expr),
+            stringr::fixed("\n"), "<br>"),
+          stringr::fixed(" "), "&nbsp;"),
+        "</font></p>"
+      )
+      
+      return(title)
+    },
+    
     initialize =
       function(
         ...,
@@ -897,7 +948,41 @@ db_node <- R6::R6Class(
     print_sql = function(prefix = "") {
       cat(prefix, crayon::cyan(paste_sql(self$sql)), sep = "")
     },
+    
+    title = function() {
+      
+      title <- super$title()
 
+      title <- 
+        if (length(self$r_expr)) {
+          paste0(
+            title,
+            "<p>",
+            "R:<br><font size=\"-2\" face = \"monospace\">",
+            stringr::str_replace_all(
+              stringr::str_replace_all(
+                as.character(self$r_expr),
+                stringr::fixed("\n"), "<br>"),
+              stringr::fixed(" "), "&nbsp;"),
+            "</font></p>"
+          )
+        } else {
+          paste0(
+            title,
+            "<p>",
+            "SQL:<br><font size=\"-2\" face = \"monospace\">",
+            stringr::str_replace_all(
+              stringr::str_replace_all(
+                deescape_quotes(paste_sql(self$sql)),
+                stringr::fixed("\n"), "<br>"),
+              stringr::fixed(" "), "&nbsp;"),
+            "</font></p>"
+          )
+        }
+      
+      return(title)
+    },
+    
     get = function() {
       if (self$exists()) {
         return(DBI::dbReadTable(conn = self$connection, name = self$name))
