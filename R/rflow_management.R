@@ -310,18 +310,24 @@ add_node.list <- function(
 
   # check whether the object exists already
   if (id %in% names(rflow))
-    switch(conflict,
-           "update" = {
-             updated <- TRUE
-           },
-           "skip" = {
-             warning(id, " already exists! Skipping...")
-             return(FALSE)
-           },
-           "overwrite" = warning(id, " already exists! Overwriting!"),
-           NULL = stop(id, " already exists!")
+    switch(
+      conflict,
+      
+      "update" = {
+        updated <- TRUE
+      },
+      
+      "skip" = {
+        warning(id, " already exists! Skipping...")
+        return(FALSE)
+      },
+      
+      "overwrite" = warning(id, " already exists! Overwriting!"),
+      
+      # else:
+      stop(id, " already exists and conflict= '", conflict, "' is not recognized (one of update/skip/overwrite expected) !")
     )
-
+  
   # main
 
   # non-existent objects need to be constructed/initialized first
