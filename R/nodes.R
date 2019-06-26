@@ -118,18 +118,26 @@ node <- R6::R6Class(
     },
     
     title = function() {
-      title <- 
-        paste0("<b>", self$id, "</b>",
-               " &lt;", class(self)[1], "&gt;", "<br>")
+      paste0("<b>", self$id, "</b>", " &lt;", class(self)[1], "&gt;", "<br>") -> .
       
       if (length(self$desc) && !is.na(self$desc))
-        title <- paste0(title,
-                        "<p><em>",
-                        stringr::str_replace_all(
-                          stringr::str_wrap(self$desc, width = 40), stringr::fixed("\n"), "<br>"),
-                        "</em></p>")
+        . <- paste0(
+          .,
+          "<em>",
+          stringr::str_replace_all(
+            stringr::str_wrap(self$desc, width = 80), stringr::fixed("\n"), "<br>"),
+          "</em><br>"
+        )
       
-      return(title)
+      . <- paste0(
+        ., 
+        "<font size=\"-2\">", 
+        "evaluated: <em>", self$last_evaluated, "</em><br>",
+        "changed:   <em>", self$last_changed,   "</em><br>", 
+        "</font>"
+      )
+      
+      return(.)
     },
     
     initialize =
@@ -1377,7 +1385,7 @@ file_node <- R6::R6Class(
     title = function() {
       title <- super$title()
       
-      title <- paste0(title, "<p>", "path: <font size=\"-2\">", self$path, "</font></p>")
+      title <- paste0(title, "<font size=\"-2\">", "path: ", self$path, "</font><br>")
       
       if (length(self$r_expr)) {
         title <- paste0(
