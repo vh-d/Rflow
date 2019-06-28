@@ -2,17 +2,34 @@
 % Please edit documentation in R/rflow_management.R
 \name{make}
 \alias{make}
+\alias{make.rflow}
 \title{Make/build target or multiple targets}
 \usage{
 make(x, ...)
+
+\method{make}{rflow}(rflow, tags = NULL, leaves_only = TRUE,
+  force = FALSE, verbose = TRUE)
 }
 \arguments{
 \item{x}{node's id or rflow object}
 
+\item{rflow}{rflow object}
+
+\item{tags}{filter nodes by tags}
+
+\item{leaves_only}{logical; Option to run make only from ending nodes. Avoids redundant visits on intermediate nodes.}
+
 \item{force}{logical; force eval()}
 
 \item{verbose}{logical; switch on/off verbose output}
+
+\item{force}{logical; force eval()?}
+
+\item{verbose}{logical; Print verbose output?}
 }
 \description{
 Make/build target or multiple targets
+}
+\details{
+tags parameter can be used to filter nodes in two modes depending on length of the argument. A character vector of lenght > 1 results in union of matches. A scalar character value is applied as a regular expression.
 }

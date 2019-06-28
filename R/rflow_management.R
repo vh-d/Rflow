@@ -510,10 +510,14 @@ make.character <- function(
 
 #' @param rflow rflow object
 #'
+#' @param tags filter nodes by tags
 #' @param leaves_only logical; Option to run make only from ending nodes. Avoids redundant visits on intermediate nodes.
 #' @param force logical; force eval()?
 #' @param verbose logical; Print verbose output?
+#' @details 
+#' tags parameter can be used to filter nodes in two modes depending on length of the argument. A character vector of lenght > 1 results in union of matches. A scalar character value is applied as a regular expression.
 #' @method make rflow
+#' @rdname make
 #' @export
 make.rflow <- function(
   rflow,
@@ -526,22 +530,28 @@ make.rflow <- function(
 
   E <- edges(rflow)
   N <- nodes(rflow)
-
-  if (leaves_only) {
-    nodes_to_make <- N[!E, on = c("id" = "from"), id]
-  } else {
-    # nodes_to_make <- ls(rflow)
-    nodes_to_make <- N[["id"]]
-  }
-
+  
+  # exit if there's nothing to be done
+  if (!nrow(N)) return(invisible(NULL))
+  
+  nodes_to_make <- N[, id]
+  
   if (length(tags)) {
     query_tags <- tags
     rm(tags)
-    nodes_to_make <-
-      N[id %in% nodes_to_make
-        ][stringr::str_detect(tags, stringr::fixed(paste0("|", query_tags, "|"))), id]
+    
+    nodes_to_make <- 
+      if (length(query_tags) == 1) 
+        N[stringr::str_detect(tags, query_tags), id] else # query as regexp
+          N[stringr::str_detect(tags, stringr::fixed(paste0("|", query_tags, "|"))), id] # query as a union tag1 | tag2 | ...
+    
+    N <- N[id %in% nodes_to_make]
   }
-
+  
+  if (leaves_only) {
+    nodes_to_make <- N[!E[(to %in% nodes_to_make)], on = c("id" = "from"), id]
+  }
+  
   # RUN
   res <- sapply(
     X       = nodes_to_make,
