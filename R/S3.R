@@ -1,3 +1,41 @@
+
+
+# tools for passing arguments ---------------------------------------------
+
+
+# ff <- function(a = 1+2, b = a, ...) {
+#   # sys.call()
+#   # sys.function()
+#   args_form <- formals()
+#   args_form$... <- NULL
+#   args_var <- as.list(match.call()[-1])
+#   args_union <- Rflow:::union.list(args_form, args_var)
+#   
+#   # def_args_eval <- lapply(def_args, eval)
+#   # var_args_eval <- lapply(var_args, eval)
+#   # 
+#   args_union_eval <- lapply(args_union, eval, envir = args_union)
+#   
+#   str(args_union_eval)
+# }
+
+
+unionArgsToList <- function(args_form = NULL, args_var = NULL) {
+  args_form$... <- NULL
+  args_union <- Rflow:::union.list(args_form, args_var)
+  
+  lapply(args_union, eval, envir = args_union)
+}
+
+
+# example how to use unionArgsToList
+fff <- function(arg1 = 2, ...) {
+  unionArgsToList(formals(), match.call()[-1])
+}
+
+# fff(c = 1+2)
+
+
 node_defaults <- 
   list(
     id      = NULL, 
