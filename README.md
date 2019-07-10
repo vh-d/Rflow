@@ -6,9 +6,25 @@
 Rflow is an R package providing R users a general-purpose workflow
 system.
 
+## The idea
+
+There are three building blocks of **rflows** (DAGs connecting nodes
+through dependency relations):
+
+  - **nodes** (aka targets) represent your data objects such as R
+    values, db tables, spreadsheets, files, etc…
+  - **environments** (for nodes) serves as containters for objects. A
+    database is a container for tables.
+  - **jobs** represents dependency connection between nodes
+
 ## Installation
 
-…
+Rflow is hosted on GitHub. The easies way to install it is by using
+`devtools` package:
+
+``` r
+devtools::install_github("vh-d/Rflow")
+```
 
 ## Examples
 
@@ -40,9 +56,7 @@ system.
 
   - experiment with proper ORM instead of serialization of selected
     properties
-  - SQL execution by a generic R function instead of metaprogramming
-      - solves potential problems with escaping quotes in SQL code
-  - environments as R6 classes
+  - environment class
   - generic methods in node class for initializing and updating
     properties
   - more unit tests
