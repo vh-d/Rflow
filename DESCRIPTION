@@ -1,6 +1,6 @@
 Package: Rflow
 Title: General-purpose workflow system for R.
-Version: 0.2.18.9008
+Version: 0.2.19.9004
 Authors@R: 
     person(given = "Václav",
            family = "Hausenblas",

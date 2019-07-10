@@ -34,3 +34,22 @@ test_that("nodes can be connected", {
   expect_equal(rf2$node2$upstream[[1]],   rf2$node1)
   expect_equal(rf2$node1$downstream[[1]], rf2$node2)
 })
+
+test_that("node definitions are processed correctly", {
+  expect_equal("FOO", Rflow:::env_name_from_id("FOO.bar")[, env[1]])
+  expect_equal("bar", Rflow:::env_name_from_id("FOO.bar")[, name[1]])
+  
+  obj <- list(
+    env  = "FOO",
+    name = "bar"
+  )
+  
+  obj_process <- process_obj_defs(list(obj))
+  expect_equal(obj_process, list("FOO.bar" = obj))
+  
+  obj2 <- list(
+    id = "FOO.bar"
+  )
+  obj_process2 <- process_obj_defs(list(obj2))
+  expect_equal(obj_process2, list("FOO.bar" = c(list(id = "FOO.bar"), obj)))
+})

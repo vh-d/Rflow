@@ -17,11 +17,12 @@ nodes.rflow <- function(rflow) {
 
   coln <- c("id", "name", "env", "desc", "sql_code", "r_expr", "node_type")
 
-  # for empty rflow return empty data.table
   node_objs <- get_nodes(rflow)
+  
+  # for empty rflow return empty data.table
   if (!length(node_objs)) {
     return(setnames(data.table(matrix(character(), 1, length(coln))), coln)[0])
-  }
+  } # else:
 
   dtNODES <-
     rbindlist(
@@ -36,7 +37,11 @@ nodes.rflow <- function(rflow) {
             tags  = format_tags(x$tags),
             sql_code  = deescape_quotes(paste_sql(x$sql)),
             r_expr    = paste0(as.character(x$r_expr), collapse = ";\n\n"),
-            node_type = class(x)[1])
+            node_type = class(x)[1], 
+            title = x$title(),
+            label = x$label(),
+            shape = x$vis_params$shape
+          )
         }
       )
     )
@@ -55,8 +60,13 @@ edges <- function(x) {
 edges.rflow <- function(rflow) {
 
   rbindlist(
-    lapply(
-      mget(ls(rflow), envir = rflow),
-      function(x) if (length(x$depends)) data.table(from = x$depends, to = x$id) else NULL))
-
+    c(
+      list(data.table(from = character(), to = character())),
+      lapply(
+        mget(ls(rflow), envir = rflow),
+        function(x) if (length(x$depends)) data.table(from = x$depends, to = x$id) else NULL
+      )
+    )
+  )
+    
 }

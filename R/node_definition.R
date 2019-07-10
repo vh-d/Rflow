@@ -23,8 +23,8 @@ process_obj_defs <- function(obj_defs) {
         obj_id <- obj_id_inside
       }
       
-      node_env  <- env_name_from_id(obj_name)[, env[1]]
-      node_name <- env_name_from_id(obj_name)[, name[1]]
+      node_env  <- env_name_from_id(obj_id)[, env[1]]
+      node_name <- env_name_from_id(obj_id)[, name[1]]
       
       # node_id   <- env_names[id == "obj_id", id]
       if (!has_env_inside)
@@ -37,10 +37,12 @@ process_obj_defs <- function(obj_defs) {
           if (obj_defs[[obj_ind]]$name != node_name) 
             stop(stringr::str_interp("${obj_id}: name '${obj_defs[[obj_ind]]$name}' does not match"))
     } else {
-      full_names <- names(obj_defs)
-      full_names[obj_ind] <- get_id(obj_defs[[obj_ind]])
-      names(obj_defs) <- full_names
+      obj_id <- get_id(obj_defs[[obj_ind]])
     }
+    
+    full_names <- names(obj_defs)
+    full_names[obj_ind] <- obj_id
+    names(obj_defs) <- full_names
   }
   
   obj_defs
