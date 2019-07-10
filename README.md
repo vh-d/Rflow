@@ -8,12 +8,12 @@ system.
 
 ## The idea
 
-There are three building blocks of **rflows** (DAGs connecting nodes
-through dependency relations):
+**Rflow** is a DAG connecting nodes through dependency relations. There
+are three building blocks of rflows:
 
   - **nodes** (aka targets) represent your data objects such as R
     values, db tables, spreadsheets, files, etc…
-  - **environments** (for nodes) serves as containters for objects. A
+  - **environments** serves as containters for nodes. For example a
     database is a container for tables.
   - **jobs** represents dependency connection between nodes
 
