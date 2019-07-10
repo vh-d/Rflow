@@ -56,6 +56,8 @@ node <- R6::R6Class(
     upstream   = NULL, # vector of references to depencies
     downstream = NULL, # vector of references to dependants
     
+    definition_hash = NULL,
+    
     persistence        = NULL,
     trigger_defchange  = FALSE,
     trigger_manual     = FALSE,
@@ -150,6 +152,7 @@ node <- R6::R6Class(
         depends = NULL,
         trigger_defchange = NULL,
         trigger_condition = NULL,
+        definition_hash = NULL,
         persistence = list(enabled = FALSE),
         .last_evaluated = NULL,
         .last_changed   = NULL,
@@ -164,6 +167,8 @@ node <- R6::R6Class(
         self$name    <- name
         self$env     <- env
         self$desc    <- desc
+        
+        self$definition_hash <- definition_hash
         
         self$set_persistence(persistence)
         
@@ -204,6 +209,7 @@ node <- R6::R6Class(
           c("id", "name", "env", 
             "desc", "tags", 
             "depends", 
+            "definition_hash",
             "trigger_condition", "trigger_defchange", 
             "vis_params",
             public_fields))
@@ -230,6 +236,7 @@ node <- R6::R6Class(
         desc    = NULL,
         tags    = NULL,
         depends = NULL,
+        definition_hash = NULL,
         trigger_defchange = NULL,
         trigger_condition = NULL,
         
@@ -239,6 +246,8 @@ node <- R6::R6Class(
         store  = TRUE,
         verbose = TRUE
       ) {
+        self$definition_hash <- definition_hash
+        
         if (!is.null(trigger_defchange))
           self$trigger_defchange <- trigger_defchange
         

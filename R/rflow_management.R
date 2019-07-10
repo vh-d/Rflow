@@ -13,32 +13,32 @@ new_rflow <- function(
 ) {
   result <- new.env()
   class(result) <- c("rflow", class(result))
-
+  
   if (length(path)) {
     result[[".def_path"]] <- path
-
+    
     persistence_path <- file.path(path, ".rflow", "persistence")
     if (!dir.exists(persistence_path)) dir.create(persistence_path, recursive = TRUE)
     .persistence <- list(
       enabled = TRUE,
       path    = persistence_path
     )
-
+    
     cache_path <- file.path(path, ".rflow", "cache")
     if (!dir.exists(cache_path)) dir.create(cache_path, recursive = TRUE)
     .cache <- list(
       enabled = TRUE,
       path    = cache_path
     )
-
+    
   } else {
     .persistence <- list(enabled = FALSE)
     .cache       <- list(enabled = FALSE)
   }
-
+  
   result[[".persistence"]] <- .persistence
   result[[".cache"]]       <- .cache
-
+  
   return(result)
 }
 
@@ -53,10 +53,10 @@ as_igraph <- function(x, ...) {
 #' @export
 as_igraph.rflow <- function(rflow) {
   if (!requireNamespace("igraph")) stop("igraph package required")
-
+  
   E <- edges(rflow)
   G <- igraph::graph_from_data_frame(E)
-
+  
   G
 }
 
@@ -88,13 +88,13 @@ clean_cache <- function(x, ...) {
 #' @method clean_cache rflow
 #' @export
 clean_cache.rflow <- function(x, ...) {
-
+  
   # warn if not defined and return
   if (!length(x$.cache$path)) {
     warning("Cache dir not defined!")
     return(TRUE)
   }
-
+  
   # warn if nonexistet and return
   if (dir.exists(x$.cache$path)) {
     as.logical(
@@ -124,13 +124,13 @@ clean_persistence <- function(x, ...) {
 #' @method clean_persistence rflow
 #' @export
 clean_persistence.rflow <- function(x) {
-
+  
   # warn if not defined and return
   if (!length(x$.persistence$path)) {
     warning("Persistence storage folder not defined!")
     return(TRUE)
   }
-
+  
   # warn if nonexistet and return
   if (dir.exists(x$.persistence$path)) {
     as.logical(
@@ -163,13 +163,13 @@ load_nodes.rflow <- function(
   conflict = "update", # overwrite existing objects
   verbose = TRUE
 ) {
-
+  
   obj_defs <-
     load_node_definitions(
       path = x$.def_path,
       modified_since = x$.last_updated,
       verbose = verbose)
-
+  
   if (length(obj_defs)) {
     res <- add_nodes(
       objs        = obj_defs,
@@ -181,9 +181,9 @@ load_nodes.rflow <- function(
   } else {
     res <- NULL
   }
-
+  
   x$.last_updated <- Sys.time()
-
+  
   return(invisible(res))
 }
 
@@ -196,30 +196,30 @@ load_nodes.rflow <- function(
 #' @param verbose logical; print verbose output?
 #' @export
 load_node_definitions <- function(path, modified_since = NULL, verbose = TRUE) {
-
+  
   if (!requireNamespace("RcppTOML")) stop("Package RcppTOML not available!")
-
+  
   obj_yaml_files <-
     list.files(path       = path,
                pattern    = "*.toml",
                full.names = TRUE)
   nf <- length(obj_yaml_files)
-
+  
   if (length(modified_since)) {
     # only modified-since-last-update YAML definitions are loaded
     dtYAMLFILES <- rbindlist(lapply(obj_yaml_files, function(yf) c(file = yf, file.info(yf))))
     obj_yaml_files <- dtYAMLFILES[mtime > as.POSIXct(modified_since), file]
   }
-
+  
   if (!length(obj_yaml_files)) {
     if (nf > 0) cat("All up to date...\n") else
       warning("Nothing to be loaded.")
-
+    
     return(invisible(NULL))
   }
-
+  
   obj_list <- vector(mode = "list", length = length(obj_yaml_files))
-
+  
   # loop over all files listed
   for (i in 1:length(obj_list)) {
     if (verbose) cat("Loading from ", obj_yaml_files[i], "\n", sep = "")
@@ -231,7 +231,7 @@ load_node_definitions <- function(path, modified_since = NULL, verbose = TRUE) {
         }
       )
   }
-
+  
   return(obj_list)
 }
 
@@ -242,7 +242,7 @@ load_node_definitions <- function(path, modified_since = NULL, verbose = TRUE) {
 #' @param ...
 load_state_of_node <- function(path, ...) {
   state_list <- readRDS(file = path, ...)
-
+  
   return(
     c(
       state_list$private,
@@ -258,7 +258,7 @@ load_state_of_node <- function(path, ...) {
 #' @param ignore.case passed to list.files
 #' @param ...
 load_state_of_nodes <- function(path, recursive = FALSE, ignore.case = TRUE, ...) {
-
+  
   # list all relevant files
   persistence_files <-
     list.files(path       = path,
@@ -267,10 +267,10 @@ load_state_of_nodes <- function(path, recursive = FALSE, ignore.case = TRUE, ...
                recursive  = recursive,
                ignore.case = ignore.case,
                include.dirs = FALSE)
-
+  
   # load it into a list and return
   nodes_list <- lapply(persistence_files, load_state_of_node, ...)
-
+  
   return(nodes_list)
 }
 
@@ -295,84 +295,99 @@ add_node.list <- function(
   x,
   rflow,
   ...,
-  conflict= "update",
-  connect = FALSE,
-  verbose = TRUE) {
-
+  conflict = "update",
+  connect  = FALSE,
+  verbose  = TRUE) {
+  
   # extract object's id
   id <- get_id(x)
-
-  if (verbose) cat(crayon::red(id), "\n", sep = "")
-
-  # default behaviour
-  updated   <- FALSE # when object already exists and is only going to be updated
-  recovered <- FALSE # when object is being recovered from disk
-
-  # check whether the object exists already
-  if (id %in% names(rflow))
-    switch(
-      conflict,
-      
-      "update" = {
-        updated <- TRUE
-      },
-      
-      "skip" = {
-        warning(id, " already exists! Skipping...")
-        return(FALSE)
-      },
-      
-      "overwrite" = warning(id, " already exists! Overwriting!"),
-      
-      # else:
-      stop(id, " already exists and conflict= '", conflict, "' is not recognized (one of update/skip/overwrite expected) !")
-    )
+  definition_hash <- digest::digest(x)
   
-  # main
-
+  # default behaviour
+  exists       <- isTRUE(id %in% names(rflow))
+  recovering   <- FALSE # object should be recovered from disk
+  
+  if (!exists && rflow$.persistence$enabled) {
+    fp <- file.path(rflow$.persistence$path, filename_from_id(id))
+    recovering <- file.exists(fp)
+  }
+  
+  initializing <- (!exists || conflict == "overwrite") || recovering
+  
+  # # check whether the object exists already
+  # if (exists)
+  #   switch(
+  #     conflict,
+  #     
+  #     "update" = {
+  #       updating <- TRUE
+  #     },
+  #     
+  #     "skip" = {
+  #       warning(id, " already exists! Skipping...")
+  #       return(FALSE)
+  #     },
+  #     
+  #     "overwrite" = {
+  #       warning(id, " already exists! Overwriting!")
+  #       initializing <- TRUE
+  #     },
+  #     
+  #     # else:
+  #     stop(id, " already exists and conflict= '", conflict, "' is not recognized (one of update/skip/overwrite expected) !")
+  #   )
+  
+  
+  # ...... initialization ......
+  
   # non-existent objects need to be constructed/initialized first
   # either completely new objects or objects being recovered
-  if (!updated) {
-
-    if (verbose) cat("  * initializing")
-
-    if (rflow$.persistence$enabled) {
-      fp <- file.path(rflow$.persistence$path, filename_from_id(id))
-
-      if (file.exists(fp)) {
-        if (verbose) cat(" from a saved state...\n")
-        saved_state   <- load_state_of_node(path = fp)
-        initiated_obj <- as_node(saved_state, persistence = rflow$.persistence, ...)
-        recovered     <- TRUE
-      } else {
-        if (verbose) cat(" as a new object...\n")
-        initiated_obj <- as_node(x, persistence = rflow$.persistence, ...)
-      }
+  if (initializing) {
+    
+    if (verbose) {
+      cat(crayon::red(id), "\n", sep = "")
+      cat("  * initializing")
+    }
+    
+    if (recovering) {
+      if (verbose) cat(" from a saved state...\n")
+      saved_state   <- load_state_of_node(path = fp)
+      initiated_obj <- as_node(saved_state, persistence = rflow$.persistence, ...)
     } else {
       if (verbose) cat(" as a new object...\n")
-      initiated_obj <- as_node(x, persistence = rflow$.persistence, ...)
+      initiated_obj <- as_node(x, persistence = rflow$.persistence, definition_hash = definition_hash, ...)
     }
-
+    
     # assign reference
     assign(
       x     = id,
       value = initiated_obj,
-      pos   = rflow)
-
+      pos   = rflow
+    )
+    
     # link the two environments
     parent.env(rflow[[id]]) <- rflow
   }
-
-  if (recovered || updated) {
-    if (verbose) cat("  * updating...\n")
-    update_node(x, rflow = rflow, verbose = verbose)
+  
+  
+  # ...... updating ......
+  
+  updating <- ((exists && conflict == "update") || recovering) && !identical(rflow[[id]][["definition_hash"]], definition_hash) # object already exists and is only going to be updated
+  
+  if (updating) {
+    if (verbose) {
+      if (!initializing) cat(crayon::red(id), "\n", sep = "")
+      cat("  * updating...\n")
+    }
+    
+    update_node(x, rflow = rflow, definition_hash = definition_hash, verbose = verbose)
   }
-
+  
   # connect to required objects
-  if (connect) rflow[[id]]$connect()
-
+  if (connect && (updating || initializing)) rflow[[id]]$connect()
+  
   result <- setNames(TRUE, id)
-
+  
   return(result)
 }
 
@@ -380,10 +395,10 @@ add_node.list <- function(
 # @export
 set_id.rflow <- function(x, id_old, id_new, ...) {
   rflow <- x
-
+  
   rflow[[id_new]] <- rflow[[id_old]] # new reference
   rm(id_old, pos = rflow)
-
+  
   set_id(rflow[[id_new]], id_new)
 }
 
@@ -397,7 +412,7 @@ set_id.rflow <- function(x, id_old, id_new, ...) {
 #' @param verbose logical; print verbose output?
 #' @export
 add_nodes <- function(objs, rflow, connect = TRUE, ..., verbose = TRUE) {
-
+  
   result <-
     lapply(
       X       = objs,
@@ -405,10 +420,10 @@ add_nodes <- function(objs, rflow, connect = TRUE, ..., verbose = TRUE) {
       rflow   = rflow,
       verbose = verbose,
       ...)
-
+  
   # connect objects after all are initiated
   if (connect) connect_nodes(rflow, verbose = max(0, verbose - 1L))
-
+  
   return(unlist(result))
 }
 
@@ -421,17 +436,18 @@ add_nodes <- function(objs, rflow, connect = TRUE, ..., verbose = TRUE) {
 update_node <- function(
   obj,
   rflow,
+  definition_hash = digest::digest(obj),
   verbose = FALSE
 ) {
-
+  
   # extract object's id
   id <- get_id(obj)
-
+  
   # find the node that is going to be updated
   if (!(id %in% names(rflow))) stop("Object ", id, " not found!")
-
+  
   # update
-  do.call(rflow[[id]]$update_definition, args = c(obj, verbose = verbose))
+  do.call(rflow[[id]]$update_definition, args = c(obj, definition_hash = definition_hash, verbose = verbose))
 }
 
 
@@ -443,14 +459,14 @@ update_node <- function(
 #'
 #' @export
 update_nodes <- function(objs, rflow, verbose = FALSE) {
-
+  
   result <-
     lapply(
       X   = objs,
       FUN = update_node,
       rflow = rflow,
       verbose = verbose)
-
+  
   return(unlist(result))
 }
 
@@ -527,7 +543,7 @@ make.rflow <- function(
   verbose = TRUE
 ) {
   if (verbose) cat(rep("\u2500", 3), " Make ", rep("\u2500", 25), "\n\n", sep = "")
-
+  
   E <- edges(rflow)
   N <- nodes(rflow)
   
@@ -560,6 +576,6 @@ make.rflow <- function(
     force   = force,
     verbose = verbose
   )
-
+  
   return(invisible(res))
 }
