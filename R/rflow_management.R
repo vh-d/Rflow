@@ -314,30 +314,6 @@ add_node.list <- function(
   
   initializing <- (!exists || conflict == "overwrite") || recovering
   
-  # # check whether the object exists already
-  # if (exists)
-  #   switch(
-  #     conflict,
-  #     
-  #     "update" = {
-  #       updating <- TRUE
-  #     },
-  #     
-  #     "skip" = {
-  #       warning(id, " already exists! Skipping...")
-  #       return(FALSE)
-  #     },
-  #     
-  #     "overwrite" = {
-  #       warning(id, " already exists! Overwriting!")
-  #       initializing <- TRUE
-  #     },
-  #     
-  #     # else:
-  #     stop(id, " already exists and conflict= '", conflict, "' is not recognized (one of update/skip/overwrite expected) !")
-  #   )
-  
-  
   # ...... initialization ......
   
   # non-existent objects need to be constructed/initialized first
