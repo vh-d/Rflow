@@ -25,7 +25,7 @@ r_job <- function(
   if (length(r_expr)) {
     job$mode <- "expression"
     job$r_expr <- r_expr
-
+    
     return(job)
   }
   
@@ -51,6 +51,23 @@ r_job <- function(
   return(NULL)
   
 }
+
+expression_r <- function(...){
+  # simulate behaviour of expression()
+  exprs <- match.call(expand.dots = TRUE)
+  exprs[1] <- expression(expression)
+  exprs <- eval(exprs)
+  
+  # references to sourcefile would make expressions (and its hashes) context dependent
+  attr(exprs[[1]], "srcref") <- NULL
+  attr(exprs[[1]], "srcfile") <- NULL
+  attr(exprs[[1]], "wholeSrcref") <- NULL
+  
+  return(exprs)
+}
+
+# debug(expression_r)
+
 
 sql_job <- function(sql = NULL, sql_code = NULL, mode = "execute") {
   

@@ -31,3 +31,15 @@ test_that("in.R6 behaves similarly as %in% for R6 objects", {
   
 })
 
+
+test_that("expression_r strips attributes from expressions", {
+  
+  # test
+  l1 <- list(expression_r({a = 1; b = 2}), expression_r({a = 1; b = 2}))
+  l2 <- list(expression({a = 1; b = 2}), expression({a = 1; b = 2}))
+  
+  expect_identical(lapply(l1, eval), lapply(l2, eval))
+  
+  hashes <- sapply(l1, digest::digest)
+  expect_equal(hashes[1], hashes[2])
+})
