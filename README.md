@@ -3,8 +3,15 @@
 
 # Rflow
 
-Rflow is an R package providing R users a general-purpose workflow
-system.
+Rflow is an R package providing R users with a general-purpose workflow
+framework. It is suitable for various purposes: from simple automation
+to building powerfull ETL tools.
+
+Rflow makes your data pipelines better organized and managable (worflow
+can be visualized, objects may have documentation and tags).
+
+It saves your time as your objects are rebuild only when its needed
+(also most objects are persistent over sessions).
 
 ## The idea
 
@@ -28,7 +35,51 @@ devtools::install_github("vh-d/Rflow")
 
 ## Examples
 
-…
+Define the target nodes:
+
+``` r
+objs <- 
+  list(
+    "DB.mytable" = list(
+      type = "db_node",
+      desc = "A db table with data that serves as source for further computation"
+    ),
+    "mytable_summary" = list(
+      type = "r_node", # unnecessary for R objects
+      desc = "Summary statistics of DB.mytable",
+      r_expr = expression_r({
+        RETL::etl_read(.RFLOW[["DB.mytable"]]) %>% summary()
+      })
+    ),
+    "main_product" = list(
+      desc = "Main output",
+      r_expr = expression_r({
+        .RFLOW[["DB.mytable"]]$get() %>% some_fancy_computation()
+      })
+    ), 
+    "DB.output" = list(
+      desc = "Outcome is loaded back to the DB",
+      r_expr = expression_r({
+        .RFLOW[["main_product"]]$get() %>%
+          RETL::etl_write(to = self$connection, name = self$name)
+      })
+    )
+  ) 
+```
+
+Add the to your existing workflow:
+
+``` r
+objs %>% 
+  Rflow::process_obj_defs() %>% 
+  Rflow::add_nodes(rflow = .RFLOW)
+```
+
+and build targets
+
+``` r
+make(.RFLOW)
+```
 
 ## TODO:
 
