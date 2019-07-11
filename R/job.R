@@ -52,6 +52,17 @@ r_job <- function(
   
 }
 
+#' Expression with source code references stripped off 
+#'
+#' @param ... expression (see \code{\link[base]{expression}})
+#'
+#' @return 
+#' `expression_r` returns expression object similar to the one returned from \code{\link[base]{expression}} except references to source code
+#' @export
+#' @seealso \code{\link[base]{expression}}
+#' @examples
+#' identical(expression(1+1), expression_r(1+1))
+#' identical(expression({1+1}), expression_r({1+1}))
 expression_r <- function(...){
   # simulate behaviour of expression()
   exprs <- match.call(expand.dots = TRUE)
