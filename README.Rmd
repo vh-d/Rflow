@@ -95,9 +95,10 @@ make(.RFLOW)
 
 **Features**
 
-* R/SQL code in standalone R scripts (outside of TOML file)
+* formal job classes (with possibility to keep R/SQL code in standalone R scripts)
+* add more types of jobs (bash, Python, Julia, ...)
 * more nuanced `verbose` option
-* logging into rflow object
+* proper logging for rflow object
 * handling of obsolete nodes
   * removing objects from DAG
   * removing cache
@@ -108,7 +109,6 @@ make(.RFLOW)
 * query function to set or get fields of multiple objects
 * documentation
 * quick start guide
-* allow Python and Julia code
 * new node types:
   * test node
 * Rflow manager as a Shiny app
