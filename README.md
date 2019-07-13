@@ -4,14 +4,16 @@
 # Rflow
 
 Rflow is an R package providing R users with a general-purpose workflow
-framework. It is suitable for various purposes: from simple automation
-to building powerfull ETL tools.
+framework. Rflow allows you to describe your data declaratively as
+objects with dependencies and does the heavy lifting for you. It is
+suitable for various purposes: from managing several simple automation
+scripts to building powerfull ETL pipelines.
 
 Rflow makes your data pipelines better organized and managable (worflow
 can be visualized, objects may have documentation and tags).
 
 It saves your time as your objects are rebuild only when its needed
-(also most objects are persistent over sessions).
+(also objects are persistent over sessions).
 
 ## The idea
 
