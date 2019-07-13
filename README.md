@@ -85,30 +85,35 @@ make(.RFLOW)
 
 **Features**
 
-  - R/SQL code in standalone R scripts (outside of TOML file)
+  - formalize job as S3 classes
+  - add possibility to keep R/SQL code in standalone R scripts
+  - add more types of jobs (bash, Python, Julia, …)
   - more nuanced `verbose` option
-  - logging into rflow object
+  - proper logging for rflow object
   - handling of obsolete nodes
       - removing objects from DAG
       - removing cache
       - removing node config files
       - deleting represented objects
-  - deleting properties / setting some to NULL
+  - allow deleting properties / setting some to NULL
       - currently, if a property is deleted update() method ignores it
-  - query function to set or get fields of multiple objects
-  - documentation
-  - quick start guide
-  - allow Python and Julia code
+  - add query function to set or get fields of multiple objects
+  - finish documentation
+      - add quick start guide
   - new node types:
       - test node
-  - Rflow manager as a Shiny app
+  - advance db\_node
+      - other types of objects (Views, indexes, …)
+  - build a Shiny app for Rflow management
+  - parallel evaluation (futures?)
 
 **Implementation**
 
+  - make all public properties active (trigger persistence storage)
+  - migrate from R6 to S3 classes?
   - experiment with proper ORM instead of serialization of selected
     properties
-  - environment class
+  - add an environment class
   - generic methods in node class for initializing and updating
     properties
-  - more unit tests
-  - make all public properties active (trigger persistence storage)
+  - improve test coverage
