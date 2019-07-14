@@ -15,7 +15,16 @@ can be visualized, objects may have documentation and tags).
 It saves your time as your objects are rebuild only when its needed
 (also objects are persistent over sessions).
 
-## The idea
+## Installation
+
+Rflow is hosted on GitHub. The easies way to install it is by using
+`devtools` package:
+
+``` r
+devtools::install_github("vh-d/Rflow")
+```
+
+## How it works
 
 **Rflow** is a DAG connecting nodes through dependency relations. There
 are three building blocks of rflows:
@@ -25,15 +34,6 @@ are three building blocks of rflows:
   - **environments** serves as containters for nodes. For example a
     database is a container for tables.
   - **jobs** represents dependency connection between nodes
-
-## Installation
-
-Rflow is hosted on GitHub. The easies way to install it is by using
-`devtools` package:
-
-``` r
-devtools::install_github("vh-d/Rflow")
-```
 
 ## Examples
 
