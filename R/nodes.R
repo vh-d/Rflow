@@ -1013,9 +1013,32 @@ db_node <- R6::R6Class(
     },
 
     remove = function(verbose = TRUE, verbose_prefix = "") {
+
       if (self$exists()) {
+
         if (verbose) notify_removal(self$id, verbose_prefix = verbose_prefix)
-        return(invisible(DBI::dbRemoveTable(conn = self$connection, name = self$name)))
+
+        msg <-
+          tryCatch(
+            expr  = list(result = DBI::dbRemoveTable(conn = self$connection, name = self$name)),
+            error = function(e) list(result = -1L, error1 = e)
+          )
+
+        # try as if it was a VIEW
+        if (msg$result == -1L) {
+          msg <-
+            tryCatch(
+              expr  = list(result = DBI::dbExecute(conn = self$connection, statement = paste0("DROP VIEW ", self$name))),
+              error = function(e) list(result = -1L, error1 = msg$error, error2 = e)
+            )
+        }
+
+        if (msg$result == -1L) {
+          stop(msg$error1, msg$error2)
+        }
+
+        return(invisible(TRUE))
+
       } else {
         if (verbose) notify_nonexistence(self$id, verbose_prefix = verbose_prefix)
         return(invisible(FALSE))
