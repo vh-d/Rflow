@@ -58,3 +58,46 @@ verify_dependencies.node <- function(x) {
 verify_dependencies.rflow <- function(x) {
   sapply(get_nodes(x), verify_dependencies.node)
 }
+
+
+#' Detect dependencies
+#'
+#' @param x
+#' @param envir
+#' @param space
+#'
+#' @return
+#' @export
+#'
+#' @examples
+detect_nodes <- function(x, envir = parent.frame(), space = "", st = 0, stmax = 20) {
+
+  if (st > stmax) return("stop")
+
+  if (any(class(x) %in% c("<-", "{", "(", "call", "language", "expression"))) {
+    cat(space, class(x), ":\n")
+    return(sapply(x, detect_nodes, envir = envir, space = paste0("   ", space), st = st + 1))
+  }
+
+  if (is.function(x) & !is.primitive(x)) {
+    cat(space, class(x), ":\n")
+    return(detect_nodes(body(x), envir = envir, space = paste0("   ", space), st = st + 1))
+  }
+
+  if (is.name(x)) {
+    xname <- as.character(x)
+    cat(space, xname, ":\n")
+    if (exists(xname, where = envir) && !(xname %in% c("::"))) { # do not detect_nodes into external packages for now
+      xx <- get(xname)
+      if (length(xx) && !is.name(xx)) {
+        return(detect_nodes(xx, envir = envir, space = paste0("   ", space), st = st + 1))
+      } else return(NULL)
+    }
+  }
+
+  if (is(x, "node")) return(x$id)
+
+  cat(space, class(x), ":\n")
+  return(NULL)
+}
+
