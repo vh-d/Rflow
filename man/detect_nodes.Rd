@@ -4,8 +4,8 @@
 \alias{detect_nodes}
 \title{Detect dependencies}
 \usage{
-detect_nodes(x, envir = parent.frame(), space = "", st = 0,
-  stmax = 20)
+detect_nodes(x, rflow, found = c(), space = "", depth = 0L,
+  depthmax = 20L)
 }
 \arguments{
 \item{space}{}
