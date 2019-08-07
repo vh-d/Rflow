@@ -532,7 +532,7 @@ r_node <- R6::R6Class(
         "R:<br><font size=\"-2\" face = \"monospace\">",
         stringr::str_replace_all(
           stringr::str_replace_all(
-            as.character(self$r_expr),
+            stringr::str_c(as.character(self$r_expr), collapse = "\n"),
             stringr::fixed("\n"), "<br>"),
           stringr::fixed(" "), "&nbsp;"),
         "</font></p>"
@@ -980,7 +980,7 @@ db_node <- R6::R6Class(
             "R:<br><font size=\"-2\" face = \"monospace\">",
             stringr::str_replace_all(
               stringr::str_replace_all(
-                as.character(self$r_expr),
+                stringr::str_c(as.character(self$r_expr), collapse = "\n"),
                 stringr::fixed("\n"), "<br>"),
               stringr::fixed(" "), "&nbsp;"),
             "</font></p>"),
@@ -1426,7 +1426,7 @@ file_node <- R6::R6Class(
           "R:<br><font size=\"-2\" face = \"monospace\">",
           stringr::str_replace_all(
             stringr::str_replace_all(
-              as.character(self$r_expr),
+              stringr::str_c(as.character(self$r_expr), collapse = "\n"),
               stringr::fixed("\n"), "<br>"),
             stringr::fixed(" "), "&nbsp;"),
           "</font></p>"
