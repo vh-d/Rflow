@@ -4,7 +4,7 @@
 \alias{verify_dependencies}
 \title{Verify consistency of user-declared dependencies with node's behaviour}
 \usage{
-verify_dependencies(x)
+verify_dependencies(x, ...)
 }
 \arguments{
 \item{x}{}

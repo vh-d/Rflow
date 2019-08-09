@@ -5,7 +5,7 @@
 \title{Detect dependencies}
 \usage{
 detect_nodes(x, rflow, found = c(), space = "", depth = 0L,
-  depthmax = 20L)
+  depthmax = 20L, verbose = FALSE)
 }
 \arguments{
 \item{space}{}

@@ -9,16 +9,16 @@ detect_deps <- function(x, ...) {
   UseMethod("detect_deps", x)
 }
 
-detect_deps.NULL <- function(x, node_names) {
+detect_deps.NULL <- function(x, node_ids) {
   character()
 }
 
-detect_deps.character <- function(x, node_names) {
-  which.name(sapply(node_names, grepl, x = x, fixed = TRUE))
+detect_deps.character <- function(x, node_ids) {
+  which.name(sapply(node_ids, grepl, x = x, fixed = TRUE))
 }
 
-detect_deps.expression <- function(x, node_names) {
-  detect_deps(paste0(deparse(x), collapse = ""), node_names = node_names)
+detect_deps.expression <- function(x, node_ids) {
+  detect_deps(paste0(deparse(x), collapse = ""), node_ids = node_ids)
 }
 
 
@@ -30,14 +30,23 @@ detect_deps.expression <- function(x, node_names) {
 #' @export
 #'
 #' @examples
-verify_dependencies <- function(x) {
+verify_dependencies <- function(x, ...) {
   UseMethod("verify_dependencies", x)
 }
 
 #' @export
-verify_dependencies.node <- function(x) {
-  found  <- if (!length(x$r_expr)) detect_deps(x$r_expr, node_names = nodes(parent.env(x))$id) else character()
-  stated <- if (!length(x$r_expr)) x$depends else character()
+verify_dependencies.node <- function(x, method = c("ast", "grep"), maxdepth = 20L, verbose = FALSE) {
+
+  method <- match.arg(method)
+
+  found  <- if (length(x$r_expr))
+    switch(
+      method,
+      grep = detect_deps(x$r_expr, node_ids = nodes(parent.env(x))$id),
+      ast = detect_nodes(x$r_expr, rflow = parent.env(x), depthmax = maxdepth, verbose = verbose)
+    ) else character()
+
+  stated <- if (length(x$depends)) x$depends else character()
 
   lacks <- setdiff(found, stated)
   extra <- setdiff(stated, found)
@@ -55,8 +64,8 @@ verify_dependencies.node <- function(x) {
 
 
 #' @export
-verify_dependencies.rflow <- function(x) {
-  sapply(get_nodes(x), verify_dependencies.node)
+verify_dependencies.rflow <- function(x, ...) {
+  sapply(get_nodes(x), verify_dependencies.node, ...)
 }
 
 
@@ -70,21 +79,21 @@ verify_dependencies.rflow <- function(x) {
 #' @export
 #'
 #' @examples
-detect_nodes <- function(x, rflow, found = c(), space = "", depth = 0L, depthmax = 20L) {
-  
+detect_nodes <- function(x, rflow, found = c(), space = "", depth = 0L, depthmax = 20L, verbose = FALSE) {
+
   # folling convention of referencing Rflow objects
   .RFLOW = rflow
-  
+
   # (poor) protection against recursion
   if (depth > depthmax) return()
-  
+
   # these objects whould be recursively iterated
   if (any(class(x) %in% c("<-", "{", "(", "call", "language", "expression"))) {
-    cat(space, class(x), ":\n")
-    
+    if (verbose) cat(space, class(x), ":\n")
+
     if (
-      is.call(x) 
-      && (as.character(x[[1]]) %in% c("[[", "$")) 
+      is.call(x)
+      && (as.character(x[[1]]) %in% c("[[", "$"))
       && length(x) > 1
       && exists(as.character(x[[2]]))
     ) {
@@ -92,44 +101,44 @@ detect_nodes <- function(x, rflow, found = c(), space = "", depth = 0L, depthmax
       if (is.environment(xv) && identical(xv, rflow))
         if (depth == 0L) return(unique(unlist(c(found, as.character(x[[3]]))))) else return(c(found, as.character(x[[3]])))
     }
-    
-    if (depth == 0L) 
-      return(unique(unlist(c(found, sapply(x, detect_nodes, rflow = rflow, found = found, space = paste0("   ", space), depth = depth + 1))))) else 
+
+    if (depth == 0L)
+      return(unique(unlist(c(found, sapply(x, detect_nodes, rflow = rflow, found = found, space = paste0("   ", space), depth = depth + 1))))) else
         return(c(found, sapply(x, detect_nodes, rflow = rflow, found = found, space = paste0("   ", space), depth = depth + 1)))
   }
-  
+
   # dive into function bodies except primitives
   if (is.function(x)) {
     if (is.primitive(x)) return(NULL)
-    
-    cat(space, class(x), ":\n")
-    if (depth == 0L) 
-      return(unique(unlist(c(found, sapply(x, detect_nodes, rflow = rflow, found = found, space = paste0("   ", space), depth = depth + 1))))) else 
+
+    if (verbose) cat(space, class(x), ":\n")
+    if (depth == 0L)
+      return(unique(unlist(c(found, sapply(x, detect_nodes, rflow = rflow, found = found, space = paste0("   ", space), depth = depth + 1))))) else
         return(c(found, sapply(x, detect_nodes, rflow = rflow, found = found, space = paste0("   ", space), depth = depth + 1)))
   }
-  
+
   # existing obejcts can be subjet to further exploration
   if (is.name(x)) {
     xname <- as.character(x)
-    cat(space, xname, ":\n")
+    if (verbose) cat(space, xname, ":\n")
     if (xname != "" && exists(xname) && !(xname %in% c("::", "{"))) { # do not detect_nodes into external packages for now
       xx <- get(xname)
       if (length(xx) && !is.name(xx)) {
-        if (depth == 0L) 
-          return(unique(unlist(c(found, detect_nodes(xx, rflow = rflow, found = found, space = paste0("   ", space), depth = depth + 1))))) else 
+        if (depth == 0L)
+          return(unique(unlist(c(found, detect_nodes(xx, rflow = rflow, found = found, space = paste0("   ", space), depth = depth + 1))))) else
             return(c(found, detect_nodes(xx, rflow = rflow, found = found, space = paste0("   ", space), depth = depth + 1)))
       }
     } else return(NULL)
   }
-  
+
   # node objects can be imediately reported as dependencies
   if (is(x, "node")) {
-    if (depth == 0L) 
-      return(unique(unlist(c(found, x$id)))) else 
+    if (depth == 0L)
+      return(unique(unlist(c(found, x$id)))) else
         return(c(found, x$id))
   }
 
-  cat(space, class(x), ":\n")
+  if (verbose) cat(space, class(x), ":\n")
   return(NULL)
 }
 
