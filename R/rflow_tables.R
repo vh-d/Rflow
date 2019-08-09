@@ -4,6 +4,23 @@ format_tags <- function(tags = NULL) {
   paste0("|", paste0(tags, collapse = "|"), "|")
 }
 
+#' @export
+basic_node_attributes <- function(x) {
+    data.table(
+      id    = null2na(x$id),
+      name  = null2na(x$name),
+      env   = null2na(x$env),
+      desc  = null2na(x$desc),
+      tags  = format_tags(x$tags),
+      sql_code  = deescape_quotes(paste_sql(x$sql)),
+      r_expr    = paste0(as.character(x$r_expr), collapse = ";\n\n"),
+      node_type = class(x)[1], 
+      title = x$title(),
+      label = x$label(),
+      as.data.table(x$vis_params)[1]
+    )
+}
+
 #' list all nodes of an Rflow object
 #'
 #' @param rflow rflow object
@@ -28,22 +45,10 @@ nodes.rflow <- function(rflow) {
     rbindlist(
       lapply(
         node_objs,
-        function(x) {
-          data.table(
-            id    = null2na(x$id),
-            name  = null2na(x$name),
-            env   = null2na(x$env),
-            desc  = null2na(x$desc),
-            tags  = format_tags(x$tags),
-            sql_code  = deescape_quotes(paste_sql(x$sql)),
-            r_expr    = paste0(as.character(x$r_expr), collapse = ";\n\n"),
-            node_type = class(x)[1], 
-            title = x$title(),
-            label = x$label(),
-            shape = x$vis_params$shape
-          )
-        }
-      )
+        basic_node_attributes
+      ), 
+      use.names = TRUE, # graphical parameters can vary
+      fill      = TRUE
     )
 
   dtNODES

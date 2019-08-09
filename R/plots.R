@@ -32,17 +32,25 @@ visData <- function(rflow, tags = NULL, includeIsolated = TRUE) {
     dtNODES <- dtNODES[dtEDGES[, .(id = unique(c(from, to)))], on = "id"]
   }
   
+  # graphics -------------------------
   # colors are dynamic: based on number of environments
   unique_levels <- dtNODES[, unique(env)]
   unique_levels_colors <- disc_scale()(length(unique_levels))
   names(unique_levels_colors) <- unique_levels
   
-  dtNODES[, color.background := unique_levels_colors[env]]
-  dtNODES[, color.border     := color.background]
-  dtNODES[, color.hover      := color.background]
-  dtNODES[, color.highlight.border := "black"]
-  dtNODES[, color.highlight.background := color.background]
-  # dtNODES[, color.border := "black"]
+  # some nodes can have graphical params already set
+  if (!("color.background"           %in% colnames(dtNODES))) dtNODES[, color.background := NA_character_]
+  if (!("color.border"               %in% colnames(dtNODES))) dtNODES[, color.border := NA_character_]
+  if (!("color.hover"                %in% colnames(dtNODES))) dtNODES[, color.hover := NA_character_]
+  if (!("color.highlight.border"     %in% colnames(dtNODES))) dtNODES[, color.highlight.border := NA_character_]
+  if (!("color.highlight.background" %in% colnames(dtNODES))) dtNODES[, color.highlight.background := NA_character_]
+
+  dtNODES[is.na(color.background),           color.background           := unique_levels_colors[env]]
+  dtNODES[is.na(color.border),               color.border               := color.background]
+  dtNODES[is.na(color.hover),                color.hover                := color.background]
+  dtNODES[is.na(color.highlight.border),     color.highlight.border     := "black"]
+  dtNODES[is.na(color.highlight.background), color.highlight.background := color.background]
+  
   
   setkeyv(dtNODES, "id")
   setkeyv(dtEDGES, c("from", "to"))

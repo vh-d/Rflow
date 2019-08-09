@@ -40,7 +40,7 @@ node <- R6::R6Class(
     .last_changed   = NULL, # datetime when target value changed the last time (it might be evaluated without any change)
 
     .vis_params_default = list(
-      shape = "circle"
+      shape = "diamond"
     )
   ),
 
