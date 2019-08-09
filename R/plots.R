@@ -32,54 +32,6 @@ visData <- function(rflow, tags = NULL, includeIsolated = TRUE) {
     dtNODES <- dtNODES[dtEDGES[, .(id = unique(c(from, to)))], on = "id"]
   }
   
-  # dtNODES[, label := paste0(env, "\n", name)]
-  # dtNODES[,
-  #         title :=
-  #           paste0("<b>", id, "</b>",
-  #                  " &lt;", node_type, "&gt;", "<br>")]
-  # 
-  # # add description if present
-  # dtNODES[(!is.na(desc)),
-  #         title := paste0(title,
-  #                         "<p><em>",
-  #                         stringr::str_replace_all(
-  #                           stringr::str_wrap(desc, width = 40), stringr::fixed("\n"), "<br>"),
-  #                         "</em></p>")]
-  # 
-  # # add SQL code if present
-  # dtNODES[(nchar(sql_code)>0),
-  #         title := paste0(title,
-  #                         "<p>",
-  #                         "SQL:<br>
-  #                         <font size=\"-2\" face = \"monospace\">",
-  #                         stringr::str_replace_all(
-  #                           stringr::str_replace_all(
-  #                             sql_code,
-  #                             stringr::fixed("\n"), "<br>"),
-  #                           stringr::fixed(" "), "&nbsp;"),
-  #                         "</font></p>")]
-  # 
-  # # add SQL code if present
-  # dtNODES[(is.na(sql_code) | nchar(sql_code)==0),
-  #         title := paste0(title,
-  #                         "<p>",
-  #                         "R:<br>
-  #                         <font size=\"-2\" face = \"monospace\">",
-  #                         stringr::str_replace_all(
-  #                           stringr::str_replace_all(
-  #                             r_expr,
-  #                             stringr::fixed("\n"), "<br>"),
-  #                           stringr::fixed(" "), "&nbsp;"),
-  #                         "</font></p>")]
-  # 
-  # dtNODES[,
-  #         shape :=
-  #           c("r_node"     = "triangle",
-  #             "db_node"    = "square",
-  #             "accdb_node" = "square",
-  #             "file_node"  = "star"
-  #           )[node_type]]
-  
   # colors are dynamic: based on number of environments
   unique_levels <- dtNODES[, unique(env)]
   unique_levels_colors <- disc_scale()(length(unique_levels))
