@@ -466,8 +466,7 @@ r_node <- R6::R6Class(
   public = list(
 
     r_env    = NULL,  # reference to R envinronment
-    r_code   = NULL,  # R code text
-    r_expr   = NULL,  # R expression (from r_code)
+    r_expr   = NULL,  # R expression 
 
     hash     = NULL,  # hash of the represented R object from digest(), hashing enables checking for changes of the R objects
     cache    = list(enabled = FALSE),
@@ -520,7 +519,7 @@ r_node <- R6::R6Class(
       cat("    enabled: ", self$cache$enabled,  "\n", sep = "")
       cat("    exists:  ", self$cache_exists(), "\n", sep = "")
       cat("  expression: \n")
-      cat_r_expr(head(self$r_expr), verbose_prefix = "    ")
+      print_with_prefix(head(deparse_nicely(self$r_expr)), verbose_prefix = "    ")
     },
 
     title = function() {
@@ -532,7 +531,7 @@ r_node <- R6::R6Class(
         "R:<br><font size=\"-2\" face = \"monospace\">",
         stringr::str_replace_all(
           stringr::str_replace_all(
-            stringr::str_c(as.character(self$r_expr), collapse = "\n"),
+            stringr::str_c(deparse_nicely(self$r_expr), collapse = "\n"),
             stringr::fixed("\n"), "<br>"),
           stringr::fixed(" "), "&nbsp;"),
         "</font></p>"
@@ -555,9 +554,9 @@ r_node <- R6::R6Class(
       ) {
         super$initialize(..., store = FALSE)
 
-        self$r_code <- r_code
-        self$r_expr <- suppressWarnings(as_r_expr(r_code = r_code, r_expr = r_expr))
+        self$r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
 
+        # TODO change to is.length()
         if (is.null(self$r_expr) && length(self$depends))
           warning(self$id, " is not a leaf node but has no R expression to evaluate")
 
@@ -602,7 +601,7 @@ r_node <- R6::R6Class(
 
     store_state = function() {
       super$store_state(
-        public_fields  = c("r_code", "r_expr", "hash")
+        public_fields  = c("r_expr", "hash")
       )
     },
 
@@ -616,12 +615,12 @@ r_node <- R6::R6Class(
       ) {
         super$update_definition(..., verbose = verbose, store = FALSE)
 
-        r_expr <- suppressWarnings(as_r_expr(r_code = r_code, r_expr = r_expr))
+        r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
         if (!identical(as.character(self$r_expr), as.character(r_expr))) {
           if (verbose) notify_update(self$id, "R expression")
-          self$r_expr <- r_expr
           self$trigger_defchange <- TRUE
         }
+        self$r_expr <- r_expr # overwrite in case the srouce code has changed
 
         if (self$persistence$enabled && store) self$store_state()
 
@@ -631,7 +630,7 @@ r_node <- R6::R6Class(
     eval = function(verbose = TRUE, verbose_prefix = "") {
       if (verbose) {
         cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
-        cat_r_expr(self$r_expr, verbose_prefix)
+        print_with_prefix(deparse_nicely(self$r_expr), verbose_prefix = verbose_prefix)
       }
 
       # for referencing other objects in rflow
@@ -763,7 +762,6 @@ db_node <- R6::R6Class(
     connection = NULL,
     sql        = NULL,
 
-    r_code     = NULL,
     r_expr     = NULL,
 
     auto_remove = NULL,
@@ -775,7 +773,7 @@ db_node <- R6::R6Class(
         sql_code = NULL,
         sql      = NULL,
         r_code   = NULL,
-        r_expr   = NULL,  # R expression (from r_code)
+        r_expr   = NULL,  # R expression 
         connection = NULL,
         .last_evaluated = NULL,
         type     = NULL,
@@ -800,19 +798,15 @@ db_node <- R6::R6Class(
         self$auto_remove <- auto_remove
 
         # TODO: we need to handle situations when node is modified from R job to SQL job
-        if (length(r_expr)) {
+        if (length(r_expr) || length(r_code)) {
           self$mode <- "R"
-          self$r_expr <- r_expr
-        } else if (length(r_code)) {
-          self$mode <- "R"
-          self$r_code <- r_code
-          self$r_expr <- parse(text = r_code)
+          self$r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
         } else if (length(sql)) {
+          self$mode <- "SQL"
           self$sql <- sql_structure(sql)
-          self$mode <- "SQL"
         } else if (length(sql_code)) {
-          self$sql <- sql_structure(sql_code)
           self$mode <- "SQL"
+          self$sql <- sql_structure(sql_code)
         } else
           warning(id, ": no R expression/code or SQL code!")
 
@@ -825,7 +819,7 @@ db_node <- R6::R6Class(
 
     store_state = function() {
       super$store_state(
-        public_fields  = c("r_expr", "r_code", "sql", "mode", "auto_remove")
+        public_fields  = c("r_expr", "sql", "mode", "auto_remove")
       )
     },
 
@@ -855,18 +849,15 @@ db_node <- R6::R6Class(
         }
 
         # TODO: we need to handle situations when node is modified from R job to SQL job
-        if (length(r_expr)) {
+        if (length(r_expr) || length(r_code)) {
           mode <- "R"
-          r_expr <- r_expr
-        } else if (length(r_code)) {
-          mode <- "R"
-          r_expr <- parse(text = r_code)
+          r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
         } else if (length(sql)) {
+          mode <- "SQL"
           sql <- sql_structure(sql)
-          mode <- "SQL"
         } else if (length(sql_code)) {
-          sql <- sql_structure(sql_code)
           mode <- "SQL"
+          sql <- sql_structure(sql_code)
         } else
           warning(id, ": no R expression/code or SQL code!")
 
@@ -878,9 +869,9 @@ db_node <- R6::R6Class(
 
         if (!identical(as.character(self$r_expr), as.character(r_expr))) {
           if (verbose) notify_update(self$id, "R expression")
-          self$r_expr <- r_expr
           self$trigger_defchange <- TRUE
         }
+        self$r_expr <- r_expr # overwrite in case the srouce code has changed
 
         if (!identical(self$sql,sql)) {
           if (verbose) notify_update(self$id, "SQL expressions")
@@ -900,7 +891,7 @@ db_node <- R6::R6Class(
       sapply(self$sql,
              function(sql_statement) {
                if (verbose) {
-                 cat_r_expr(sql_statement$code, verbose_prefix = paste0(verbose_prefix, "  "))
+                 print_with_prefix(sql_statement$code, verbose_prefix = paste0(verbose_prefix, "  "))
                }
                tryCatch(
                  DBI::dbExecute(self$connection, sql_statement$code),
@@ -926,7 +917,7 @@ db_node <- R6::R6Class(
         if (verbose) {
           # if (!is.null(self$sql_code)) cat(verbose_prefix, "SQL: ", self$sql_code, sep = "")
           cat(verbose_prefix_inc, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
-          cat_r_expr(self$r_expr, verbose_prefix = verbose_prefix_inc)
+          print_with_prefix(deparse_nicely(self$r_expr), verbose_prefix = verbose_prefix_inc)
         }
         eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
       }
@@ -959,7 +950,7 @@ db_node <- R6::R6Class(
       cat("  DBI: ", class(self$connection)[1], "\n", sep = "")
       if (length(self$sql_code))
         cat("  SQL code:\n   ", crayon::cyan(head(paste0(self$sql_code, collapse = "; \n\n"))), "\n", sep = "") else
-          cat("  R expression:\n   ", crayon::cyan(head(as.character(self$r_expr))), "\n", sep = "")
+          cat("  R expression:\n   ", crayon::cyan(head(deparse_nicely(self$r_expr))), "\n", sep = "")
     },
 
     print_sql = function(prefix = "") {
@@ -980,7 +971,7 @@ db_node <- R6::R6Class(
             "R:<br><font size=\"-2\" face = \"monospace\">",
             stringr::str_replace_all(
               stringr::str_replace_all(
-                stringr::str_c(as.character(self$r_expr), collapse = "\n"),
+                stringr::str_c(deparse_nicely(self$r_expr), collapse = "\n"),
                 stringr::fixed("\n"), "<br>"),
               stringr::fixed(" "), "&nbsp;"),
             "</font></p>"),
@@ -1093,7 +1084,7 @@ accdb_node <- R6::R6Class(
       sapply(self$sql,
              function(sql_statement) {
                if (verbose) {
-                 cat_r_expr(sql_statement$code, verbose_prefix = paste0(verbose_prefix, "  "))
+                 print_with_prefix(sql_statement$code, verbose_prefix = paste0(verbose_prefix, "  "))
                }
                tryCatch(odbc32::sqlQuery(con = self$connection, query = sql_statement$code),
                         error = function(e) if (isTRUE(sql_statement$ignoreErrors)) return(NULL) else stop(e))
@@ -1273,7 +1264,6 @@ file_node <- R6::R6Class(
   public    = list(
 
     path    = NULL,
-    r_code  = NULL,
     r_expr  = NULL,
     hash    = NULL,
 
@@ -1289,8 +1279,7 @@ file_node <- R6::R6Class(
       ) {
         super$initialize(..., store = FALSE)
 
-        self$r_code <- r_code
-        self$r_expr <- suppressWarnings(as_r_expr(r_code = r_code, r_expr = r_expr))
+        self$r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
 
         if (is.null(self$r_expr) && length(self$depends))
           warning(self$id, " is not a leaf node but has no R expression to evaluate")
@@ -1328,12 +1317,12 @@ file_node <- R6::R6Class(
           self$trigger_defchange <- TRUE
         }
 
-        r_expr <- suppressWarnings(as_r_expr(r_code = r_code, r_expr = r_expr))
+        r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
         if (!identical(as.character(self$r_expr), as.character(r_expr))) {
           if (verbose) notify_update(self$id, "R expression")
-          self$r_expr <- r_expr
           self$trigger_defchange <- TRUE
         }
+        self$r_expr <- r_expr # overwrite in case the srouce code has changed
 
         if (length(hash)) {
           self$hash <- hash
@@ -1370,7 +1359,7 @@ file_node <- R6::R6Class(
 
       if (verbose) {
         cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
-        cat_r_expr(self$r_expr, paste0(verbose_prefix, "  "))
+        print_with_prefix(deparse_nicely(self$r_expr), verbose_prefix = paste0(verbose_prefix, "  "))
       }
 
       # for referencing other objects in rflow
@@ -1426,7 +1415,7 @@ file_node <- R6::R6Class(
           "R:<br><font size=\"-2\" face = \"monospace\">",
           stringr::str_replace_all(
             stringr::str_replace_all(
-              stringr::str_c(as.character(self$r_expr), collapse = "\n"),
+              stringr::str_c(deparse_nicely(self$r_expr), collapse = "\n"),
               stringr::fixed("\n"), "<br>"),
             stringr::fixed(" "), "&nbsp;"),
           "</font></p>"

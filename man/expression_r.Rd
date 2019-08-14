@@ -4,7 +4,7 @@
 \alias{expression_r}
 \title{Expression with source code references stripped off}
 \usage{
-expression_r(...)
+expression_r(x)
 }
 \arguments{
 \item{...}{expression (see \code{\link[base]{expression}})}
