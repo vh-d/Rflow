@@ -29,58 +29,6 @@ union.list <- function(
 }
 
 
-#' Returns R expression from either R expression or parsed R code
-#'
-#' @param r_code character vector of R code; ignored when R expression is not NULL
-#' @param r_expr optional R expression
-#'
-#' @return
-#' @export
-#'
-#' @examples
-as_r_expr <- function(r_code = NULL, r_expr = NULL) {
-  if (length(r_expr)) {
-    return(r_expr)
-  } else {
-    if (length(r_code)) {
-      return(parse(text = r_code))
-    } else {
-      warning("Either R expression or R code has to be supplied! Returning empty expression.")
-      return(expression())
-    }
-  }
-}
-
-
-#' Pretty printing of R expressions
-#'
-#' @param r_expr
-#' @param verbose_prefix
-#'
-#' @return
-#'
-#' @examples
-cat_r_expr <- function(r_expr, verbose_prefix = "") {
-  eol <- paste0("\n", crayon::white(verbose_prefix))
-
-  r_expr_s1 <-
-    stringr::str_replace_all(
-      string      = as.character(r_expr),
-      pattern     = stringr::fixed("\\n"),
-      replacement = "\n"
-    )
-
-  r_expr_s2 <-
-    stringr::str_replace_all(
-      string      = r_expr_s1,
-      pattern     = stringr::fixed("\n"),
-      replacement = eol
-    )
-
-  cat(verbose_prefix, crayon::cyan(r_expr_s2), "\n", sep = "")
-}
-
-
 # Print a nice notifications
 notify_update <- function(id, property) {
   cat(crayon::yellow("Definition of "), crayon::red(id), crayon::yellow(" has changed (", property, ")", sep = ""), "\n", sep = "")
