@@ -556,8 +556,7 @@ r_node <- R6::R6Class(
 
         self$r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
 
-        # TODO change to is.length()
-        if (is.null(self$r_expr) && length(self$depends))
+        if (!length(self$r_expr) && length(self$depends))
           warning(self$id, " is not a leaf node but has no R expression to evaluate")
 
         # caching properties
