@@ -52,29 +52,6 @@ r_job <- function(
   
 }
 
-#' Expression with source code references stripped off
-#'
-#' @param ... expression (see \code{\link[base]{expression}})
-#'
-#' @return
-#' `expression_r` returns expression object similar to the one returned from \code{\link[base]{expression}} except references to source code
-#' @export
-#' @seealso \code{\link[base]{expression}}
-#' @examples
-#' identical(expression(1+1), expression_r(1+1))
-#' identical(expression({1+1}), expression_r({1+1}))
-expression_r <- function(x){
-  # simulate behaviour of expression() (but accept only one argument)
-  exprs <- match.call(expand.dots = TRUE)
-  exprs[1] <- expression(expression)
-  exprs <- eval(exprs)
-  
-  return(as_r_expr(r_expr = exprs))
-}
-
-# debug(expression_r)
-
-
 sql_job <- function(sql = NULL, sql_code = NULL, mode = "execute") {
   
 }
@@ -154,6 +131,27 @@ as_r_expr <- function(r_code = NULL, r_expr = NULL) {
   
 }
 
+#' Expression with source code references stripped off
+#'
+#' @param ... expression (see \code{\link[base]{expression}})
+#'
+#' @return
+#' `expression_r` returns expression object similar to the one returned from \code{\link[base]{expression}} except references to source code
+#' @export
+#' @seealso \code{\link[base]{expression}}
+#' @examples
+#' identical(expression(1+1), expression_r(1+1))
+#' identical(expression({1+1}), expression_r({1+1}))
+expression_r <- function(x){
+  # simulate behaviour of expression() (but accept only one argument)
+  exprs <- match.call(expand.dots = TRUE)
+  exprs[1] <- expression(expression)
+  exprs <- eval(exprs)
+  
+  return(as_r_expr(r_expr = exprs))
+}
+
+
 #' Pretty printing of R expressions
 #'
 #' @param r_expr
@@ -176,6 +174,7 @@ print_with_prefix <- function(x, verbose_prefix = "") {
 }
 
 
+# deparse expressions (if not already deparsed in "src" attribute)
 deparse_nicely <- function(x, ...) {
   UseMethod("deparse_nicely", x)
 }
