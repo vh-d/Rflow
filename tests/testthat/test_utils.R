@@ -43,3 +43,9 @@ test_that("expression_r strips attributes from expressions", {
   hashes <- sapply(l1, digest::digest)
   expect_equal(hashes[1], hashes[2])
 })
+
+# rexp <- expression({1+1})
+# rexp_tidy <- as_r_expr(r_expr = rexp)
+# str(rexp[[1]])
+# str(rexp_tidy[[1]])
+# cat(attr(rexp_tidy, "src"))

@@ -43,7 +43,7 @@ test_that("nodes can be initiated", {
   expect_error(Rflow::r_node$new(name = "node1"), regexp = "[Mm]issing", info = "initialization requires id or env + name")
   expect_error(Rflow::r_node$new(env  = "env1"),  regexp = "[Mm]issing", info = "initialization requires id or env + name")
 
-  node1 <- Rflow::r_node$new(id = "node1")
+  node1 <- Rflow::r_node$new(id = "node1", r_expr = 1)
   expect_s3_class(object = node1, class = "r_node")
   expect_s3_class(object = node1, class = "node")
   expect_s3_class(object = node1, class = "R6")
@@ -58,7 +58,7 @@ test_that("nodes can be initiated", {
 
 test_that("nodes can be initiated with persistence", {
   tmp_rflow_dir <- tempdir()
-  node2 <- Rflow::r_node$new(id = "node2", persistence = list(path = tmp_rflow_dir))
+  node2 <- Rflow::r_node$new(id = "node2", r_expr = 1, persistence = list(path = tmp_rflow_dir))
   expect_is(node2$persistence, "list")
   expect_true(node2$persistence$enabled)
   expect_equal(node2$persistence$path, tmp_rflow_dir)
@@ -67,7 +67,7 @@ test_that("nodes can be initiated with persistence", {
 
 test_that("nodes can be initiated with caching", {
   tmp_rflow_dir <- tempdir()
-  node3 <- Rflow::r_node$new(id = "node3", cache = list(path = tmp_rflow_dir), verbose = FALSE)
+  node3 <- Rflow::r_node$new(id = "node3", r_expr = 1, cache = list(path = tmp_rflow_dir), verbose = FALSE)
   expect_true(node3$cache$enabled)
   expect_equal(node3$cache$path, tmp_rflow_dir)
   expect_error(node3$cache_write(), info = "cache cannot be written without existing value")
@@ -84,11 +84,11 @@ test_that("nodes can be initiated", {
   expect_error(Rflow::file_node$new(),               regexp = "[Mm]issing", info = "initialization requires id or env + name")
   expect_error(Rflow::file_node$new(name = "node1"), regexp = "[Mm]issing", info = "initialization requires id or env + name")
   expect_error(Rflow::file_node$new(env  = "env1"),  regexp = "[Mm]issing", info = "initialization requires id or env + name")
-  expect_error(Rflow::file_node$new(id = "node1"),   regexp = "[Mm]issing", info = "initialization requires file path")
+  expect_error(Rflow::file_node$new(id = "node1", r_expr = 1),   regexp = "[Mm]issing", info = "initialization requires file path")
 
   tmp_file <- tempfile()
 
-  node1 <- Rflow::file_node$new(id = "node1", path = tmp_file)
+  node1 <- Rflow::file_node$new(id = "node1", r_expr = 1, path = tmp_file)
   expect_s3_class(object = node1, class = "file_node")
   expect_s3_class(object = node1, class = "node")
   expect_s3_class(object = node1, class = "R6")
