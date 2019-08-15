@@ -151,28 +151,45 @@ expression_r <- function(x){
   return(as_r_expr(r_expr = exprs))
 }
 
-
-#' Pretty printing of R expressions
+#' Print with prefix
 #'
-#' @param r_expr
-#' @param verbose_prefix
+#' @param x value to print
+#' @param verbose_prefix prefix to be added after every new-line symbol 
 #'
 #' @return
 #'
 #' @examples
-print_with_prefix <- function(x, verbose_prefix = "") {
-  eol <- paste0("\n", crayon::white(verbose_prefix))
-  
-  r_expr_s2 <-
-    stringr::str_replace_all(
-      string      = x,
-      pattern     = stringr::fixed("\n"),
-      replacement = eol
-    )
-  
-  cat(verbose_prefix, crayon::cyan(r_expr_s2), "\n", sep = "")
+add_prefix <- function(x, prefix = "", color_main = NULL, color_prefix = NULL) {
+  . <- unlist(crayon::col_strsplit(x, split = "\n", fixed = TRUE))
+  . <- paste0(prefix, .)
+  .
 }
 
+# add_prefix <- function(x, prefix = "", color_main = NULL, color_prefix = NULL) {
+#   . <- unlist(stringr::str_split(x, stringr::fixed("\n")))
+#   if (length(color_main))   . <-  color_main(.)
+#   if (length(color_prefix)) . <-  color_prefix(.)
+#   . <- paste0(prefix, .)
+#   .
+# }
+
+
+
+#' Print with prefix
+#'
+#' @param x value to print
+#' @param verbose_prefix prefix to be added after every new-line symbol 
+#'
+#' @return
+#'
+#' @examples
+cat_with_prefix <- function(x, prefix = "", sep = "\n", ...) {
+  cat(
+    add_prefix(x, prefix = prefix), 
+    sep = sep, 
+    ...
+  )
+}
 
 # deparse expressions (if not already deparsed in "src" attribute)
 deparse_nicely <- function(x, ...) {
@@ -183,6 +200,6 @@ deparse_nicely.expression <- function(x) {
   if (length(attr(x, "src"))) return(attr(x, "src")) else paste0(deparse(x, control = "useSource"), collapse = "\n")
 }
 
-deparse_nicely.NULL <- function(x) {
-  "" # or pass NULL?
+deparse_nicely.default <- function(x) {
+  as.character(x)
 }
