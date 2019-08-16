@@ -32,52 +32,52 @@
 #'   \item{\code{new(node)}}{This method is used to create object of this class.}
 #' }
 node <- R6::R6Class(
-  
+
   classname = "node",
-  
+
   private = list(
     .last_evaluated = NULL, # datetime when target value was last evaluated/made
     .last_changed   = NULL, # datetime when target value changed the last time (it might be evaluated without any change)
-    
+
     .vis_params_default = list(
       shape = "diamond"
     )
   ),
-  
+
   public    = list(
     id         = NULL, # unique withing an rflow
     env        = NULL, # name of container (real such as R env or datebase schema, or abstract such as group of files)
     name       = NULL, # name is unique withing its env
     desc       = NULL, # brief describtion of the object
-    
+
     tags       = NULL, # character vector of tags
-    
+
     depends    = NULL, # character vector of dependencies (upstream nodes)
     upstream   = NULL, # vector of references to depencies
     downstream = NULL, # vector of references to dependants
-    
+
     definition_hash = NULL,
-    
+
     persistence        = NULL,
     trigger_defchange  = FALSE,
     trigger_manual     = FALSE,
     trigger_condition  = NULL,
-    
+
     vis_params = NULL,
-    
+
     vis_params_process = function(params) {
       union.list(
         private$.vis_params_default,
         params
       )
     },
-    
+
     # derive object's ID from given identificators
     set_id = function(id, name, env) {
       if (is.null(id) & (is.null(name) | is.null(env))) stop("Missing id or (env + name)!") # either 'id' or 'name' + 'env' arguments have to be provided
       self$id <- if (is.null(id)) paste0(env, ".", name) else id
     },
-    
+
     # set up persistency
     set_persistence = function(persistence) {
       self$persistence <-
@@ -94,10 +94,10 @@ node <- R6::R6Class(
             enabled = FALSE
           )
         }
-      
+
       invisible(TRUE)
     },
-    
+
     print = function(...) {
       cat("<", class(self)[1], "> ", crayon::red(self$id), ": ", self$name,  "\n", sep = "")
       if (length(self$desc)) cat("  desc: ", crayon::italic(self$desc),         "\n", sep = "")
@@ -110,16 +110,16 @@ node <- R6::R6Class(
       cat("    manual:     ", self$trigger_manual,    "\n", sep = "")
       if (length(self$trigger_condition)) cat("    condition:  ", self$check_trigger_condition(), "\n", sep = "")
     },
-    
+
     label = function() {
       label <- paste0(self$env, "\n", self$name)
-      
+
       return(label)
     },
-    
+
     title = function() {
       paste0("<b>", self$id, "</b>", " &lt;", class(self)[1], "&gt;", "<br>") -> .
-      
+
       # insert description
       if (length(self$desc) && !is.na(self$desc))
         . <- paste0(
@@ -129,7 +129,7 @@ node <- R6::R6Class(
             stringr::str_wrap(self$desc, width = 80), stringr::fixed("\n"), "<br>"),
           "</em><br>"
         )
-      
+
       # insert date of last evaluation
       . <- paste0(
         .,
@@ -138,10 +138,10 @@ node <- R6::R6Class(
         # "changed:   <em>", self$last_changed,   "</em><br>",
         "</font>"
       )
-      
+
       return(.)
     },
-    
+
     initialize =
       function(
         id      = NULL,
@@ -156,54 +156,54 @@ node <- R6::R6Class(
         persistence = list(enabled = FALSE),
         .last_evaluated = NULL,
         .last_changed   = NULL,
-        
+
         vis_params = NULL,
-        
+
         store   = TRUE,
         ...
       ) {
         self$set_id(id = id, name = name, env = env)
-        
+
         self$name    <- name
         self$env     <- env
         self$desc    <- desc
-        
+
         self$definition_hash <- definition_hash
-        
+
         self$set_persistence(persistence)
-        
+
         self$tags    <- as.character(tags)
-        
+
         self$vis_params <- self$vis_params_process(vis_params)
-        
+
         depends_char <- if (is.character(depends)) depends else names(depends)
         self$depends <- depends_char
-        
+
         if (length(trigger_defchange))
           self$trigger_defchange <- as.logical(trigger_defchange)
-        
+
         if (!is.null(trigger_condition))
           self$trigger_condition <- as_r_expr(r_code = trigger_condition)
-        
+
         private$.last_evaluated <- if (length(.last_evaluated)) .last_evaluated else as.POSIXct(NA)
         private$.last_changed   <- if (length(.last_changed))   .last_changed else as.POSIXct(NA)
-        
+
         # other_args <- list(...)
         # if (length(other_args)) warning("Ignoring ", paste(names(other_args), collapse = ", "), " properties.\n")
-        
+
         # this should be always at the very end
         # storing is not neccesary when e.g. update_definition() is called from ancestor's method
         if (self$persistence$enabled && store) self$store_state()
-        
+
         return(invisible(TRUE))
       },
-    
+
     # save function for state persistency
     # currently only file-based store backend is supported
     store_state = function(
       public_fields  = NULL,
       private_fields = NULL) {
-      
+
       public_fields  <-
         unique(
           c("id", "name", "env",
@@ -213,12 +213,12 @@ node <- R6::R6Class(
             "trigger_condition", "trigger_defchange",
             "vis_params",
             public_fields))
-      
+
       private_fields <-
         unique(
           c(".last_evaluated", ".last_changed",
             private_fields))
-      
+
       saveRDS(
         object = list(
           self    = c(type = class(self)[1],
@@ -228,7 +228,7 @@ node <- R6::R6Class(
         file = file.path(self$persistence$path, self$persistence$file)
       )
     },
-    
+
     # allows to change properties of existing objects/instances
     update_definition =
       function(
@@ -240,43 +240,43 @@ node <- R6::R6Class(
         definition_hash = NULL,
         trigger_defchange = NULL,
         trigger_condition = NULL,
-        
+
         vis_params = NULL,
-        
+
         ...,
         store  = TRUE,
         verbose = TRUE
       ) {
         self$definition_hash <- definition_hash
-        
+
         if (!is.null(trigger_defchange))
           self$trigger_defchange <- trigger_defchange
-        
+
         # graphics params need to be processed before checking
         vis_params <- self$vis_params_process(vis_params)
         if (!identical(vis_params, self$vis_params)) {
           self$vis_params <- vis_params
         }
-        
+
         # changes in dependencies
         depends_char <- if (is.character(depends)) depends else names(depends)
         if (!setequal(self$depends, depends_char)) {
-          
+
           if (verbose) notify_update(self$id, "dependencies")
-          
+
           self$depends <- depends_char
           self$trigger_defchange <- TRUE
         }
-        
+
         # changes in description
         if (!is.null(desc)) self$desc <- desc
-        
+
         # changes in tags
         if (!identical(as.character(self$tags), as.character(tags))) {
           if (verbose) notify_update(self$id, "tags")
           self$tags <- as.character(tags)
         }
-        
+
         # changes in user defined trigger
         trigger_condition <- suppressWarnings(as_r_expr(r_code = trigger_condition))
         if (!identical(as.character(self$trigger_condition), as.character(trigger_condition))) {
@@ -284,129 +284,139 @@ node <- R6::R6Class(
           self$trigger_condition <- trigger_condition
           self$trigger_defchange <- TRUE
         }
-        
+
         # currently all the remaingn arguments are ifnored, TODO ?
         # other_args <- list(...)
         # if (length(other_args)) warning("Not updating ", paste(names(other_args), collapse = ", "), " properties.\n")
-        
+
         # this should be always at the very end
         # storing is not neccesary when e.g. update_definition() is called from ancestor's method
         if (self$persistence$enabled && store) self$store_state()
-        
+
         return(invisible(TRUE))
       },
-    
+
     # connect object to upstream
     set_upstream = function(obj) {
       if (!in.R6(obj, self$upstream)) {
         self$upstream <- c(self$upstream, obj)
       }
     },
-    
+
     # connect this object to its upsream (currently not used)
     set_downstream = function(obj) {
       if (!in.R6(self, obj$downstream)) {
         obj$downstream <- c(obj$downstream, self)
       }
     },
-    
+
     # make the references to both upstream and downstream
     connect_to = function(id) {
       # connect object to upstream
-      
+
       if (exists(id, where = parent.env(self))) {
-        
+
         obj <- get(x = id, envir = parent.env(self))
-        
+
         self$set_upstream(obj)
         self$set_downstream(obj)
-        
+
       } else {
         warning("Node", crayon::red(id), " does not exists...?")
         return(FALSE)
       }
-      
+
       return(TRUE)
     },
-    
+
     # make the references to all relevant upstream objects
     connect = function(verbose = TRUE) {
       if (verbose) cat("Connecting ", crayon::red(self$id), " to: ", crayon::red(self$depends, collapse = " "), "\n", sep = "")
       sapply(self$depends, self$connect_to)
     },
-    
+
     get = function() {
       warning("This is just empty method...")
     },
-    
+
     remove = function() {
       warning("This is just empty method...")
     },
-    
+
     check_trigger_condition = function() {
       isTRUE(eval(self$trigger_condition, envir = self))
     },
-    
+
     # run checks that triggers evaluation
     # note that the order of checking the triggers is important (short circuit)
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
       if (!isFALSE(self$trigger_defchange))         {if (verbose) notify_trigger(self$id, "change in eval. expression", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
       if (!isFALSE(self$trigger_manual))            {if (verbose) notify_trigger(self$id, "manual trigger", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
       if (!isFALSE(self$check_trigger_condition())) {if (verbose) notify_trigger(self$id, "custom trigger condition", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
-      
+
       if (!length(self$last_evaluated) || is.na(self$last_evaluated)) {if (verbose) notify_trigger(self$id, "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
-      
+
       return(FALSE)
     },
-    
-    # for resetting triggers after successfull evaluation
+
+    # to reset triggers (e.g. after successfull evaluation)
     reset_triggers = function() {
       self$trigger_defchange <- FALSE
       self$trigger_manual <- FALSE
     },
-    
+
     # main evaluation function
     eval = function() {
+
       # all triggers should be resetted now
       self$reset_triggers()
+
       # make changes persistent
       if (self$persistence$enabled) self$store_state()
+
+      # by default return no change (but descendant classes with some actual logic in eval() should implement detection of changes or return TRUE by default)
+      return(FALSE)
     },
-    
+
     # generic make function that recursivelly solves all dependencies
+    # it is the workhorse of the Rflow framework
     # in most cases, this is not supposed to be overloaded in custom subclasses
     make = function(force = FALSE, verbose = TRUE, verbose_prefix = "") {
-      
+
       if (verbose) {
         cat(verbose_prefix, "\u250C Solving node ", crayon::red(crayon::bold(self$id)), "\n", sep = "")
       }
-      
+
       # solve/make upstream nodes first
       if (length(self$upstream) != length(self$depends)) self$connect() # check that it's connected to upstream
-      
+
+      # do not evaluate unless triggered
       results <- FALSE
+
+      # collect triggers from upstream
       upstream_changed_ids <- character()
       for (y in self[["upstream"]]) {
-        trigger_upstream_changed <- y$make(force = force, verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  "))
+        # upsream can trigger me if it has changed since my last eval
+        trigger_upstream_changed <- y$make(force = force, verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  ")) # TODO: this might be redundant if do the next line anyawy
         trigger_upstream_newer   <- y$last_changed > self$last_evaluated
-        
+
         # increment list of changed nodes in upstream
         # there is another trigger for cases when self$last_evaluated in NULL/NA, therefore isTRUE() should be safe and is better for logging
         if (!isFALSE(trigger_upstream_newer) || isTRUE(trigger_upstream_changed))
           upstream_changed_ids <- c(upstream_changed_ids, y$id)
-        
-        results <- results || trigger_upstream_newer || trigger_upstream_changed
+
+        results <- results || trigger_upstream_newer || trigger_upstream_changed # TODO: can trigger_upstream_newer ever be different from trigger_upstream_changed?
       }
-      
+
       triggered <-
-        if (isTRUE(force)) {
-          if (verbose) notify_trigger(self$id, "manual trigger", verbose_prefix = paste0(verbose_prefix, "\u2514 "))
+        if (isTRUE(force)) { # forced evaluation
+          if (verbose) notify_trigger(self$id, trigger = "manual trigger",                verbose_prefix = paste0(verbose_prefix, "\u2514 "))
           TRUE
         } else if (!length(self$last_evaluated) || is.na(self$last_evaluated)) {
-          if (verbose) notify_trigger(self$id, "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u2514 "))
+          if (verbose) notify_trigger(self$id, trigger = "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u2514 "))
           TRUE
         } else if (!isFALSE(results)) {
-          if (verbose) notify_trigger(self$id, paste0("changes in upstream nodes (", paste0(upstream_changed_ids, collapse = ", "), ")"), verbose_prefix = paste0(verbose_prefix, "\u2514 "))
+          if (verbose) notify_trigger(self$id, trigger = paste0("changes in upstream nodes (", paste0(upstream_changed_ids, collapse = ", "), ")"), verbose_prefix = paste0(verbose_prefix, "\u2514 "))
           TRUE
         } else if (!isFALSE(self$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) {
           TRUE
@@ -414,21 +424,21 @@ node <- R6::R6Class(
           if (verbose) cat(verbose_prefix, "\u2514 ", crayon::silver(self$id, " not triggered.", sep = ""), "\n", sep = "")
           return(invisible(FALSE))
         }
-      
+
       # then make the object itself
       # eval should return if the object was evaluated/changed etc...
       trigger_downstream <- !isFALSE(self$eval(verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  ")))
-      
+
       # all triggers should be resetted now
       self$reset_triggers()
-      
+
       # return whether dependants should be triggered or not
       return(invisible(trigger_downstream))
     }
   ) ,
-  
+
   active = list(
-    
+
     # datetime of last evaluation
     last_evaluated = function(value) {
       if (missing(value)) {
@@ -438,7 +448,7 @@ node <- R6::R6Class(
         private$.last_changed   <- value
       }
     },
-    
+
     # datetime of last change (does not have to equal to last evaluation unless the target value really changes)
     last_changed = function(value) {
       if (missing(value)) {
@@ -457,23 +467,23 @@ node <- R6::R6Class(
 r_node <- R6::R6Class(
   classname = "r_node",
   inherit = node,
-  
+
   private = list(
     .vis_params_default = list(
       shape = "triangle"
     )
   ),
-  
+
   public = list(
-    
+
     r_env    = NULL,  # reference to R envinronment
-    r_expr   = NULL,  # R expression 
-    
+    r_expr   = NULL,  # R expression
+
     hash     = NULL,  # hash of the represented R object from digest(), hashing enables checking for changes of the R objects
     cache    = list(enabled = FALSE),
-    
+
     # triggers  = NULL, # every node has a list of triggers that are checked before evaluation
-    
+
     cache_setup = function(cache) {
       self$cache <-
         if (is.list(cache) && length(cache$path)) {
@@ -497,23 +507,23 @@ r_node <- R6::R6Class(
             enabled = FALSE
           )
         }
-      
+
       invisible(TRUE)
     },
-    
+
     cache_exists = function() {
       file.exists(file.path(self$cache$path, self$cache$file))
     },
-    
+
     cache_write = function() {
       saveRDS(object = self$get(), file = file.path(self$cache$path, self$cache$file))
     },
-    
+
     cache_restore = function() {
       value <- readRDS(file.path(self$cache$path, self$cache$file))
       assign(self$name, value, pos = self$r_env)
     },
-    
+
     print = function(...) {
       super$print()
       cat("  cache: \n")
@@ -527,10 +537,10 @@ r_node <- R6::R6Class(
         prefix = "    "
       )
     },
-    
+
     title = function() {
       title <- super$title()
-      
+
       title <- paste0(
         title,
         "<p>",
@@ -542,10 +552,10 @@ r_node <- R6::R6Class(
           stringr::fixed(" "), "&nbsp;"),
         "</font></p>"
       )
-      
+
       return(title)
     },
-    
+
     initialize =
       function(
         ...,
@@ -555,25 +565,25 @@ r_node <- R6::R6Class(
         store   = TRUE,
         cache   = list(enabled = FALSE),
         hash    = NULL,
-        
+
         verbose = TRUE
       ) {
         super$initialize(..., store = FALSE)
-        
+
         self$r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
-        
+
         if (!length(self$r_expr) && length(self$depends))
           warning(self$id, " is not a leaf node but has no R expression to evaluate")
-        
+
         # caching properties
         self$cache_setup(cache)
-        
+
         # hash
-        if (length(hash) && self$cache$enabled) {
+        if (length(hash) && isTRUE(self$cache$enabled)) {
           self$hash <- hash
         }
-        
-        # connect to R environment (.GlobalEnv if not specified)
+
+        # connect to R environment (.GlobalEnv if not specified othewise)
         if (is.null(self$env)) {
           self$r_env <- .GlobalEnv
         } else {
@@ -581,7 +591,7 @@ r_node <- R6::R6Class(
           if (!is.environment(r_env)) stop(paste(self$env, "is not an R environment object"))
           self$r_env <- r_env
         }
-        
+
         # try restoring the object from cache
         if (self$cache$enabled)
           if (self$cache_exists()) {
@@ -598,18 +608,18 @@ r_node <- R6::R6Class(
           } else {
             if (verbose) cat(crayon::red(self$id), ": no cache found\n", sep = "")
           }
-        
+
         if (self$persistence$enabled && store) self$store_state()
-        
+
         return(invisible(TRUE))
       },
-    
+
     store_state = function() {
       super$store_state(
         public_fields  = c("r_expr", "hash")
       )
     },
-    
+
     update_definition =
       function(
         ...,
@@ -619,82 +629,82 @@ r_node <- R6::R6Class(
         verbose = TRUE
       ) {
         super$update_definition(..., verbose = verbose, store = FALSE)
-        
+
         r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
         if (!identical(as.character(self$r_expr), as.character(r_expr))) {
           if (verbose) notify_update(self$id, "R expression")
           self$trigger_defchange <- TRUE
         }
         self$r_expr <- r_expr # overwrite in case the srouce code has changed
-        
+
         if (self$persistence$enabled && store) self$store_state()
-        
+
         return(invisible(TRUE))
       },
-    
+
     eval = function(verbose = TRUE, verbose_prefix = "") {
       if (verbose) {
         cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
         cat_with_prefix(
           crayon::cyan(
-            substr(deparse_nicely(self$r_expr), 1, 200) 
+            substr(deparse_nicely(self$r_expr), 1, 200)
           ),
           prefix = verbose_prefix
         )
       }
-      
+
       # for referencing other objects in rflow
       .RFLOW <- parent.env(self)
-      
+
       assign(self$name, eval(self$r_expr), pos = self$r_env)
-      
+
       private$.last_evaluated <- Sys.time()
-      
+
       # checking hash before signalling change to parent
       changed <- self$check_hash()
-      
+
       if (verbose) {
         cat(verbose_prefix, crayon::red(self$id), ": done", if (changed) crayon::yellow(" (value has changed)"), ".\n", sep = "")
       }
-      
+
       if (self$cache$enabled && (changed || !isTRUE(self$cache_exists()))) self$cache_write()
-      
+
       # all triggers should be resetted now
       self$reset_triggers()
-      
+
       # make changes persistent
       if (self$persistence$enabled) self$store_state()
-      
+
       return(changed)
     },
-    
+
     exists = function() {
       exists(self$name, where = self$r_env)
     },
-    
+
     check_hash = function() {
       if (!self$exists()) return(NA) # TODO: or NULL?
-      
+
       hash <- digest::digest(object = self$get(), file = FALSE, algo = "md5")
       changed <- !isTRUE(self$hash$hash == hash)
-      
+
       if (changed)
         self$hash <- list(
           hash = hash,
           time = Sys.time()
         )
-      
+
       return(changed)
     },
-    
+
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
-      
+
       if (!isFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
       if (!isTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
-      
+
       return(FALSE)
     },
-    
+
     get = function() {
       if (self$exists()) {
         return(get(self$name, pos = self$r_env))
@@ -703,7 +713,7 @@ r_node <- R6::R6Class(
         return(NULL)
       }
     },
-    
+
     remove = function(verbose = TRUE, verbose_prefix = "") {
       if (self$exists()) {
         if (verbose) notify_removal(self$id, verbose_prefix = verbose_prefix)
@@ -714,9 +724,9 @@ r_node <- R6::R6Class(
       }
     }
   ),
-  
+
   active = list(
-    
+
     last_evaluated = function(value) {
       if (missing(value)) {
         return(private$.last_evaluated)
@@ -724,7 +734,7 @@ r_node <- R6::R6Class(
         private$.last_evaluated <- value
       }
     },
-    
+
     last_changed = function(value) {
       if (missing(value)) {
         # file might have been modified but the content stayed the same
@@ -735,7 +745,7 @@ r_node <- R6::R6Class(
         stop("Can't set `$last_changed")
       }
     }
-    
+
   )
 )
 
@@ -756,26 +766,26 @@ solve_connection.DBIConnection <- function(con) {
 db_node <- R6::R6Class(
   classname = "db_node",
   inherit   = node,
-  
+
   private = list(
     .vis_params_default = list(
       shape = "square"
     )
   ),
-  
+
   public    = list(
-    
+
     env        = NULL,
-    
+
     mode       = NULL,
     driver     = NULL,
     connection = NULL,
     sql        = NULL,
-    
+
     r_expr     = NULL,
-    
+
     auto_remove = NULL,
-    
+
     initialize =
       function(
         ...,
@@ -783,30 +793,30 @@ db_node <- R6::R6Class(
         sql_code = NULL,
         sql      = NULL,
         r_code   = NULL,
-        r_expr   = NULL,  # R expression 
+        r_expr   = NULL,  # R expression
         connection = NULL,
         .last_evaluated = NULL,
         type     = NULL,
         store    = TRUE
       ) {
         super$initialize(..., store = FALSE)
-        
+
         # TODO:
         # * how to handle storage of connection when DBI connection object is given?
         # * tryCatch connection to avoid failure during update
         if (!length(connection)) {
           connection <- self$env
         }
-        
+
         self$connection <- solve_connection(connection)
         # if (is(connection, "DBIconnection")) connection else
         #   if (is.character(connection)) {
         #     if (is(get(connection), "DBIconnection")) get(connection) else
         #       stop(connection, " not a DBIconnection object")
         #   } else stop("Connection is neither DBI connection nor a name of a DBI connection object")
-        
+
         self$auto_remove <- auto_remove
-        
+
         # TODO: we need to handle situations when node is modified from R job to SQL job
         if (length(r_expr) || length(r_code)) {
           self$mode <- "R"
@@ -819,20 +829,20 @@ db_node <- R6::R6Class(
           self$sql <- sql_structure(sql_code)
         } else
           warning(id, ": no R expression/code or SQL code!")
-        
+
         private$.last_evaluated <- if (length(.last_evaluated)) .last_evaluated else as.POSIXct(NA)
-        
+
         if (self$persistence$enabled && store) self$store_state()
-        
+
         return(invisible(TRUE))
       },
-    
+
     store_state = function() {
       super$store_state(
         public_fields  = c("r_expr", "sql", "mode", "auto_remove")
       )
     },
-    
+
     update_definition =
       function(
         ...,
@@ -846,18 +856,18 @@ db_node <- R6::R6Class(
         verbose  = FALSE
       ) {
         super$update_definition(..., verbose = verbose, store = FALSE)
-        
+
         if (!length(connection)) {
           connection <- self$env
         }
-        
+
         self$connection <- solve_connection(connection)
-        
+
         if (length(auto_remove) && !identical(self$auto_remove, auto_remove)) {
           self$auto_remove <- auto_remove
           self$trigger_defchange <- TRUE
         }
-        
+
         # TODO: we need to handle situations when node is modified from R job to SQL job
         if (length(r_expr) || length(r_code)) {
           mode <- "R"
@@ -870,30 +880,30 @@ db_node <- R6::R6Class(
           sql <- sql_structure(sql_code)
         } else
           warning(id, ": no R expression/code or SQL code!")
-        
+
         if (!identical(self$mode, mode)) {
           if (verbose) notify_update(self$id, "R/SQL mode")
           self$mode <- mode
           self$trigger_defchange <- TRUE
         }
-        
+
         if (!identical(as.character(self$r_expr), as.character(r_expr))) {
           if (verbose) notify_update(self$id, "R expression")
           self$trigger_defchange <- TRUE
         }
         self$r_expr <- r_expr # overwrite in case the srouce code has changed
-        
+
         if (!identical(self$sql,sql)) {
           if (verbose) notify_update(self$id, "SQL expressions")
           self$sql <- sql
           self$trigger_defchange <- TRUE
         }
-        
+
         if (self$persistence$enabled && store) self$store_state()
-        
+
         return(invisible(TRUE))
       },
-    
+
     execute_sql = function(verbose = TRUE, verbose_prefix = "") {
       if (verbose) {
         cat(verbose_prefix, crayon::red(self$id), ": Evaluating SQL statements:\n", sep = "")
@@ -914,18 +924,18 @@ db_node <- R6::R6Class(
              }
       )
     },
-    
+
     eval = function(verbose = TRUE, verbose_prefix = "") {
       verbose_prefix_inc <- paste0(verbose_prefix, "  ")
-      
+
       exists_check <- self$exists()
-      
+
       # for referencing other objects in rflow
       .RFLOW <- parent.env(self)
-      
+
       # remove target object before rebuilding it
       if (self$auto_remove) self$remove(verbose = verbose, verbose_prefix = verbose_prefix_inc)
-      
+
       if (self$mode == "SQL") {
         self$execute_sql(verbose = verbose, verbose_prefix = verbose_prefix_inc)
       } else {
@@ -941,30 +951,31 @@ db_node <- R6::R6Class(
         }
         eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
       }
-      
+
       private$.last_evaluated <- Sys.time()
-      
+
       # all triggers should be resetted now
       self$reset_triggers()
-      
+
       # make changes persistent
       if (self$persistence$enabled) self$store_state()
-      
+
       return(TRUE)
     },
-    
+
+    # check that the target object exists in the database
     exists = function() {
       DBI::dbExistsTable(conn = self$connection, name = self$name)
     },
-    
+
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
-      
+
       if (!isFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
       if (!isTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
-      
+
       return(FALSE)
     },
-    
+
     print = function(...) {
       super$print()
       cat("  DBI: ", class(self$connection)[1], "\n", sep = "")
@@ -972,18 +983,18 @@ db_node <- R6::R6Class(
         cat("  SQL code:\n   ", crayon::cyan(head(paste0(self$sql_code, collapse = "; \n\n"))), "\n", sep = "") else
           cat("  R expression:\n   ", crayon::cyan(head(deparse_nicely(self$r_expr))), "\n", sep = "")
     },
-    
+
     print_sql = function(prefix = "") {
       cat(prefix, crayon::cyan(paste_sql(self$sql)), sep = "")
     },
-    
+
     title = function() {
-      
+
       title <- super$title()
-      
+
       switch(
         self$mode,
-        
+
         "R" =
           paste0(
             title,
@@ -995,7 +1006,7 @@ db_node <- R6::R6Class(
                 stringr::fixed("\n"), "<br>"),
               stringr::fixed(" "), "&nbsp;"),
             "</font></p>"),
-        
+
         "SQL" =
           paste0(
             title,
@@ -1008,12 +1019,12 @@ db_node <- R6::R6Class(
               stringr::fixed(" "), "&nbsp;"),
             "</font></p>"
           ),
-        
+
         # else:
         title
       )
     },
-    
+
     get = function() {
       if (self$exists()) {
         return(DBI::dbReadTable(conn = self$connection, name = self$name))
@@ -1022,19 +1033,19 @@ db_node <- R6::R6Class(
         return(NULL)
       }
     },
-    
+
     remove = function(verbose = TRUE, verbose_prefix = "") {
-      
+
       if (self$exists()) {
-        
+
         if (verbose) notify_removal(self$id, verbose_prefix = verbose_prefix)
-        
+
         msg <-
           tryCatch(
             expr  = list(result = DBI::dbRemoveTable(conn = self$connection, name = self$name)),
             error = function(e) list(result = -1L, error1 = e)
           )
-        
+
         # try as if it was a VIEW
         if (msg$result == -1L) {
           msg <-
@@ -1043,19 +1054,19 @@ db_node <- R6::R6Class(
               error = function(e) list(result = -1L, error1 = msg$error, error2 = e)
             )
         }
-        
+
         if (msg$result == -1L) {
           stop(msg$error1, msg$error2)
         }
-        
+
         return(invisible(TRUE))
-        
+
       } else {
         if (verbose) notify_nonexistence(self$id, verbose_prefix = verbose_prefix)
         return(invisible(FALSE))
       }
     }
-    
+
   )
 )
 
@@ -1071,13 +1082,13 @@ solve_connection.odbc32 <- function(con) {
 accdb_node <- R6::R6Class(
   classname = "accdb_node",
   inherit   = db_node,
-  
+
   public    = list(
-    
+
     exists = function() {
       isTRUE(self$name %in% odbc32::sqlTables(self$connection)$TABLE_NAME)
     },
-    
+
     get = function() {
       if (self$exists()) {
         return(odbc32::sqlFetch(con = self$connection, name = self$name))
@@ -1086,7 +1097,7 @@ accdb_node <- R6::R6Class(
         return(NULL)
       }
     },
-    
+
     remove = function(verbose = TRUE, verbose_prefix = "") {
       if (self$exists()) {
         if (verbose) notify_removal(self$id, verbose_prefix = verbose_prefix)
@@ -1096,7 +1107,7 @@ accdb_node <- R6::R6Class(
         return(invisible(FALSE))
       }
     },
-    
+
     execute_sql = function(verbose = TRUE, verbose_prefix = "") {
       if (verbose) {
         cat(verbose_prefix, crayon::red(self$id), ": Evaluating SQL statements:\n", sep = "")
@@ -1124,17 +1135,17 @@ accdb_node <- R6::R6Class(
 # excel sheet node ---------------------------------------------------------
 #' @export
 excel_sheet <- R6::R6Class(
-  
+
   classname = "excel_sheet",
   inherit   = node,
-  
+
   public    = list(
-    
+
     path   = NULL,
     sheet  = NULL,
     hash   = NULL,
     read_args = NULL, # TODO!
-    
+
     initialize =
       function(
         ...,
@@ -1146,26 +1157,26 @@ excel_sheet <- R6::R6Class(
         store     = TRUE
       ) {
         if (!requireNamespace("openxlsx", quietly = TRUE)) stop(self$id, " requires openxlsx package.")
-        
+
         super$initialize(..., store = FALSE)
-        
+
         if (length(path)) {
           self$path <- as.character(path[1])
         } else {
           stop(self$id, ": missing file path.")
         }
-        
+
         self$sheet <- if (length(sheet)) sheet else 1L
-        
+
         if (length(hash)) {
           self$hash <- hash
         }
-        
+
         if (self$persistence$enabled && store) self$store_state()
-        
+
         return(invisible(TRUE))
       },
-    
+
     update_definition =
       function(
         ...,
@@ -1176,38 +1187,34 @@ excel_sheet <- R6::R6Class(
         verbose = TRUE
       ) {
         super$update_definition(..., verbose = verbose, store = FALSE)
-        
+
         if (!identical(self$path, path)) {
           if (verbose) notify_update(self$id, "file path")
           self$path <- path
           self$trigger_defchange <- TRUE
         }
-        
+
         if (!identical(self$sheet, sheet)) {
           if (verbose) notify_update(self$id, "sheet name/index")
           self$sheet <- sheet
           self$trigger_defchange <- TRUE
         }
-        
+
         if (length(hash)) {
           self$hash <- hash
         }
-        
+
         if (self$persistence$enabled && store) self$store_state()
-        
+
         return(invisible(TRUE))
       },
-    
+
     store_state = function() {
       super$store_state(
         public_fields  = c("path", "sheet", "hash")
       )
     },
-    
-    eval = function(...) {
-      # warning(self$id, " is read only node")
-    },
-    
+
     exists = function() {
       if (file.exists(self$path)) {
         if (is.numeric(self$sheet)) {
@@ -1216,40 +1223,40 @@ excel_sheet <- R6::R6Class(
           return(isTRUE(self$sheet %in% openxlsx::getSheetNames(self$path)))
       }
     },
-    
+
     check_hash = function() {
       if (!self$exists()) return(NA) # TODO: or NULL?
-      
+
       hash <- digest::digest(object = self$get(), algo = "md5")
       changed <- !isTRUE(self$hash$hash == hash)
-      
+
       if (changed)
         self$hash <- list(
           hash = hash,
           time = Sys.time()
         )
-      
+
       return(changed)
     },
-    
+
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
-      
+
       if (!isFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
       if (!isTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
-      
+
       return(FALSE)
     },
-    
+
     get = function() {
       if (self$exists()) {
         do.call(openxlsx::read.xlsx, args = c(list(xlsxFile = self$path, sheet = self$sheet), self$read_args))
       } else stop(self$id, ": sheet '", self$sheet, "' does not exists in ", self$path)
     }
-    
+
   ),
-  
+
   active = list(
-    
+
     last_evaluated = function(value) {
       if (missing(value)) {
         return(file.mtime(self$path))
@@ -1257,7 +1264,7 @@ excel_sheet <- R6::R6Class(
         stop("Can't set `$last_evaluated")
       }
     },
-    
+
     last_changed = function(value) {
       if (missing(value)) {
         # file might have been modified but the content stayed the same
@@ -1269,7 +1276,7 @@ excel_sheet <- R6::R6Class(
         stop("Can't set `$last_changed")
       }
     }
-    
+
   )
 )
 
@@ -1277,22 +1284,22 @@ excel_sheet <- R6::R6Class(
 
 #' @export
 file_node <- R6::R6Class(
-  
+
   classname = "file_node",
   inherit   = node,
-  
+
   private = list(
     .vis_params_default = list(
       shape = "star"
     )
   ),
-  
+
   public    = list(
-    
+
     path    = NULL,
     r_expr  = NULL,
     hash    = NULL,
-    
+
     initialize =
       function(
         ...,
@@ -1304,27 +1311,27 @@ file_node <- R6::R6Class(
         store    = TRUE
       ) {
         super$initialize(..., store = FALSE)
-        
+
         self$r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
-        
+
         if (is.null(self$r_expr) && length(self$depends))
           warning(self$id, " is not a leaf node but has no R expression to evaluate")
-        
+
         if (length(path)) {
           self$path <- as.character(path[1])
         } else {
           stop(self$id, ": missing file path.")
         }
-        
+
         if (length(hash)) {
           self$hash <- hash
         }
-        
+
         if (self$persistence$enabled && store) self$store_state()
-        
+
         return(invisible(TRUE))
       },
-    
+
     update_definition =
       function(
         ...,
@@ -1336,50 +1343,50 @@ file_node <- R6::R6Class(
         verbose = TRUE
       ) {
         super$update_definition(..., verbose = verbose, store = FALSE)
-        
+
         if (!identical(self$path, path)) {
           if (verbose) notify_update(self$id, "file path")
           self$path <- path
           self$trigger_defchange <- TRUE
         }
-        
+
         r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
         if (!identical(as.character(self$r_expr), as.character(r_expr))) {
           if (verbose) notify_update(self$id, "R expression")
           self$trigger_defchange <- TRUE
         }
         self$r_expr <- r_expr # overwrite in case the srouce code has changed
-        
+
         if (length(hash)) {
           self$hash <- hash
         }
-        
+
         if (self$persistence$enabled && store) self$store_state()
-        
+
         return(invisible(TRUE))
       },
-    
+
     store_state = function() {
       super$store_state(
         public_fields  = c("r_expr", "path", "hash")
       )
     },
-    
+
     check_hash = function() {
       if (!self$exists()) return(NA) # TODO: or NULL?
-      
+
       hash <- digest::digest(object = self$path, file = TRUE, algo = "md5")
       changed <- !isTRUE(self$hash$hash == hash)
-      
+
       if (changed)
         self$hash <- list(
           hash = hash,
           time = Sys.time()
         )
-      
+
       return(changed)
     },
-    
+
     eval = function(verbose = TRUE, verbose_prefix = "") {
       if (verbose) {
         cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
@@ -1390,38 +1397,38 @@ file_node <- R6::R6Class(
           prefix = paste0(verbose_prefix, "  ")
         )
       }
-      
+
       # for referencing other objects in rflow
       .RFLOW <- parent.env(self)
-      
+
       eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
-      
+
       # checking hash before signalling change to parent
       changed <- self$check_hash()
-      
+
       private$.last_evaluated <- Sys.time()
-      
+
       # all triggers should be resetted now
       self$reset_triggers()
-      
+
       # make changes persistent
       if (self$persistence$enabled) self$store_state()
-      
+
       return(changed)
     },
-    
+
     exists = function() {
       file.exists(self$path)
     },
-    
+
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
-      
+
       if (!isFALSE(super$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) return(TRUE)
       if (!isTRUE(self$exists())) {if (verbose) notify_trigger(self$id, "missing target/value", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
-      
+
       return(FALSE)
     },
-    
+
     remove = function(verbose = TRUE, verbose_prefix = "") {
       if (self$exists()) {
         if (verbose) notify_removal(self$id, verbose_prefix = verbose_prefix)
@@ -1431,12 +1438,12 @@ file_node <- R6::R6Class(
         return(invisible(FALSE))
       }
     },
-    
+
     title = function() {
       title <- super$title()
-      
+
       title <- paste0(title, "<font size=\"-2\">", "path: ", self$path, "</font><br>")
-      
+
       if (length(self$r_expr)) {
         title <- paste0(
           title,
@@ -1450,13 +1457,13 @@ file_node <- R6::R6Class(
           "</font></p>"
         )
       }
-      
+
       return(title)
     }
   ),
-  
+
   active = list(
-    
+
     last_evaluated = function(value) {
       if (missing(value)) {
         return(private$.last_evaluated)
@@ -1464,10 +1471,10 @@ file_node <- R6::R6Class(
         private$.last_evaluated <- value
       }
     },
-    
+
     last_changed = function(value) {
       if (missing(value)) {
-        # file might have been modified but the content stayed the same
+        # file might have been modified but the content remained the same
         self$check_hash()
         time_changed  <- self$hash$time
         time_modified <- file.mtime(self$path)
@@ -1482,15 +1489,15 @@ file_node <- R6::R6Class(
 
 
 # csv_node ----------------------------------------------------------------
-
+# basically a file node with get() function implemented
 csv_node <- R6::R6Class(
-  
+
   classname = "csv_node",
   inherit   = file_node,
-  
+
   public = list(
-    read_args = NULL,
-    
+    read_args = NULL, # are passed to read functions
+
     initialize =
       function(
         ...,
@@ -1498,14 +1505,14 @@ csv_node <- R6::R6Class(
         read_args = NULL
       ) {
         super$initialize(..., store = FALSE)
-        
+
         self$read_args <- read_args
-        
+
         if (self$persistence$enabled && store) self$store_state()
-        
+
         return(invisible(TRUE))
       },
-    
+
     get = function() {
       do.call(
         if (requireNamespace("data.table")) data.table::fread else read.csv,
