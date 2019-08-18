@@ -366,7 +366,7 @@ node <- R6::R6Class(
     },
 
     # main evaluation function
-    eval = function() {
+    eval = function(verbose = TRUE, verbose_prefix = "") {
 
       # all triggers should be resetted now
       self$reset_triggers()
