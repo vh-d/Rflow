@@ -362,7 +362,12 @@ node <- R6::R6Class(
     # to reset triggers (e.g. after successfull evaluation)
     reset_triggers = function() {
       self$trigger_defchange <- FALSE
-      self$trigger_manual <- FALSE
+      self$trigger_manual    <- FALSE
+      
+      # make changes persistent
+      if (self$persistence$enabled) self$store_state()
+      
+      return(invisible(TRUE))      
     },
 
     # main evaluation function
@@ -431,7 +436,7 @@ node <- R6::R6Class(
 
       # all triggers should be resetted now
       self$reset_triggers()
-
+      
       # return whether dependants should be triggered or not
       return(invisible(trigger_downstream))
     }
