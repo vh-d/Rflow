@@ -282,7 +282,6 @@ node <- R6::R6Class(
         if (!identical(as.character(self$trigger_condition), as.character(trigger_condition))) {
           if (verbose) notify_update(self$id, "trigger condition")
           self$trigger_condition <- trigger_condition
-          self$trigger_defchange <- TRUE
         }
 
         # currently all the remaingn arguments are ifnored, TODO ?
@@ -870,7 +869,6 @@ db_node <- R6::R6Class(
 
         if (length(auto_remove) && !identical(self$auto_remove, auto_remove)) {
           self$auto_remove <- auto_remove
-          self$trigger_defchange <- TRUE
         }
 
         # TODO: we need to handle situations when node is modified from R job to SQL job
