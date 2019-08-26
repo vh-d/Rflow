@@ -362,11 +362,11 @@ node <- R6::R6Class(
     reset_triggers = function() {
       self$trigger_defchange <- FALSE
       self$trigger_manual    <- FALSE
-      
+
       # make changes persistent
       if (self$persistence$enabled) self$store_state()
-      
-      return(invisible(TRUE))      
+
+      return(invisible(TRUE))
     },
 
     # main evaluation function
@@ -435,7 +435,7 @@ node <- R6::R6Class(
 
       # all triggers should be resetted now
       self$reset_triggers()
-      
+
       # return whether dependants should be triggered or not
       return(invisible(trigger_downstream))
     }
@@ -536,7 +536,7 @@ r_node <- R6::R6Class(
       cat("  expression: \n")
       cat_with_prefix(
         crayon::cyan(
-          substr(deparse_nicely(self$r_expr), 1, 200)
+          deparse_nicely(self$r_expr)
         ),
         prefix = "    "
       )
@@ -651,7 +651,7 @@ r_node <- R6::R6Class(
         cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
         cat_with_prefix(
           crayon::cyan(
-            substr(deparse_nicely(self$r_expr), 1, 200)
+            deparse_nicely(self$r_expr)
           ),
           prefix = verbose_prefix
         )
