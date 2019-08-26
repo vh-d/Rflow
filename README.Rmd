@@ -97,9 +97,9 @@ make(.RFLOW)
 
 **Features**
 
-* formalize job as S3 classes
-* add possibility to keep R/SQL code in standalone R scripts
-* add more types of jobs (bash, Python, Julia, ...)
+* job classes
+  * add possibility to keep R/SQL code in standalone R scripts
+  * add more types of jobs (bash, Python, Julia, ...)
 * more nuanced `verbose` option
 * proper logging for rflow object
 * handling of obsolete nodes
@@ -121,7 +121,7 @@ make(.RFLOW)
 
 **Implementation**
 
-* make all public properties active (trigger persistence storage)
+* make all public properties active (mutation would trigger persistence storage)
 * migrate from R6 to S3 classes?
 * experiment with proper ORM instead of serialization of selected properties 
 * add an environment class
