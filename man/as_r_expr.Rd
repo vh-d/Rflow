@@ -2,15 +2,29 @@
 % Please edit documentation in R/job.R
 \name{as_r_expr}
 \alias{as_r_expr}
+\alias{as_r_expr.default}
+\alias{as_r_expr.expression}
+\alias{as_r_expr.character}
 \title{Returns R expression from either R expression or parsed R code}
 \usage{
-as_r_expr(r_code = NULL, r_expr = NULL)
+as_r_expr(x)
+
+\method{as_r_expr}{default}(x)
+
+\method{as_r_expr}{expression}(x)
+
+\method{as_r_expr}{character}(x)
 }
 \arguments{
-\item{r_code}{character vector of R code; ignored when R expression is not NULL}
-
-\item{r_expr}{optional R expression}
+\item{x}{either character or R expression vector of R code}
+}
+\value{
+an R expression object with src attribute containing original code that can be used for printing
 }
 \description{
 Returns R expression from either R expression or parsed R code
+}
+\examples{
+as_r_expr("{\\n1+1\\n}")
+as_r_expr({1+1})
 }

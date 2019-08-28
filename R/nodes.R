@@ -183,7 +183,7 @@ node <- R6::R6Class(
           self$trigger_defchange <- as.logical(trigger_defchange)
 
         if (!is.null(trigger_condition))
-          self$trigger_condition <- as_r_expr(r_code = trigger_condition)
+          self$trigger_condition <- as_r_expr(trigger_condition)
 
         private$.last_evaluated <- if (length(.last_evaluated)) .last_evaluated else as.POSIXct(NA)
         private$.last_changed   <- if (length(.last_changed))   .last_changed else as.POSIXct(NA)
@@ -278,7 +278,7 @@ node <- R6::R6Class(
         }
 
         # changes in user defined trigger
-        trigger_condition <- suppressWarnings(as_r_expr(r_code = trigger_condition))
+        trigger_condition <- suppressWarnings(as_r_expr(trigger_condition))
         if (!identical(as.character(self$trigger_condition), as.character(trigger_condition))) {
           if (verbose) notify_update(self$id, "trigger condition")
           self$trigger_condition <- trigger_condition
@@ -574,7 +574,7 @@ r_node <- R6::R6Class(
       ) {
         super$initialize(..., store = FALSE)
 
-        self$r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
+        self$r_expr <- as_r_expr(firstnotnull(r_expr, r_code))
 
         if (!length(self$r_expr) && length(self$depends))
           warning(self$id, " is not a leaf node but has no R expression to evaluate")
@@ -634,7 +634,7 @@ r_node <- R6::R6Class(
       ) {
         super$update_definition(..., verbose = verbose, store = FALSE)
 
-        r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
+        r_expr <- as_r_expr(firsnotnull(r_expr, r_code))
         if (!identical(as.character(self$r_expr), as.character(r_expr))) {
           if (verbose) notify_update(self$id, "R expression")
           self$trigger_defchange <- TRUE
@@ -824,7 +824,7 @@ db_node <- R6::R6Class(
         # TODO: we need to handle situations when node is modified from R job to SQL job
         if (length(r_expr) || length(r_code)) {
           self$mode <- "R"
-          self$r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
+          self$r_expr <- as_r_expr(firstnotnull(r_expr, r_code))
         } else if (length(sql)) {
           self$mode <- "SQL"
           self$sql <- sql_structure(sql)
@@ -874,7 +874,7 @@ db_node <- R6::R6Class(
         # TODO: we need to handle situations when node is modified from R job to SQL job
         if (length(r_expr) || length(r_code)) {
           mode <- "R"
-          r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
+          r_expr <- as_r_expr(firstnotnull(r_expr, r_code))
         } else if (length(sql)) {
           mode <- "SQL"
           sql <- sql_structure(sql)
@@ -1315,7 +1315,7 @@ file_node <- R6::R6Class(
       ) {
         super$initialize(..., store = FALSE)
 
-        self$r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
+        self$r_expr <- as_r_expr(firstnotnull(r_expr, r_code))
 
         if (is.null(self$r_expr) && length(self$depends))
           warning(self$id, " is not a leaf node but has no R expression to evaluate")
@@ -1353,7 +1353,7 @@ file_node <- R6::R6Class(
           self$trigger_defchange <- TRUE
         }
 
-        r_expr <- as_r_expr(r_code = r_code, r_expr = r_expr)
+        r_expr <- as_r_expr(firstnotnull(r_expr, r_code))
         if (!identical(as.character(self$r_expr), as.character(r_expr))) {
           if (verbose) notify_update(self$id, "R expression")
           self$trigger_defchange <- TRUE
