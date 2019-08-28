@@ -38,6 +38,7 @@ node <- R6::R6Class(
   private = list(
     .last_evaluated = NULL, # datetime when target value was last evaluated/made
     .last_changed   = NULL, # datetime when target value changed the last time (it might be evaluated without any change)
+    .trigger_defchange  = FALSE,
 
     .vis_params_default = list(
       shape = "diamond"
@@ -59,7 +60,6 @@ node <- R6::R6Class(
     definition_hash = NULL,
 
     persistence        = NULL,
-    trigger_defchange  = FALSE,
     trigger_manual     = FALSE,
     trigger_condition  = NULL,
 
@@ -150,12 +150,13 @@ node <- R6::R6Class(
         desc    = NULL,
         tags    = NULL,
         depends = NULL,
-        trigger_defchange = NULL,
+        trigger_defchange  = NULL,
         trigger_condition = NULL,
         definition_hash = NULL,
         persistence = list(enabled = FALSE),
         .last_evaluated = NULL,
         .last_changed   = NULL,
+        .trigger_defchange = NULL,
 
         vis_params = NULL,
 
@@ -179,8 +180,10 @@ node <- R6::R6Class(
         depends_char <- if (is.character(depends)) depends else names(depends)
         self$depends <- depends_char
 
-        if (length(trigger_defchange))
-          self$trigger_defchange <- as.logical(trigger_defchange)
+        if (length(.trigger_defchange))
+          private$.trigger_defchange <- as.logical(.trigger_defchange) else
+            if (length(trigger_defchange)) # TODO: drop this when all projects are migrated
+              private$.trigger_defchange <- as.logical(trigger_defchange)
 
         if (!is.null(trigger_condition))
           self$trigger_condition <- as_r_expr(trigger_condition)
@@ -202,22 +205,29 @@ node <- R6::R6Class(
     # currently only file-based store backend is supported
     store_state = function(
       public_fields  = NULL,
-      private_fields = NULL) {
+      private_fields = NULL
+    ) {
 
       public_fields  <-
         unique(
-          c("id", "name", "env",
+          c(
+            "id", "name", "env",
             "desc", "tags",
             "depends",
             "definition_hash",
-            "trigger_condition", "trigger_defchange",
+            "trigger_condition",
             "vis_params",
-            public_fields))
+            public_fields
+          )
+        )
 
       private_fields <-
         unique(
-          c(".last_evaluated", ".last_changed",
-            private_fields))
+          c(
+            ".last_evaluated", ".last_changed",
+            ".trigger_defchange",
+            private_fields)
+          )
 
       saveRDS(
         object = list(
@@ -238,7 +248,6 @@ node <- R6::R6Class(
         tags    = NULL,
         depends = NULL,
         definition_hash = NULL,
-        trigger_defchange = NULL,
         trigger_condition = NULL,
 
         vis_params = NULL,
@@ -248,9 +257,6 @@ node <- R6::R6Class(
         verbose = TRUE
       ) {
         self$definition_hash <- definition_hash
-
-        if (!is.null(trigger_defchange))
-          self$trigger_defchange <- trigger_defchange
 
         # graphics params need to be processed before checking
         vis_params <- self$vis_params_process(vis_params)
@@ -265,7 +271,7 @@ node <- R6::R6Class(
           if (verbose) notify_update(self$id, "dependencies")
 
           self$depends <- depends_char
-          self$trigger_defchange <- TRUE
+          private$.trigger_defchange <- TRUE
         }
 
         # changes in description
@@ -360,7 +366,7 @@ node <- R6::R6Class(
 
     # to reset triggers (e.g. after successfull evaluation)
     reset_triggers = function() {
-      self$trigger_defchange <- FALSE
+      private$.trigger_defchange <- FALSE
       self$trigger_manual    <- FALSE
 
       # make changes persistent
@@ -459,6 +465,15 @@ node <- R6::R6Class(
         return(private$.last_evaluated)
       } else {
         stop("Can't set `$last_changed")
+      }
+    },
+
+    trigger_defchange = function(value) {
+      if (missing(value)) {
+        return(private$.trigger_defchange)
+      } else {
+        warning("Setting `$trigger_defchange = TRUE` in a non-standard way")
+        private$.trigger_defchange <- value
       }
     }
   )
@@ -637,7 +652,7 @@ r_node <- R6::R6Class(
         r_expr <- as_r_expr(firsnotnull(r_expr, r_code))
         if (!identical(as.character(self$r_expr), as.character(r_expr))) {
           if (verbose) notify_update(self$id, "R expression")
-          self$trigger_defchange <- TRUE
+          private$.trigger_defchange <- TRUE
         }
         self$r_expr <- r_expr # overwrite in case the srouce code has changed
 
@@ -887,19 +902,19 @@ db_node <- R6::R6Class(
         if (!identical(self$mode, mode)) {
           if (verbose) notify_update(self$id, "R/SQL mode")
           self$mode <- mode
-          self$trigger_defchange <- TRUE
+          private$.trigger_defchange <- TRUE
         }
 
         if (!identical(as.character(self$r_expr), as.character(r_expr))) {
           if (verbose) notify_update(self$id, "R expression")
-          self$trigger_defchange <- TRUE
+          private$.trigger_defchange <- TRUE
         }
         self$r_expr <- r_expr # overwrite in case the srouce code has changed
 
         if (!identical(self$sql,sql)) {
           if (verbose) notify_update(self$id, "SQL expressions")
           self$sql <- sql
-          self$trigger_defchange <- TRUE
+          private$.trigger_defchange <- TRUE
         }
 
         if (self$persistence$enabled && store) self$store_state()
@@ -1194,13 +1209,13 @@ excel_sheet <- R6::R6Class(
         if (!identical(self$path, path)) {
           if (verbose) notify_update(self$id, "file path")
           self$path <- path
-          self$trigger_defchange <- TRUE
+          private$.trigger_defchange <- TRUE
         }
 
         if (!identical(self$sheet, sheet)) {
           if (verbose) notify_update(self$id, "sheet name/index")
           self$sheet <- sheet
-          self$trigger_defchange <- TRUE
+          private$.trigger_defchange <- TRUE
         }
 
         if (length(hash)) {
@@ -1350,13 +1365,13 @@ file_node <- R6::R6Class(
         if (!identical(self$path, path)) {
           if (verbose) notify_update(self$id, "file path")
           self$path <- path
-          self$trigger_defchange <- TRUE
+          private$.trigger_defchange <- TRUE
         }
 
         r_expr <- as_r_expr(firstnotnull(r_expr, r_code))
         if (!identical(as.character(self$r_expr), as.character(r_expr))) {
           if (verbose) notify_update(self$id, "R expression")
-          self$trigger_defchange <- TRUE
+          private$.trigger_defchange <- TRUE
         }
         self$r_expr <- r_expr # overwrite in case the srouce code has changed
 
