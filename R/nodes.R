@@ -1200,7 +1200,6 @@ excel_sheet <- R6::R6Class(
         ...,
         path    = NULL,
         sheet   = 1L, # not in file_node
-        hash    = NULL,
         store   = TRUE,
         verbose = TRUE
       ) {
@@ -1216,10 +1215,6 @@ excel_sheet <- R6::R6Class(
           if (verbose) notify_update(self$id, "sheet name/index")
           self$sheet <- sheet
           private$.trigger_defchange <- TRUE
-        }
-
-        if (length(hash)) {
-          self$hash <- hash
         }
 
         if (self$persistence$enabled && store) self$store_state()
@@ -1359,7 +1354,6 @@ file_node <- R6::R6Class(
         path    = NULL,
         r_code  = NULL,
         r_expr  = NULL,
-        hash    = NULL,
         store   = TRUE,
         verbose = TRUE
       ) {
@@ -1377,10 +1371,6 @@ file_node <- R6::R6Class(
           private$.trigger_defchange <- TRUE
         }
         self$r_expr <- r_expr # overwrite in case the srouce code has changed
-
-        if (length(hash)) {
-          self$hash <- hash
-        }
 
         if (self$persistence$enabled && store) self$store_state()
 
