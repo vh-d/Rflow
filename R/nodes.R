@@ -1249,7 +1249,7 @@ excel_sheet <- R6::R6Class(
           time = Sys.time()
         )
         
-        if (self$persistence$enabled && store) self$store_state()
+        if (self$persistence$enabled) self$store_state()
       }
       
       return(changed)
@@ -1395,7 +1395,7 @@ file_node <- R6::R6Class(
           time = Sys.time()
         )
         
-        if (self$persistence$enabled && store) self$store_state()
+        if (self$persistence$enabled) self$store_state()
       }
       
       return(changed)
