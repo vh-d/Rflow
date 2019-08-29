@@ -166,7 +166,7 @@ expression_r <- function(x){
   exprs[1] <- expression(expression)
   exprs <- eval(exprs)
 
-  return(as_r_expr(r_expr = exprs))
+  return(as_r_expr(exprs))
 }
 
 #' Print with prefix
