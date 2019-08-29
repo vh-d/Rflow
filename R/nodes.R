@@ -1248,12 +1248,15 @@ excel_sheet <- R6::R6Class(
       hash <- digest::digest(object = self$get(), algo = "md5")
       changed <- !isTRUE(self$hash$hash == hash)
 
-      if (changed)
+      if (changed) {
         self$hash <- list(
           hash = hash,
           time = Sys.time()
         )
-
+        
+        if (self$persistence$enabled && store) self$store_state()
+      }
+      
       return(changed)
     },
 
@@ -1396,12 +1399,15 @@ file_node <- R6::R6Class(
       hash <- digest::digest(object = self$path, file = TRUE, algo = "md5")
       changed <- !isTRUE(self$hash$hash == hash)
 
-      if (changed)
+      if (changed) {
         self$hash <- list(
           hash = hash,
           time = Sys.time()
         )
-
+        
+        if (self$persistence$enabled && store) self$store_state()
+      }
+      
       return(changed)
     },
 
