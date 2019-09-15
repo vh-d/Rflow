@@ -11,16 +11,17 @@ job.list <- function(x) {
 }
 
 job.expression <- function(x, ...) {
-  r_job(r_expr = x)
+  job_r(r_expr = x)
 }
 
-r_job <- function(
+#' @export
+job_r <- function(
   r_expr = NULL,
   r_code = NULL,
   r_file = NULL
 ) {
 
-  job <- structure(list(r_expr = NULL, mode = NULL), class = c("r_job", "job"))
+  job <- structure(list(r_expr = NULL, mode = NULL), class = c("job_r", "job"))
 
   if (length(r_expr)) {
     job$mode <- "expression"
@@ -52,12 +53,68 @@ r_job <- function(
 
 }
 
-sql_job <- function(sql = NULL, sql_code = NULL, mode = "execute") {
+
+#' @export
+job_file <- function(x, ...) {
+
+  struct <- list(
+    fp   = x,
+    hash = hash_file(x)
+  )
+
+  struct <- union.list(list(...), struct)
+
+  structure(struct, class = c("job_file", "job"))
+}
+
+read.job_file <- function(x, ...) {
+  paste0(readLines(x$path, ...))
+}
+
+#' @export
+job_r_file <- function(x, ...) {
+  struct <- job_file(x, ...)
+  class(struct) <- c("job_r_file", "job_r", class(struct))
+}
+
+
+job_sql_code <- function(x, mode = "execute", ...) {
 
 }
 
-# job(expression({1+b}))
+#' @export
+job_sql_file <- function(x, mode = "execute", ...) {
+  struct <- job_file(x, mode = mode, ...)
+  class(struct) <- c("job_sql_file", "job_sql", class(struct))
+}
 
+
+#' @export
+evaluate_job <- function(x, ...) {
+  UseMethod("evaluate_job", x)
+}
+
+#' @export
+evaluate_job.job_r_expr <- function(x, ...) {
+  eval(x$r_expr, ...)
+}
+
+#' @export
+evaluate_job.job_r_file <- function(x, ...) {
+  source(x$path, ...)
+}
+
+
+hash_file <- function(x, algo = "md5", ...) {
+  structure(
+    list(
+      value = digest::digest(x, algo = algo, file = TRUE, ...),
+      path = x,
+      time = Sys.time()
+    ),
+    class = c("hash_file", "hash")
+  )
+}
 
 expr2fun <- function(expr, depends, envir = NULL) {
 
