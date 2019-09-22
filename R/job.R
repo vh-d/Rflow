@@ -1,58 +1,26 @@
+
+# Generic job class -------------------------------------------------------
+
+
+#' @export
 job <- function(x, ...) {
   UseMethod("job", x)
 }
 
-job.character <- function(x, ...) {
-  do.call(paste0(x, "_job"), ...)
+#' @export
+evaluate <- function(x, ...) {
+  UseMethod("evaluate", x)
 }
 
-job.list <- function(x) {
-  do.call(job, x$type, x)
-}
-
-job.expression <- function(x, ...) {
-  job_r(r_expr = x)
-}
 
 #' @export
-job_r <- function(
-  r_expr = NULL,
-  r_code = NULL,
-  r_file = NULL
-) {
-
-  job <- structure(list(r_expr = NULL, mode = NULL), class = c("job_r", "job"))
-
-  if (length(r_expr)) {
-    job$mode <- "expression"
-    job$r_expr <- r_expr
-
-    return(job)
-  }
-
-  if (length(r_code)) {
-    job$mode <- "code"
-    job$code <- r_code
-    job$r_expr <- parse(text = r_code)
-
-    return(job)
-  }
-
-  if (length(r_file)) {
-    job$mode <- "file"
-    job$file <- r_file
-    job$code <- paste0(eadLines(r_file))
-    job$r_expr <- parse(file = r_file)
-
-    return(job)
-  }
-
-  # else:
-  # warning("?")
-  return(NULL)
-
+evaluate.job <- function(x, ...) {
+  warning("This an empty method!")
 }
 
+print.job <- function(x, ...) {
+  warning("This an empty method!")
+}
 
 #' @export
 job_file <- function(x, ...) {
@@ -67,17 +35,91 @@ job_file <- function(x, ...) {
   structure(struct, class = c("job_file", "job"))
 }
 
+
+#' @export
 read.job_file <- function(x, ...) {
   paste0(readLines(x$path, ...))
 }
 
+
+# job.character <- function(x, ...) {
+#   do.call(paste0(x, "_job"), ...)
+# }
+# 
+# job.list <- function(x) {
+#   do.call(job, x$type, x)
+# }
+
+
+# R jobs ------------------------------------------------------------------
+
+
 #' @export
-job_r_file <- function(x, ...) {
-  struct <- job_file(x, ...)
-  class(struct) <- c("job_r_file", "job_r", class(struct))
+job.expression <- function(x, ...) {
+  job_r(x, ...)
+}
+
+#' @export
+job_r <- function(x, ...) {
+  UseMethod("job_r", x)
+} 
+
+#' @export
+job_r.default <- function(x, ...) {
+  job_r(as.expression(x), ...)
+} 
+
+#' @export
+job_r.expression <- function(x, ...) {
+  job <-
+    structure(
+      list(
+        r_expr = x,
+        code   = deparse_nicely(x)
+      ), 
+      class = c("job_r_expr", "job_r", "job"))
+  
+  job
+}
+
+#' @export
+job_r.character <- function(x, file = FALSE, ...) {
+  
+  if (isTRUE(file)) return(job_r_file(x, ...))
+  # else:
+  
+  job <-
+    structure(
+      list(
+        r_expr = parse(text = x), 
+        code   = x
+      ), 
+      class = c("job_r_expr", "job_r", "job"))
+  
+  job
+}
+
+#' @export
+evaluate.job_r_expr <- function(x, ...) {
+  eval(x$r_expr, ...)
 }
 
 
+#' @export
+job_r_file <- function(x, ...) {
+  struct <- job_file(x, ...)
+  class(struct) <- c("job_r_file", "job_r", "job_file", class(struct))
+}
+
+#' @export
+evaluate.job_r_file <- function(x, ...) {
+  source(x$path, ...)
+}
+
+
+# SQL jobs ----------------------------------------------------------------
+
+#' @export
 job_sql_code <- function(x, mode = "execute", ...) {
 
 }
@@ -85,24 +127,54 @@ job_sql_code <- function(x, mode = "execute", ...) {
 #' @export
 job_sql_file <- function(x, mode = "execute", ...) {
   struct <- job_file(x, mode = mode, ...)
-  class(struct) <- c("job_sql_file", "job_sql", class(struct))
+  class(struct) <- c("job_sql_file", "job_sql", "job_file", class(struct))
+}
+
+
+
+# Python jobs -------------------------------------------------------------
+
+#' @export
+job_python <- function(x, ...) {
+  UseMethod("job_python", x)
 }
 
 
 #' @export
-evaluate_job <- function(x, ...) {
-  UseMethod("evaluate_job", x)
+job_python.character <- function(x, file = FALSE, ...) {
+  warning("Python is not supported yet")
 }
 
-#' @export
-evaluate_job.job_r_expr <- function(x, ...) {
-  eval(x$r_expr, ...)
-}
 
 #' @export
-evaluate_job.job_r_file <- function(x, ...) {
-  source(x$path, ...)
+job_python_file <- function(x, ...) {
+  struct <- job_file(x, ...)
+  class(struct) <- c("job_python_file", "job_python", class(struct))
 }
+
+
+#' @export
+evaluate.job_python <- function(x, ...) {
+  result <- NULL
+  reticulate::py_run_string(x$src)
+  try(result <- py$result)
+  
+  return(result)
+}
+
+
+#' @export
+evaluate.job_python_file <- function(x, ...) {
+  # reticulate::source_python('add.py')
+  result <- NULL
+  reticulate::py_run_file(x$fp)
+  try(result <- py$result)
+  
+  return(result)
+}
+
+
+# Misc tools --------------------------------------------------------------------
 
 
 hash_file <- function(x, algo = "md5", ...) {
