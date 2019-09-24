@@ -2,13 +2,15 @@
 % Please edit documentation in R/rflow_management.R
 \name{clean_cache}
 \alias{clean_cache}
-\title{Clean cache folder}
+\title{Delete/clean cache file/folder}
 \usage{
 clean_cache(x, ...)
 }
 \arguments{
+\item{x}{a node or rflow object}
+
 \item{...}{}
 }
 \description{
-Clean cache folder
+Delete/clean cache file/folder
 }

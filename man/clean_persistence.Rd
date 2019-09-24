@@ -2,13 +2,15 @@
 % Please edit documentation in R/rflow_management.R
 \name{clean_persistence}
 \alias{clean_persistence}
-\title{Clean stored state folder}
+\title{Delete/clean stored state file/folder}
 \usage{
 clean_persistence(x, ...)
 }
 \arguments{
+\item{x}{a node or rflow object}
+
 \item{...}{}
 }
 \description{
-Clean stored state folder
+Delete/clean stored state file/folder
 }
