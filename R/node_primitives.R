@@ -55,12 +55,11 @@ set_id.node <- function(x, id_new, ...) {
 
 #' Make a vector of all nodes' ids
 #'
-#' @param x
+#' @param x an rflow object
 #'
 #' @return
+#' Character vector of all nodes' ids
 #' @export
-#'
-#' @examples
 get_nodes_ids <- function(x) {
   UseMethod("get_nodes_ids", x)
 }
@@ -73,12 +72,11 @@ get_nodes_ids.rflow <- function(x) {
 
 #' Returns a list with all node objects
 #'
-#' @param x
+#' @param x an rflow object
 #'
 #' @return
+#' List of all node object from given rflow
 #' @export
-#'
-#' @examples
 get_nodes <- function(x) {
   UseMethod("get_nodes", x)
 }

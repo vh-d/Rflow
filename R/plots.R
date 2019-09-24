@@ -8,36 +8,36 @@ disc_scale <- function(
 
 
 visData <- function(rflow, tags = NULL, includeIsolated = TRUE) {
-  
+
   if (!requireNamespace("data.table", quietly = TRUE)) stop("data.table package required to plot graphs")
-  
+
   dtEDGES <- edges.rflow(rflow)
   dtNODES <- nodes.rflow(rflow)
-  
+
   if (!nrow(dtNODES)) {
     warning("Nothing to plot...")
     return(invisible(NULL))
   }
   # TODO: objects will have their own methods for printing nice hover titles
-  
+
   # format tags
   if (length(tags)) {
     query_tags <- tags
     rm(tags)
     dtNODES <- dtNODES[stringr::str_detect(tags, stringr::fixed(paste0("|", query_tags, "|")))]
   }
-  
+
   # drop isolated/lonely nodes if needed
   if (isFALSE(includeIsolated)) {
     dtNODES <- dtNODES[dtEDGES[, .(id = unique(c(from, to)))], on = "id"]
   }
-  
+
   # graphics -------------------------
   # colors are dynamic: based on number of environments
   unique_levels <- dtNODES[, unique(env)]
   unique_levels_colors <- disc_scale()(length(unique_levels))
   names(unique_levels_colors) <- unique_levels
-  
+
   # some nodes can have graphical params already set
   if (!("color.background"           %in% colnames(dtNODES))) dtNODES[, color.background := NA_character_]
   if (!("color.border"               %in% colnames(dtNODES))) dtNODES[, color.border := NA_character_]
@@ -50,11 +50,11 @@ visData <- function(rflow, tags = NULL, includeIsolated = TRUE) {
   dtNODES[is.na(color.hover),                color.hover                := color.background]
   dtNODES[is.na(color.highlight.border),     color.highlight.border     := "black"]
   dtNODES[is.na(color.highlight.background), color.highlight.background := color.background]
-  
-  
+
+
   setkeyv(dtNODES, "id")
   setkeyv(dtEDGES, c("from", "to"))
-  
+
   list(
     dtNODES = dtNODES,
     dtEDGES = dtEDGES
@@ -72,35 +72,35 @@ visData <- function(rflow, tags = NULL, includeIsolated = TRUE) {
 #'
 #' @export
 plot.rflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "LR", ...) {
-  
+
   if (!requireNamespace("visNetwork", quietly = TRUE)) stop("visNetwork package required to plot graphs")
-  
+
   l <- visData(rflow = rflow, tags = tags, includeIsolated = includeIsolated)
-  
+
   visNetwork::visNetwork(
     nodes = l$dtNODES,
     edges = l$dtEDGES,
     ...
   ) ->.
-  
+
   # visLayout()
   visNetwork::visHierarchicalLayout(
     .,
     sortMethod = "directed",
     direction = direction
   ) ->.
-  
+
   visNetwork::visNodes(
     .,
     borderWidthSelected = 4
   ) ->.
-  
+
   visNetwork::visEdges(
     .,
     arrows = "to",
     smooth = FALSE
   ) ->.
-  
+
   visNetwork::visOptions(
     .,
     nodesIdSelection =
@@ -108,12 +108,12 @@ plot.rflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "
         enabled = TRUE,
         useLabels = TRUE
       ),
-    
+
     selectedBy =
       list(
         variable = "env"
       ),
-    
+
     highlightNearest =
       list(
         enabled = TRUE,
@@ -121,16 +121,16 @@ plot.rflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "
         degree = list(from = 50, to = 50),
         hover   = TRUE
       )
-    
+
   ) ->.
-  
+
   visNetwork::visInteraction(
     .,
     tooltipDelay      = 1,
     navigationButtons = TRUE,
     dragNodes         = TRUE
   ) ->.
-  
+
   visNetwork::visPhysics(
     .,
     enabled = FALSE
@@ -140,33 +140,32 @@ plot.rflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "
 
 #' visualize workflow DAG
 #'
-#' @param rflow
-#' @param tags
-#' @param includeIsolated
-#' @param direction
+#' @param rflow an rflow object
+#' @param tags character; vector of tags or regular expression for filtering nodes by tags
+#' @param includeIsolated logical; inlude disconnected nodes?
+#' @param direction orientation of flow ("UD" by default)
 #' @param ...
 #'
 #' @return
+#' A visNetwork plot.
 #' @export
-#'
-#' @examples
 visRflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD", orderBy = "id", ...) {
-  
+
   if (!requireNamespace("visNetwork", quietly = TRUE)) stop("visNetwork package required to plot graphs")
-  
+
   l <- visData(rflow = rflow, tags = tags, includeIsolated = includeIsolated)
-  
+
   nodes <- l$dtNODES
   edges <- l$dtEDGES
-  
+
   if (length(orderBy)) setorderv(nodes, orderBy)
-  
+
   visNetwork::visNetwork(
     nodes = nodes,
     edges = edges,
     ...
   ) ->.
-  
+
   visNetwork::visIgraphLayout(
     .,
     layout  = "layout_with_sugiyama", # layout with layers
@@ -174,18 +173,18 @@ visRflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD
     smooth  = TRUE,
     type    = "full"
   ) ->.
-  
+
   visNetwork::visNodes(
     .,
     borderWidthSelected = 4
   ) ->.
-  
+
   visNetwork::visEdges(
     .,
     arrows = "to",
     smooth = FALSE
   ) ->.
-  
+
   visNetwork::visOptions(
     .,
     nodesIdSelection =
@@ -193,12 +192,12 @@ visRflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD
         enabled = TRUE,
         useLabels = TRUE
       ),
-    
+
     selectedBy =
       list(
         variable = "env"
       ),
-    
+
     highlightNearest =
       list(
         enabled = TRUE,
@@ -206,18 +205,18 @@ visRflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD
         degree = list(from = 50, to = 50),
         hover   = TRUE
       ),
-    
+
     autoResize = TRUE,
-    
+
   ) ->.
-  
+
   visNetwork::visInteraction(
     .,
     tooltipDelay      = 1,
     navigationButtons = TRUE,
     dragNodes         = TRUE
   ) ->.
-  
+
   visNetwork::visPhysics(
     .,
     enabled = FALSE
@@ -226,51 +225,50 @@ visRflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD
 
 
 #' visualize workflow DAG
-#' @param rflow
-#' @param tags
-#' @param includeIsolated
-#' @param direction
+#' @param rflow an rflow object
+#' @param tags character; vector of tags or regular expression for filtering nodes by tags
+#' @param includeIsolated logical; inlude disconnected nodes?
+#' @param direction orientation of flow ("UD" by default)
 #' @param ...
 #'
 #' @return
+#' A visNetwork plot.
 #' @export
-#'
-#' @examples
 visRflow2 <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD", orderBy = "id", ...) {
-  
+
   if (!requireNamespace("visNetwork", quietly = TRUE)) stop("visNetwork package required to plot graphs")
-  
+
   l <- visData(rflow = rflow, tags = tags, includeIsolated = includeIsolated)
-  
+
   nodes  <- l$dtNODES
   edges  <- l$dtEDGES
-  
+
   if (length(orderBy)) setorderv(nodes, orderBy)
-  
+
   visNetwork::visNetwork(
     nodes = nodes,
     edges = edges,
     ...
-    
+
   ) ->.
-  
+
   visNetwork::visHierarchicalLayout(
     .,
     sortMethod = "directed",
     direction  = direction,
   ) ->.
-  
+
   visNetwork::visNodes(
     .,
     borderWidthSelected = 4
   ) ->.
-  
+
   visNetwork::visEdges(
     .,
     arrows = "to",
     smooth = TRUE
   ) ->.
-  
+
   visNetwork::visOptions(
     .,
     nodesIdSelection =
@@ -278,12 +276,12 @@ visRflow2 <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "U
         enabled = TRUE,
         useLabels = TRUE
       ),
-    
+
     selectedBy =
       list(
         variable = "env"
       ),
-    
+
     highlightNearest =
       list(
         enabled = TRUE,
@@ -291,18 +289,18 @@ visRflow2 <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "U
         degree = list(from = 50, to = 50),
         hover   = TRUE
       ),
-    
+
     autoResize = TRUE
-    
+
   ) ->.
-  
+
   visNetwork::visInteraction(
     .,
     tooltipDelay      = 1,
     navigationButtons = TRUE,
     dragNodes         = TRUE
   ) ->.
-  
+
   visNetwork::visPhysics(
     .,
     enabled = TRUE,

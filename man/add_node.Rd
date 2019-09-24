@@ -7,6 +7,10 @@
 add_node(x, ...)
 }
 \arguments{
+\item{x}{object's definition}
+
+\item{...}{further args passed to \code{as_node()}}
+
 \item{rflow}{an rflow object}
 
 \item{conflict}{logical; How to resolve conflict when an object of the same id already exists in the rflow?}

@@ -13,6 +13,8 @@ add_nodes(objs, rflow, connect = TRUE, ..., verbose = TRUE)
 
 \item{connect}{logical;}
 
+\item{...}{further args passed to \code{add_node()}}
+
 \item{verbose}{logical; print verbose output?}
 }
 \description{

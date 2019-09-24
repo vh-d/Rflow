@@ -8,7 +8,18 @@ visRflow2(rflow, tags = NULL, includeIsolated = TRUE,
   direction = "UD", orderBy = "id", ...)
 }
 \arguments{
+\item{rflow}{an rflow object}
+
+\item{tags}{character; vector of tags or regular expression for filtering nodes by tags}
+
+\item{includeIsolated}{logical; inlude disconnected nodes?}
+
+\item{direction}{orientation of flow ("UD" by default)}
+
 \item{...}{}
+}
+\value{
+A visNetwork plot.
 }
 \description{
 visualize workflow DAG

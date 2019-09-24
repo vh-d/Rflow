@@ -134,8 +134,6 @@ clean_cache.node <- function(x, ...) {
 #' Delete/clean stored state file/folder
 #'
 #' @param x a node or rflow object
-#'
-#' @param x
 #' @param ...
 #'
 #' @export
@@ -238,7 +236,7 @@ load_nodes.rflow <- function(
 #' load DAG's objects' definition from TOML files
 #'
 #' @param path path to folder with node definitions
-#' @param modified_since
+#' @param modified_since a datetime object to keep only newly modified files
 #' @param verbose logical; print verbose output?
 #' @export
 load_node_definitions <- function(path, modified_since = NULL, verbose = TRUE) {
@@ -322,9 +320,9 @@ load_state_of_nodes <- function(path, recursive = FALSE, ignore.case = TRUE, ...
 
 #' Initialize a node and add it to an rflow
 #'
-#' @param x
+#' @param x object's definition
 #' @param rflow an rflow object
-#' @param ...
+#' @param ... further args passed to `as_node()`
 #' @param conflict logical; How to resolve conflict when an object of the same id already exists in the rflow?
 #' @param persistence path to folder containg RDS files with saved state (typically .rflow subdir of rflow config dir)
 #' @param connect logical;
@@ -430,7 +428,7 @@ set_id.rflow <- function(x, id_old, id_new, ...) {
 #' @param objs list of nodes' definitions
 #' @param rflow an rflow object
 #' @param connect logical;
-#' @param ...
+#' @param ... further args passed to `add_node()`
 #' @param verbose logical; print verbose output?
 #' @export
 add_nodes <- function(objs, rflow, connect = TRUE, ..., verbose = TRUE) {

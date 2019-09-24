@@ -9,6 +9,8 @@ load_node_definitions(path, modified_since = NULL, verbose = TRUE)
 \arguments{
 \item{path}{path to folder with node definitions}
 
+\item{modified_since}{a datetime object to keep only newly modified files}
+
 \item{verbose}{logical; print verbose output?}
 }
 \description{

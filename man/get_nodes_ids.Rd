@@ -7,7 +7,10 @@
 get_nodes_ids(x)
 }
 \arguments{
-\item{x}{}
+\item{x}{an rflow object}
+}
+\value{
+Character vector of all nodes' ids
 }
 \description{
 Make a vector of all nodes' ids

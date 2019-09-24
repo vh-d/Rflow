@@ -7,7 +7,10 @@
 get_nodes(x)
 }
 \arguments{
-\item{x}{}
+\item{x}{an rflow object}
+}
+\value{
+List of all node object from given rflow
 }
 \description{
 Returns a list with all node objects
