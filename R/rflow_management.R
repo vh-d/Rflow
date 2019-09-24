@@ -520,14 +520,12 @@ make <- function(x, ...){
 }
 
 
-#' @method make node
 #' @export
 make.node <- function(x, force = FALSE, verbose = TRUE, verbose_prefix = "") {
   x$make(force = force, verbose = verbose, verbose_prefix = verbose_prefix)
 }
 
 # recurrent procedure
-#' @method make character
 #' @export
 make.character <- function(
   id,
@@ -611,8 +609,6 @@ make.rflow <- function(
 #' @return
 #' delete methods can only return TRUE or raise error
 #' @export
-#'
-#' @examples
 delete <- function(x, ...) {
   UseMethod("delete", x)
 }
