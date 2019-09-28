@@ -171,3 +171,35 @@ eval_node.character <- function(x, rflow) {
 filename_from_id <- function(id, hash = NULL) {
   paste0(id, "_", if (length(hash)) hash else digest::digest(id, algo = "md5", serialize = FALSE), ".rds")
 }
+
+
+#' Title
+#'
+#' @param x a node object
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+depends <- function(x, ...) {
+  UseMethod("depends", x)
+}
+
+#' @export
+depends.node <- function(x, inverse = FALSE, results = character()) {
+  direction <- if (isTRUE(inverse)) "upstream" else "downstream"
+
+  if (!length(x[[direction]])) {
+    return(list())
+  } else {
+    return(
+      c(
+        results,
+        x[[direction]],
+        unlist(sapply(x[[direction]], depends, inverse = inverse))
+      )
+    )
+  }
+}
+
