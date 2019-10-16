@@ -15,7 +15,36 @@ can be visualized, objects may have documentation and tags).
 It saves your time as your objects are rebuild only when its needed
 (also objects are persistent over sessions).
 
-## Installation
+**Development of `Rflow` package is still in its beta version phase
+(some breaking changes may happen).**
+
+## Usecases
+
+1.  We have a complex suite of scripts that prepare data from various
+    sources for analysis or publication. We need to update our output
+    whenever some of the inputs changes or when some of the scripts are
+    changed.
+
+2.  We want to get data from a database, transform them in R and then
+    upload them back to the database (or other place).
+
+3.  We have complex long-running computations that need to be run only
+    when parameters changes.
+
+## Getting started
+
+### Prerequisites
+
+  - `R` (\>= 3.5.3 tested)
+  - `devtools` package
+
+<!-- end list -->
+
+``` r
+install.packages("devtools")
+```
+
+### Installation
 
 Rflow is hosted on GitHub. The easies way to install it is by using
 `devtools` package:
@@ -32,44 +61,57 @@ are three building blocks of rflows:
   - **nodes** (aka targets) represent your data objects such as R
     values, db tables, spreadsheets, files, etc…
   - **environments** serves as containters for nodes. For example a
-    database is a container for tables.
-  - **jobs** represents dependency connection between nodes
+    database is a container for database tables, R environemnt is a
+    container for R objects, etc…
+  - **jobs** represents dependency connection between nodes. It carries
+    the recipe how to build a target object.
 
 ## Examples
 
-Define the target nodes:
+``` r
+.RFLOW <- Rflow::new_rflow()
+```
+
+We can define the target nodes using TOML files or directly in R as a
+list:
 
 ``` r
 objs <- 
   list(
+    
     "DB.mytable" = list(
       type = "db_node",
       desc = "A db table with data that serves as source for further computation"
     ),
+    
     "mytable_summary" = list(
       type = "r_node", # unnecessary for R objects
       desc = "Summary statistics of DB.mytable",
       r_expr = expression_r({
-        RETL::etl_read(.RFLOW[["DB.mytable"]]) %>% summary()
+        .RFLOW[["DB.mytable"]] %>% 
+          RETL::etl_read() %>% 
+          summary()
       })
     ),
+    
     "main_product" = list(
       desc = "Main output",
       r_expr = expression_r({
-        .RFLOW[["DB.mytable"]]$get() %>% some_fancy_computation()
+        .RFLOW[["DB.mytable"]] %>% some_fancy_computation()
       })
-    ), 
+    ),
+    
     "DB.output" = list(
       desc = "Outcome is loaded back to the DB",
       r_expr = expression_r({
-        .RFLOW[["main_product"]]$get() %>%
-          RETL::etl_write(to = self$connection, name = self$name)
+        .RFLOW[["main_product"]] %>%
+          RETL::etl_write(to = self)
       })
     )
   ) 
 ```
 
-Add the to your existing workflow:
+Now we can add these definitions into an existing workflow:
 
 ``` r
 objs %>% 
@@ -77,7 +119,13 @@ objs %>%
   Rflow::add_nodes(rflow = .RFLOW)
 ```
 
-and build targets
+and visualize
+
+``` r
+Rflow::visRflow(.RFLOW)
+```
+
+or build targets
 
 ``` r
 make(.RFLOW)
@@ -87,35 +135,32 @@ make(.RFLOW)
 
 **Features**
 
-  - formalize job as S3 classes
-  - add possibility to keep R/SQL code in standalone R scripts
-  - add more types of jobs (bash, Python, Julia, …)
-  - more nuanced `verbose` option
-  - proper logging for rflow object
-  - handling of obsolete nodes
+  - Implement jobs as S3 classes
+      - add possibility to keep R/SQL code in standalone R scripts
+      - add more types of jobs (bash, Python, Julia, …)
+  - Add more nuanced `verbose` options
+  - Add proper logging for rflow object
+  - Improve handling of obsolete nodes
       - removing objects from DAG
       - removing cache
       - removing node config files
       - deleting represented objects
-  - allow deleting properties / setting some to NULL
+  - Allow deleting properties / setting some to NULL
       - currently, if a property is deleted update() method ignores it
-  - add query function to set or get fields of multiple objects
-  - finish documentation
-      - add quick start guide
-  - new node types:
+  - Add query function over multiple nodes to set or get fields
+  - Finish documentation
+      - Add quick start guide
+  - Add new node types:
       - test node
-  - advance db\_node
+  - Advance db\_node class
       - other types of objects (Views, indexes, …)
-  - build a Shiny app for Rflow management
-  - parallel evaluation (futures?)
-
-**Implementation**
-
-  - make all public properties active (trigger persistence storage)
-  - migrate from R6 to S3 classes?
-  - experiment with proper ORM instead of serialization of selected
+  - Build a Shiny app for Rflow management
+  - Implement parallel evaluation (futures?)
+  - Make all public properties active (mutation would trigger
+    persistence storage)
+  - Migrate from R6 to S3 classes?
+  - Experiment with proper ORM instead of serialization of selected
     properties
-  - add an environment class
-  - generic methods in node class for initializing and updating
-    properties
-  - improve test coverage
+  - Add an environment class
+  - Make methods initializing and updating properties more generic.
+  - Improve test coverage
