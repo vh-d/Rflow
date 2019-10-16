@@ -33,7 +33,7 @@ It saves your time as your objects are rebuild only when its needed (also object
 
 2. We want to get data from a database, transform them in R and then upload them back to the database (or other place).
 
-3. We have complex long-running computations that need to be run only when parameters changes.
+3. We have complex long-running computations that need to be run only when some of the inputs/parameters change.
 
 
 ## Getting started

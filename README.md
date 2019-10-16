@@ -29,7 +29,7 @@ It saves your time as your objects are rebuild only when its needed
     upload them back to the database (or other place).
 
 3.  We have complex long-running computations that need to be run only
-    when parameters changes.
+    when some of the inputs/parameters change.
 
 ## Getting started
 
