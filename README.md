@@ -143,6 +143,24 @@ or build targets
 make(.RFLOW)
 ```
 
+## Other similar tools and projects
+
+Rflow overlaps with several other tools in this domain.
+
+  - `GNU make` is a general purpose framework from UNIX ecosystem.
+    Compared to `Rflow` `GNU make` is strictly file-based. It requires
+    that every job has to produce a file.
+  - `drake` is an R package very similar to Rflow. Compared to Rflow, it
+    is able to run your jobs in parallel. It is however strictly focused
+    on R-based workflows. Rflow allows you to manage database tables via
+    R or SQL recipes. Support for Python and Julia languages is planned
+    too.
+  - `Luigi` is a similar framework as Rflow only for Python. Similarly
+    to `make` `luigi` relies on file outputs.
+  - `Apache Airflow` is a very general and sophisticated framework.
+    Compared to `airflow` `Rflow` is more lightweight and easier to
+    setup.
+
 ## TODO:
 
 **Features**
