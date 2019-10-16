@@ -113,6 +113,7 @@ objs <-
     
     "DB.output" = list(
       desc = "Outcome is loaded back to the DB",
+      type = "db_node",
       r_expr = expression_r({
         .RFLOW[["main_product"]] %>%
           RETL::etl_write(to = self)
@@ -152,10 +153,8 @@ make(.RFLOW)
 * Add more nuanced `verbose` options
 * Add proper logging for rflow object
 * Improve handling of obsolete nodes
-  * removing objects from DAG
   * removing cache
   * removing node config files
-  * deleting represented objects
 * Allow deleting properties / setting some to NULL
   * currently, if a property is deleted update() method ignores it
 * Add query function over multiple nodes to set or get fields
@@ -165,7 +164,7 @@ make(.RFLOW)
   * test node
 * Advance db_node class
   * other types of objects (Views, indexes, ...)
-* Build a Shiny app for Rflow management 
+* Build a Shiny app for user-friendly Rflow management 
 * Implement parallel evaluation (futures?)
 * Make all public properties active (mutation would trigger persistence storage)
 * Migrate from R6 to S3 classes?
