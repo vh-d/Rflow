@@ -145,7 +145,7 @@ make(.RFLOW)
 
 For more examples see:
 
-  - [Intro 1](./examples/intro1/Rflow_intro1.md)
+  - [Intro 1](./examples/intro1/Rflow_intro_1.md)
 
 ## Other similar tools and projects
 
