@@ -67,7 +67,15 @@ devtools::install_github("vh-d/Rflow")
 * **environments** serves as containters for nodes. For example a database is a container for database tables, R environemnt is a container for R objects, etc...
 * **jobs** represents dependency connection between nodes. It carries the recipe how to build a target object.
 
+Currently, we have these types of nodes implemented:
 
+* `node`: a generic node class (really just a parent class other classes inherit from)
+* `r_node`: node representing R objects
+* `db_node`: node representing database tables and views
+* `accdb_node`: node representing tables in 32-bit Access database
+* `file_node`: for representing files on disk
+* `csv_node`: descendant of `file_node` for representing csv files 
+* `excel_sheet`: for excel sheets (read-only)
 
 ## Examples
 
