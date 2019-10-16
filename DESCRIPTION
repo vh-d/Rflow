@@ -11,16 +11,20 @@ Encoding: UTF-8
 LazyData: true
 Licensee: MIT + file LICENSE
 Imports: 
-    R6,
-    digest,
     crayon,
-    stringr,
     data.table,
-    RcppTOML
+    digest,
+    R6,
+    RcppTOML,
+    stringr
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
 Suggests: 
-    testthat,
+    DBI,
+    knitr,
+    openxlsx,
     reticulate,
-    openxlsx
+    rmarkdown,
+    testthat
 License: MIT + file LICENSE
+VignetteBuilder: knitr
