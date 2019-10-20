@@ -164,6 +164,9 @@ Rflow overlaps with several other tools in this domain.
     parallel. With `drake`, you are limited to use R langauge. Rflow
     allows you to manage database tables via R or SQL recipes. Support
     for Python and Julia languages is planned too.
+  - [orderly](https://github.com/vimc/orderly) framework seems to have
+    very similar goals (to tackle the problem of reproducibility with
+    various R scripts, inputs and outputs)
   - [Luigi](https://github.com/spotify/luigi) is a workflow management
     framework for Python. Similarly to `make` `luigi` relies on file
     outputs.
