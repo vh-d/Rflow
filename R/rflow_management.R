@@ -43,6 +43,18 @@ new_rflow <- function(
 }
 
 
+#' @export
+print.rflow <- function(x, ...) {
+  cat("<rflow>\n")
+  # cat("<rflow> ", crayon::red(self$id), ": ", self$name,  "\n", sep = "")
+  if (length(x$.desc)) cat("  desc: ", crayon::italic(self$desc),         "\n", sep = "")
+  cat("  path: ", x$.def_path, "\n", sep = "")
+  cat("  cache enabled: ",       isTRUE(x$.cache$enabled), "\n",
+      "  persistence enabled: ", isTRUE(x$.persistence$enabled),"\n", 
+      "  nodes: ", paste0(crayon::red(head(ls(x))), collapse = ", "), ", ...",
+      sep = "")
+}
+
 #' convert DAG to an igraph object
 #' @param x rflow object
 #' @export
