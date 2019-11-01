@@ -8,7 +8,18 @@ detect_nodes(x, rflow, found = c(), space = "", depth = 0L,
   depthmax = 20L, verbose = FALSE)
 }
 \arguments{
-\item{space}{}
+\item{space}{character; prefix to be added when printing}
+
+\item{depth}{DO NOT SET THIS ARG! (counter of the level how deep the recurent algo is currently entering)}
+
+\item{depthmax}{limit on the depth to dive in}
+
+\item{verbose}{logical; print output?}
+
+\item{envir}{R environemnt}
+}
+\value{
+detected nodes' id
 }
 \description{
 Detect dependencies

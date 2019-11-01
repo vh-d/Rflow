@@ -7,7 +7,7 @@
 verify_dependencies(x, ...)
 }
 \arguments{
-\item{x}{}
+\item{x}{a node or rflow object}
 }
 \description{
 Verify consistency of user-declared dependencies with node's behaviour

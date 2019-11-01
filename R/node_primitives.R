@@ -183,15 +183,12 @@ filename_from_id <- function(id, hash = NULL) {
 }
 
 
-#' Title
+#' List all dependencies
 #'
 #' @param x a node object
-#' @param ...
 #'
-#' @return
+#' @return vector of nodes' ids
 #' @export
-#'
-#' @examples
 depends <- function(x, ...) {
   UseMethod("depends", x)
 }

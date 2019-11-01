@@ -302,10 +302,6 @@ expression_r <- function(x){
 #'
 #' @param x value to print
 #' @param verbose_prefix prefix to be added after every new-line symbol
-#'
-#' @return
-#'
-#' @examples
 add_prefix <- function(x, prefix = "", color_main = NULL, color_prefix = NULL) {
   . <- unlist(crayon::col_strsplit(x, split = "\n", fixed = TRUE))
   . <- paste0(prefix, .)
@@ -326,11 +322,7 @@ add_prefix <- function(x, prefix = "", color_main = NULL, color_prefix = NULL) {
 #'
 #' @param x value to print
 #' @param verbose_prefix prefix to be added after every new-line symbol
-#'
-#' @return
-#'
-#' @examples
-cat_with_prefix <- function(x, prefix = "", sep = "\n", ...) {
+at_with_prefix <- function(x, prefix = "", sep = "\n", ...) {
   cat(
     add_prefix(x, prefix = prefix),
     sep = sep,

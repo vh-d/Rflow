@@ -2,15 +2,16 @@
 % Please edit documentation in R/node_primitives.R
 \name{depends}
 \alias{depends}
-\title{Title}
+\title{List all dependencies}
 \usage{
 depends(x, ...)
 }
 \arguments{
 \item{x}{a node object}
-
-\item{...}{}
+}
+\value{
+vector of nodes' ids
 }
 \description{
-Title
+List all dependencies
 }

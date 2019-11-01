@@ -24,12 +24,9 @@ detect_deps.expression <- function(x, node_ids) {
 
 #' Verify consistency of user-declared dependencies with node's behaviour
 #'
-#' @param x
+#' @param x a node or rflow object
 #'
-#' @return
 #' @export
-#'
-#' @examples
 verify_dependencies <- function(x, ...) {
   UseMethod("verify_dependencies", x)
 }
@@ -71,14 +68,15 @@ verify_dependencies.rflow <- function(x, ...) {
 
 #' Detect dependencies
 #'
-#' @param x
-#' @param envir
-#' @param space
+#' @param x a call/language/expression/{/... object
+#' @param envir R environemnt
+#' @param space character; prefix to be added when printing
+#' @param depth DO NOT SET THIS ARG! (counter of the level how deep the recurent algo is currently entering)
+#' @param depthmax limit on the depth to dive in
+#' @param verbose logical; print output?
 #'
-#' @return
+#' @return detected nodes' id
 #' @export
-#'
-#' @examples
 detect_nodes <- function(x, rflow, found = c(), space = "", depth = 0L, depthmax = 20L, verbose = FALSE) {
 
   # folling convention of referencing Rflow objects

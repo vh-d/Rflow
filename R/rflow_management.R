@@ -292,10 +292,10 @@ load_node_definitions <- function(path, modified_since = NULL, verbose = TRUE) {
 }
 
 
-#' loads object definition/state from a RDS file
-#'
-#' @param path path to RDS file with saved state
-#' @param ...
+# loads object definition/state from a RDS file
+#
+# @param path path to RDS file with saved state
+# @param ... args passed to readRDS()
 load_state_of_node <- function(path, ...) {
   state_list <- readRDS(file = path, ...)
 
@@ -307,12 +307,12 @@ load_state_of_node <- function(path, ...) {
   )
 }
 
-#' batch loading objects' definition/state from RDS files
-#'
-#' @param path path to folder containg RDS files with saved state (typically .rflow subdir of rflow config dir)
-#' @param recursive passed to list.files
-#' @param ignore.case passed to list.files
-#' @param ...
+# batch loading objects' definition/state from RDS files
+#
+# @param path path to folder containg RDS files with saved state (typically .rflow subdir of rflow config dir)
+# @param recursive passed to list.files
+# @param ignore.case passed to list.files
+# @param ...
 load_state_of_nodes <- function(path, recursive = FALSE, ignore.case = TRUE, ...) {
 
   # list all relevant files
@@ -523,7 +523,6 @@ connect_nodes.rflow <- function(rflow, ...) {
 #' @param x node's id or rflow object
 #' @param force logical; force eval()
 #' @param verbose logical; switch on/off verbose output
-#' @param ...
 #' @export
 make <- function(x, ...){
   if (!is.null(x)) {
