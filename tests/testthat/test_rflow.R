@@ -10,10 +10,10 @@ test_that("Rflow can be crated", {
 
 test_that("nodes can be added", {
   rf2 <- Rflow::new_rflow()
-  expect_true(Rflow::add_node(list(id = "node1", r_expr = 1), rflow = rf2, verbose = FALSE))
+  expect_true(Rflow::add_node(list(id = "node1", r_expr = expression_r(1)), rflow = rf2, verbose = FALSE))
   expect_is(rf2[["node1"]], "node")
 
-  expect_true(Rflow::add_node(list(id = "node2", r_expr = 1, depends = "node1"), rflow = rf2, verbose = FALSE))
+  expect_true(Rflow::add_node(list(id = "node2", r_expr = expression_r(1), depends = "node1"), rflow = rf2, verbose = FALSE))
   expect_is(rf2[["node2"]], "node")
   expect_length(rf2$node2$depends, 1)
   expect_null(rf2$node2$upstream)
@@ -23,8 +23,8 @@ test_that("nodes can be added", {
 test_that("nodes can be connected", {
   rf2 <- Rflow::new_rflow()
   .GlobalEnv[["ENV"]] <- new.env()
-  expect_true(Rflow::add_node(process_obj_defs(list(list(id = "ENV.node1", r_expr = 1)))[[1]], rflow = rf2, verbose = FALSE))
-  expect_true(Rflow::add_node(process_obj_defs(list(list(id = "ENV.node2", r_expr = 1, depends = "ENV.node1")))[[1]], rflow = rf2, verbose = FALSE))
+  expect_true(Rflow::add_node(process_obj_defs(list(list(id = "ENV.node1", r_expr = expression_r(1))))[[1]], rflow = rf2, verbose = FALSE))
+  expect_true(Rflow::add_node(process_obj_defs(list(list(id = "ENV.node2", r_expr = expression_r(1), depends = "ENV.node1")))[[1]], rflow = rf2, verbose = FALSE))
 
   # connecting nodes
   connect_nodes(rf2, verbose = FALSE)
