@@ -2,13 +2,16 @@
 % Please edit documentation in R/node_primitives.R
 \name{get_id}
 \alias{get_id}
-\title{extract id from a object's definition (in a list)}
+\title{Get node's id}
 \usage{
-get_id(obj)
+get_id(x)
 }
 \arguments{
-\item{obj}{object definition}
+\item{obj}{}
+}
+\value{
+Node's id as a character scalar
 }
 \description{
-extract id from a object's definition (in a list)
+Get node's id
 }

@@ -2,10 +2,13 @@
 % Please edit documentation in R/node_definition.R
 \name{process_obj_defs}
 \alias{process_obj_defs}
-\title{Check consistency of identificators and fill missings}
+\title{Ensure all identifiers are set up correctly}
 \usage{
 process_obj_defs(obj_defs)
 }
+\arguments{
+\item{obj_defs}{list of nodes' definitions (list of lists)}
+}
 \description{
-Check consistency of identificators and fill missings
+Ensure all identifiers are set up correctly
 }

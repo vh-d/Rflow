@@ -26,15 +26,41 @@ as_node.node <- function(x) {
 
 
 
-#' extract id from a object's definition (in a list)
+#' Compose an id value from env and name
 #'
 #' @param obj object definition
+#' 
+#' @return Node's id as a character value constructed from env + name fields. 
 #' @export
-get_id <- function(obj) {
-  id <- if (length(obj$id)) obj$id else paste0(obj$env, ".", obj$name)
-  return(id)
+compose_id <- function(x) {
+  paste0(x$env, ".", x$name)
 }
 
+
+#' Get node's id
+#'
+#' @param obj 
+#'
+#' @return Node's id as a character scalar
+#' @export
+get_id <- function(x) {
+  UseMethod("get_id", x)
+}
+
+#' @export
+get_id.list <- function(x) {
+  if (length(x$id)) x$id else compose_id(x)
+}
+
+#' @export
+get_id.node <- function(x) {
+  x$id
+}
+
+#' @export
+get_id.rflow <- function(x) {
+  ls(x)
+}
 
 # @param x
 # @param id_old
@@ -53,22 +79,6 @@ set_id.node <- function(x, id_new, ...) {
 }
 
 
-#' Make a vector of all nodes' ids
-#'
-#' @param x an rflow object
-#'
-#' @return
-#' Character vector of all nodes' ids
-#' @export
-get_nodes_ids <- function(x) {
-  UseMethod("get_nodes_ids", x)
-}
-
-#' @export
-get_nodes_ids.rflow <- function(x) {
-  node_objs <- get_nodes(x)
-  sapply(node_objs, function(x) x$id)
-}
 
 #' Returns a list with all node objects
 #'
@@ -83,7 +93,7 @@ get_nodes <- function(x) {
 
 #' @export
 get_nodes.rflow <- function(x) {
-  mget(ls(x), envir = x)
+  mget(get_id(x), envir = x)
 }
 
 

@@ -1,4 +1,7 @@
-#' Check consistency of identificators and fill missings
+#' Ensure all identifiers are set up correctly
+#'
+#' @param obj_defs list of nodes' definitions (list of lists)
+#'
 #' @export
 process_obj_defs <- function(obj_defs) {
 
@@ -37,7 +40,7 @@ process_obj_defs <- function(obj_defs) {
           if (obj_defs[[obj_ind]]$name != node_name) 
             stop(stringr::str_interp("${obj_id}: name '${obj_defs[[obj_ind]]$name}' does not match"))
     } else {
-      obj_id <- get_id(obj_defs[[obj_ind]])
+      obj_id <- compose_id(obj_defs[[obj_ind]])
     }
     
     full_names <- names(obj_defs)
