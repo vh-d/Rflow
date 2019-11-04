@@ -171,36 +171,21 @@ Rflow overlaps with several other tools in this domain.
     framework for Python. Similarly to `make` `luigi` relies on file
     outputs.
   - [Apache Airflow](https://airflow.apache.org/) is a very general and
-    sophisticated platform written in Python.
+    sophisticated platform written in
+Python.
 
-## TODO:
+<!-- ## TODO: -->
 
-**Features**
+<!-- * Add more nuanced `verbose` options -->
 
-  - Implement jobs as S3 classes
-      - add possibility to keep R/SQL code in standalone R scripts
-      - add more types of jobs (bash, Python, Julia, …)
-  - Add more nuanced `verbose` options
-  - Add proper logging for rflow object
-  - Improve handling of obsolete nodes
-      - removing cache
-      - removing node config files
-  - Allow deleting properties / setting some to NULL
-      - currently, if a property is deleted update() method ignores it
-  - Add query function over multiple nodes to set or get fields
-  - Finish documentation
-      - Add quick start guide
-  - Add new node types:
-      - test node
-  - Advance db\_node class
-      - other types of objects (Views, indexes, …)
-  - Build a Shiny app for user-friendly Rflow management
-  - Implement parallel evaluation (futures?)
-  - Make all public properties active (mutation would trigger
-    persistence storage)
-  - Migrate from R6 to S3 classes?
-  - Experiment with proper ORM instead of serialization of selected
-    properties
-  - Add an environment class
-  - Make methods initializing and updating properties more generic.
-  - Improve test coverage
+<!-- * Add proper logging for rflow object -->
+
+<!-- * Allow deleting properties / setting some to NULL -->
+
+<!--   * currently, if a property is deleted update() method ignores it -->
+
+<!-- * Make all public properties active (mutation would trigger persistence storage) -->
+
+<!-- * Make methods initializing and updating properties more generic. -->
+
+<!-- * Improve test coverage -->
