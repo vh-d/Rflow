@@ -58,8 +58,8 @@ devtools::install_github("vh-d/Rflow")
 
 ## How it works
 
-**Rflow** is a DAG connecting nodes through dependency relations. There
-are three building blocks of rflows:
+**Rflow** reprent directed acyclic graphs connecting nodes through
+dependency relations. There are three building blocks of rflows:
 
   - **nodes** (aka targets) represent your data objects such as R
     values, db tables, spreadsheets, files, etc…
@@ -83,7 +83,7 @@ Currently, we have these types of nodes implemented:
 ## Examples
 
 ``` r
-.RFLOW <- Rflow::new_rflow()
+MYFLOW <- Rflow::new_rflow()
 ```
 
 We can define the target nodes using TOML files or directly in R as a
@@ -95,21 +95,27 @@ objs <-
     
     "DB.mytable" = list(
       type = "db_node",
-      desc = "A db table with data that serves as source for further computation"
+      desc = "A db table with data that serves as source for further computation in R"
+      sql = "
+        CREATE TABLE mytable AS 
+        SELECT * FROM customers WHERE year > 2010
+      "
     ),
     
     "mytable_summary" = list(
-      type = "r_node", # unnecessary for R objects
+      type = "r_node", # you can skip this when defining R nodes
       desc = "Summary statistics of DB.mytable",
+      depends = "DB.mytable", # dependencies have to be declared (this can be tested/automated)
       r_expr = expression_r({
-        .RFLOW[["DB.mytable"]] %>% 
+        .RFLOW[["DB.mytable"]] %>% # Use .RFLOW to refer to the upstream nodes.
           RETL::etl_read() %>% 
           summary()
       })
     ),
     
-    "main_product" = list(
+    "R_OUT" = list(
       desc = "Main output",
+      depends = "DB.mytable",
       r_expr = expression_r({
         .RFLOW[["DB.mytable"]] %>% some_fancy_computation()
       })
@@ -118,8 +124,9 @@ objs <-
     "DB.output" = list(
       desc = "Outcome is loaded back to the DB",
       type = "db_node",
+      depends = "main_product",
       r_expr = expression_r({
-        .RFLOW[["main_product"]] %>%
+        .RFLOW[["R_OUT"]] %>%
           RETL::etl_write(to = self)
       })
     )
@@ -131,19 +138,19 @@ Now we can add these definitions into an existing workflow:
 ``` r
 objs %>% 
   Rflow::process_obj_defs() %>% 
-  Rflow::add_nodes(rflow = .RFLOW)
+  Rflow::add_nodes(rflow = MYFLOW)
 ```
 
 and visualize
 
 ``` r
-Rflow::visRflow(.RFLOW)
+Rflow::visRflow(MYFLOW)
 ```
 
 or build targets
 
 ``` r
-make(.RFLOW)
+make(MYFLOW)
 ```
 
 For more examples see:
@@ -166,7 +173,7 @@ Rflow overlaps with several other tools in this domain.
     code dependency automatically, it is able to run your jobs in
     parallel. With `drake`, you are limited to use R langauge. Rflow
     allows you to manage database tables via R or SQL recipes. Support
-    for Python and Julia languages is planned too.
+    for Bash, Python and Julia languages is planned too.
   - [orderly](https://github.com/vimc/orderly) framework seems to have
     very similar goals (to tackle the problem of reproducibility with
     various R scripts, inputs and outputs)
