@@ -229,8 +229,9 @@ strip_srcrefs <- function(expr) {
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' as_r_expr("{\n1+1\n}")
-#' as_r_expr({1+1})
+#' }
 as_r_expr <- function(x) {
   UseMethod("as_r_expr", x)
 }
