@@ -1,6 +1,8 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+<a href="https://travis-ci.org/vh-d/Rflow"><img src="https://travis-ci.org/vh-d/Rflow.svg?branch=master" alt="Travis"></a>
+
 # Rflow
 
 Rflow is an R package providing R users with a general-purpose workflow

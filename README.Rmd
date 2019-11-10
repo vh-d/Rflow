@@ -4,6 +4,8 @@ output: github_document
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+<a href="https://travis-ci.org/vh-d/Rflow"><img src="https://travis-ci.org/vh-d/Rflow.svg?branch=master" alt="Travis"></a>
+
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -15,6 +17,7 @@ knitr::opts_chunk$set(
 ```
 
 # Rflow
+
 
 Rflow is an R package providing R users with a general-purpose workflow framework. Rflow allows you to describe your data declaratively as objects with dependencies and does the heavy lifting for you. It is suitable for various purposes: from managing several simple automation scripts to building powerfull ETL pipelines.
 
