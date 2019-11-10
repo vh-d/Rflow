@@ -2,3 +2,4 @@
 ^README\.Rmd$
 ^Rflow\.Rproj$
 ^\.Rproj\.user$
+^\.travis\.yml$
