@@ -2,6 +2,7 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 <a href="https://travis-ci.org/vh-d/Rflow"><img src="https://travis-ci.org/vh-d/Rflow.svg?branch=master" alt="Travis"></a>
+<a href="https://codecov.io/github/vh-d/Rflow?branch=master"><img src="https://codecov.io/github/vh-d/Rflow/coverage.svg?branch=master" alt="Codecov"></a>
 
 # Rflow
 
