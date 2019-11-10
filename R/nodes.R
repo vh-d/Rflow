@@ -1248,10 +1248,10 @@ excel_sheet <- R6::R6Class(
           hash = hash,
           time = Sys.time()
         )
-        
+
         if (self$persistence$enabled) self$store_state()
       }
-      
+
       return(changed)
     },
 
@@ -1267,6 +1267,19 @@ excel_sheet <- R6::R6Class(
       if (self$exists()) {
         do.call(openxlsx::read.xlsx, args = c(list(xlsxFile = self$path, sheet = self$sheet), self$read_args))
       } else stop(self$id, ": sheet '", self$sheet, "' does not exists in ", self$path)
+    },
+
+    title = function() {
+      title <- super$title()
+
+      title <- paste0(title, "<font size=\"-2\">", "path: ", self$path, " (", self$sheet, ")", "</font><br>")
+
+      return(title)
+    },
+
+    print = function(...) {
+      super$print()
+      cat("  path: ", self$path, " (", self$sheet, ")\n", sep = "")
     }
 
   ),
@@ -1394,10 +1407,10 @@ file_node <- R6::R6Class(
           hash = hash,
           time = Sys.time()
         )
-        
+
         if (self$persistence$enabled) self$store_state()
       }
-      
+
       return(changed)
     },
 
@@ -1473,7 +1486,20 @@ file_node <- R6::R6Class(
       }
 
       return(title)
+    },
+
+    print = function(...) {
+      super$print()
+      cat("  path: ", self$path, "\n", sep = "")
+      cat("  expression: \n")
+      cat_with_prefix(
+        crayon::cyan(
+          deparse_nicely(self$r_expr)
+        ),
+        prefix = "    "
+      )
     }
+
   ),
 
   active = list(

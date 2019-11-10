@@ -45,7 +45,7 @@ read.job_file <- function(x, ...) {
 # job.character <- function(x, ...) {
 #   do.call(paste0(x, "_job"), ...)
 # }
-# 
+#
 # job.list <- function(x) {
 #   do.call(job, x$type, x)
 # }
@@ -62,12 +62,12 @@ job.expression <- function(x, ...) {
 #' @export
 job_r <- function(x, ...) {
   UseMethod("job_r", x)
-} 
+}
 
 #' @export
 job_r.default <- function(x, ...) {
   job_r(as.expression(x), ...)
-} 
+}
 
 #' @export
 job_r.expression <- function(x, ...) {
@@ -76,26 +76,26 @@ job_r.expression <- function(x, ...) {
       list(
         r_expr = x,
         code   = deparse_nicely(x)
-      ), 
+      ),
       class = c("job_r_expr", "job_r", "job"))
-  
+
   job
 }
 
 #' @export
 job_r.character <- function(x, file = FALSE, ...) {
-  
+
   if (isTRUE(file)) return(job_r_file(x, ...))
   # else:
-  
+
   job <-
     structure(
       list(
-        r_expr = parse(text = x), 
+        r_expr = parse(text = x),
         code   = x
-      ), 
+      ),
       class = c("job_r_expr", "job_r", "job"))
-  
+
   job
 }
 
@@ -158,7 +158,7 @@ evaluate.job_python <- function(x, ...) {
   result <- NULL
   reticulate::py_run_string(x$src)
   try(result <- py$result)
-  
+
   return(result)
 }
 
@@ -169,7 +169,7 @@ evaluate.job_python_file <- function(x, ...) {
   result <- NULL
   reticulate::py_run_file(x$fp)
   try(result <- py$result)
-  
+
   return(result)
 }
 
@@ -302,6 +302,10 @@ expression_r <- function(x){
 #'
 #' @param x value to print
 #' @param verbose_prefix prefix to be added after every new-line symbol
+#'
+#' @return
+#'
+#' @examples
 add_prefix <- function(x, prefix = "", color_main = NULL, color_prefix = NULL) {
   . <- unlist(crayon::col_strsplit(x, split = "\n", fixed = TRUE))
   . <- paste0(prefix, .)
