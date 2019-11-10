@@ -6,3 +6,5 @@ cache:
   packages: true
 repos:
   CRAN: https://cloud.r-project.org
+
+warnings_are_errors: false
