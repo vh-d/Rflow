@@ -322,7 +322,7 @@ add_prefix <- function(x, prefix = "", color_main = NULL, color_prefix = NULL) {
 #'
 #' @param x value to print
 #' @param verbose_prefix prefix to be added after every new-line symbol
-at_with_prefix <- function(x, prefix = "", sep = "\n", ...) {
+cat_with_prefix <- function(x, prefix = "", sep = "\n", ...) {
   cat(
     add_prefix(x, prefix = prefix),
     sep = sep,
