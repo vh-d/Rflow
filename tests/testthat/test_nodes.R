@@ -1,7 +1,7 @@
 
 # node --------------------------------------------------------------------
 
-context("Creating generic node object")
+context("Constructing generic node object")
 
 test_that("nodes can be initiated", {
   expect_error(Rflow::node$new(),               regexp = "[Mm]issing", info = "initialization requires id or env + name")
@@ -36,7 +36,7 @@ test_that("nodes can be initiated with persistence", {
 # r_node ------------------------------------------------------------------
 
 
-context("Creating r_node objects")
+context("Constructing r_node objects")
 
 test_that("nodes can be initiated", {
   expect_error(Rflow::r_node$new(),               regexp = "[Mm]issing", info = "initialization requires id or env + name")
@@ -75,10 +75,11 @@ test_that("nodes can be initiated with caching", {
 })
 
 
+
 # file_node ---------------------------------------------------------------
 
 
-context("Creating file_node objects")
+context("Constructing file_node objects")
 
 test_that("nodes can be initiated", {
   expect_error(Rflow::file_node$new(),               regexp = "[Mm]issing", info = "initialization requires id or env + name")
@@ -103,7 +104,7 @@ test_that("nodes can be initiated", {
 
 
 
-context("Creating excel_sheet objects")
+context("Constructing excel_sheet nodes")
 
 test_that("nodes can be initiated", {
   expect_error(Rflow::excel_sheet$new(),               regexp = "[Mm]issing", info = "initialization requires id or env + name")
