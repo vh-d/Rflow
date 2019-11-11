@@ -1,7 +1,7 @@
 # node --------------------------------------------------------------------
 
 #' @title node class
-#' @description basic building block of an rflow
+#' @description Node is a basic building block of an rflow DAG.
 #' @docType class
 #' @importFrom R6 R6Class
 #' @export
@@ -26,10 +26,13 @@
 #' * from lists (comming from TOML, YAML...)
 #'
 #' @usage
-#' node("node1", desc = "This an example node which does nothing")
+#' node$new(id = "node")
 #' @section Methods:
 #' \describe{
-#'   \item{\code{new(node)}}{This method is used to create object of this class.}
+#'   \item{\code{$make()} or \code{make(node)}}{This method is used to build/make targets. It recursively solves dependencies by building all targets for nodes declared or detected as a dependency.}
+#'   \item{\code{$eval()}}{Compared to `make()`, `eval()` only runs the code/job associated with the node alone. It does not try to ensure all the dependencies are ready. `eval()` is usually used internally by `make()`.}
+#'   \item{\code{$value}}{Returns target's value. Targets such as database tables or csv files are automatically convert into R values.}
+#'   \item{\code{$exists()}}{Checks whether the target exists or not.}
 #' }
 node <- R6::R6Class(
 

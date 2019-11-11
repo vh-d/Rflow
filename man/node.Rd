@@ -6,13 +6,13 @@
 \title{node class}
 \format{\code{\link{R6Class}} object.}
 \usage{
-node("node1", desc = "This an example node which does nothing")
+node$new(id = "node")
 }
 \value{
 Object of \code{\link{R6Class}} with basic functionality for rflows.
 }
 \description{
-basic building block of an rflow
+Node is a basic building block of an rflow DAG.
 }
 \details{
 Nodes may represent different types of data targets (R objects, files, database tables), or jobs.
@@ -43,7 +43,10 @@ Constructing nodes
 \section{Methods}{
 
 \describe{
-\item{\code{new(node)}}{This method is used to create object of this class.}
+\item{\code{$make()} or \code{make(node)}}{This method is used to build/make targets. It recursively solves dependencies by building all targets for nodes declared or detected as a dependency.}
+\item{\code{$eval()}}{Compared to \code{make()}, \code{eval()} only runs the code/job associated with the node alone. It does not try to ensure all the dependencies are ready. \code{eval()} is usually used internally by \code{make()}.}
+\item{\code{$value}}{Returns target's value. Targets such as database tables or csv files are automatically convert into R values.}
+\item{\code{$exists()}}{Checks whether the target exists or not.}
 }
 }
 
