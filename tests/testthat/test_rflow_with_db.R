@@ -124,9 +124,9 @@ test_that("Nodes can be added to the an rflow", {
 })
 
 
-verification <- which(!verify_dependencies(RF), useNames = TRUE)
-test_that("Dependencies test passes", {
-  expect_length(verification, 0)
+not_passed <- sum(!verify_dependencies(RF))
+test_that("Dependency test passes", {
+  expect_identical(not_passed, 0L)
 })
 
 
