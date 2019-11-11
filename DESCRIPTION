@@ -25,6 +25,7 @@ Suggests:
     openxlsx,
     reticulate,
     rmarkdown,
+    RSQLite,
     testthat
 License: MIT + file LICENSE
 VignetteBuilder: knitr
