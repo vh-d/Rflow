@@ -90,7 +90,7 @@ detect_nodes <- function(x, rflow, found = c(), space = "", depth = 0L, depthmax
     if (verbose) cat(space, class(x), ":\n")
 
     if (
-      is.call(x)
+      is.call(x[1]) # can be length > 1 ?
       && (as.character(x[[1]]) %in% c("[[", "$"))
       && length(x) > 1
       && exists(as.character(x[[2]]))
@@ -121,7 +121,7 @@ detect_nodes <- function(x, rflow, found = c(), space = "", depth = 0L, depthmax
     if (verbose) cat(space, xname, ":\n")
     if (xname != "" && exists(xname) && !(xname %in% c("::", "{"))) { # do not detect_nodes into external packages for now
       xx <- get(xname)
-      if (!is.name(xx) && length(length(xx)) && length(xx)) { # what classes/types does not have a length method? 
+      if (!is.name(xx) && length(length(xx)) && length(xx)) { # what classes/types does not have a length method?
         if (depth == 0L)
           return(unique(unlist(c(found, detect_nodes(xx, rflow = rflow, found = found, space = paste0("   ", space), depth = depth + 1))))) else
             return(c(found, detect_nodes(xx, rflow = rflow, found = found, space = paste0("   ", space), depth = depth + 1)))
