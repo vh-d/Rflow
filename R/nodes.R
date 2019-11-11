@@ -449,6 +449,14 @@ node <- R6::R6Class(
 
   active = list(
 
+    value = function(value) {
+      if (missing(value)) {
+        return(self$get())
+      } else {
+        stop("Can't set `$value this way. Use make() or eval() instead.")
+      }
+    },
+
     # datetime of last evaluation
     last_evaluated = function(value) {
       if (missing(value)) {
