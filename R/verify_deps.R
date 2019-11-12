@@ -90,10 +90,10 @@ detect_nodes <- function(x, rflow, found = c(), space = "", depth = 0L, depthmax
     if (verbose) cat(space, class(x), ":\n")
 
     if (
-      is.call(x[1]) # can be length > 1 ?
-      && (as.character(x[[1]]) %in% c("[[", "$"))
-      && length(x) > 1
-      && exists(as.character(x[[2]]))
+      isTRUE(is.call(x))
+      && isTRUE(as.character(x[[1]]) %in% c("[[", "$"))
+      && isTRUE(length(x) > 1)
+      && isTRUE(exists(as.character(x[[2]])))
     ) {
       xv <- get(as.character(x[[2]]))
       if (is.environment(xv) && identical(xv, rflow))
