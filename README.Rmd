@@ -161,16 +161,29 @@ For more examples see:
 * [Intro 1](./examples/intro1/Rflow_intro_1.md)
 
 
-## Other similar tools and projects
+## Why Rflow? (comparison to other similar tools)
 
 Rflow overlaps with several other tools in this domain.
 
-* [GNU make](https://www.gnu.org/software/make/) is a general purpose framework from UNIX ecosystem. Compared to `Rflow` `GNU make` is strictly file-based. It requires that every job has to produce a file.
-* [gnumaker](https://github.com/petebaker/gnumaker) is an R package that builds upon `GNU make` and help you generate your make files using R.
-* [drake](https://cran.r-project.org/web/packages/drake/) is an R package very similar to Rflow. Compared to Rflow, it tracks your code dependency automatically, it is able to run your jobs in parallel. With `drake`, you are limited to use R langauge. Rflow allows you to manage database tables via R or SQL recipes. Support for Bash, Python and Julia languages is planned too.
-* [orderly](https://github.com/vimc/orderly) framework seems to have very similar goals (to tackle the problem of reproducibility with various R scripts, inputs and outputs) 
-* [Luigi](https://github.com/spotify/luigi) is a workflow management framework for Python. Similarly to `make` `luigi` relies on file outputs.
-* [Apache Airflow](https://airflow.apache.org/) is a very general and sophisticated platform written in Python.
+[GNU make](https://www.gnu.org/software/make/) is a general purpose framework from UNIX ecosystem. [People](https://towardsdatascience.com/structure-and-automated-workflow-for-a-machine-learning-project-2fa30d661c1e) use `GNU Make` in their Python/R datascience projects. Compared to `Rflow` `GNU make` is strictly file-based. It requires that every job has to produce a file. If your targets are files (you can safe R values in .RData files too) GNU Mmake may be a good choice.
+
+
+[gnumaker](https://github.com/petebaker/gnumaker) is an R package that builds upon `GNU make` and help you generate your make files using R.
+
+
+[drake](https://cran.r-project.org/web/packages/drake/) is an R package quite similar to `Rflow`. Compared to `Rflow`, `drake` has more features: it tracks all your code dependencies automatically (including functions), it is able to run your jobs in parallel, etc... Currently, `Rflow` does not track changes in functions in your code. On the downside `drake` is limited to R langauge. It allows you to define input and output files, but all the logic has to be implemented in R. `Rflow` allows you to manage database tables via R or SQL recipes. Support for Bash, Python and Julia languages or knitting RMarkdwon files is planned too.
+
+
+[orderly](https://github.com/vimc/orderly) framework seems to have very similar goals (to tackle the problem of complexity and reproducibility with various R scripts, inputs and outputs).
+
+
+[ProjectTemplate](http://projecttemplate.net/index.html) provides a standardized sceleton for your project and convenient API for preprocessing data from various formats and sources. 
+
+
+[Luigi](https://github.com/spotify/luigi) is a popular workflow management framework for Python.
+
+
+[Apache Airflow](https://airflow.apache.org/) is a very general and sophisticated platform written in Python.
 
 
 
