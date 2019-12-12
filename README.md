@@ -6,6 +6,16 @@
 
 # Rflow
 
+## About
+
+*TLDR*:
+
+A library for creating and executing DAGs, everything is stored
+(persistent) so you can restart worflows where it failed, support for R,
+SQL, (Python and Julia on the roadmap).
+
+*Long version*:
+
 Rflow is an R package providing R users with a general-purpose workflow
 framework. Rflow allows you to describe your data declaratively as
 objects with dependencies and does the heavy lifting for you. It is
