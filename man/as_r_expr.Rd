@@ -26,6 +26,6 @@ Returns R expression from either R expression or parsed R code
 }
 \examples{
 \dontrun{
-as_r_expr("{\\n1+1\\n}")
+as_r_expr("{\n1+1\n}")
 }
 }

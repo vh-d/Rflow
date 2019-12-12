@@ -11,6 +11,9 @@ add_prefix(x, prefix = "", color_main = NULL, color_prefix = NULL)
 
 \item{verbose_prefix}{prefix to be added after every new-line symbol}
 }
+\value{
+
+}
 \description{
 Print with prefix
 }

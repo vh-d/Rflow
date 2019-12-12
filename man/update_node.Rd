@@ -4,8 +4,7 @@
 \alias{update_node}
 \title{update object (call whenever definition in config file could have potentially changed)}
 \usage{
-update_node(obj, rflow, definition_hash = digest::digest(obj),
-  verbose = FALSE)
+update_node(obj, rflow, definition_hash = digest::digest(obj), verbose = FALSE)
 }
 \arguments{
 \item{obj}{list with definition of node}

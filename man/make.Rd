@@ -7,8 +7,7 @@
 \usage{
 make(x, ...)
 
-\method{make}{rflow}(rflow, tags = NULL, leaves_only = TRUE,
-  force = FALSE, verbose = TRUE)
+\method{make}{rflow}(rflow, tags = NULL, leaves_only = TRUE, force = FALSE, verbose = TRUE)
 }
 \arguments{
 \item{x}{node's id or rflow object}
@@ -18,10 +17,6 @@ make(x, ...)
 \item{tags}{filter nodes by tags}
 
 \item{leaves_only}{logical; Option to run make only from ending nodes. Avoids redundant visits on intermediate nodes.}
-
-\item{force}{logical; force eval()}
-
-\item{verbose}{logical; switch on/off verbose output}
 
 \item{force}{logical; force eval()?}
 

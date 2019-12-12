@@ -4,8 +4,14 @@
 \alias{visRflow2}
 \title{visualize workflow DAG}
 \usage{
-visRflow2(rflow, tags = NULL, includeIsolated = TRUE,
-  direction = "UD", orderBy = "id", ...)
+visRflow2(
+  rflow,
+  tags = NULL,
+  includeIsolated = TRUE,
+  direction = "UD",
+  orderBy = "id",
+  ...
+)
 }
 \arguments{
 \item{rflow}{an rflow object}

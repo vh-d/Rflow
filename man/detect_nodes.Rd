@@ -4,8 +4,15 @@
 \alias{detect_nodes}
 \title{Detect dependencies}
 \usage{
-detect_nodes(x, rflow, found = c(), space = "", depth = 0L,
-  depthmax = 20L, verbose = FALSE)
+detect_nodes(
+  x,
+  rflow,
+  found = c(),
+  space = "",
+  depth = 0L,
+  depthmax = 20L,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{space}{character; prefix to be added when printing}

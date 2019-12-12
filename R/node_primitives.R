@@ -183,7 +183,7 @@ filename_from_id <- function(id, hash = NULL) {
 }
 
 
-#' List all dependencies
+#' List all dependencies recursively
 #'
 #' @param x a node object
 #'
@@ -193,6 +193,12 @@ depends <- function(x, ...) {
   UseMethod("depends", x)
 }
 
+#' List all dependencies recursively
+#'
+#' @param x a node object
+#' @param inverse FALSE (default) => downtream, TRUE => upstream
+#' @param results DO NOT USE
+#' @return vector of nodes' ids
 #' @export
 depends.node <- function(x, inverse = FALSE, results = character()) {
   direction <- if (isTRUE(inverse)) "upstream" else "downstream"

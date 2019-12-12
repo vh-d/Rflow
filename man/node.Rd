@@ -26,20 +26,6 @@ Constructing nodes
 \item from lists (comming from TOML, YAML...)
 }
 }
-\section{Fields}{
-
-\describe{
-\item{\code{id}}{character; unique id}
-
-\item{\code{env}}{character; name of a environemnt (container or group of objects)}
-
-\item{\code{name}}{character; object's name}
-
-\item{\code{desc}}{character; description}
-
-\item{\code{depends}}{character; vector of uppstream nodes (other nodes this node is depending on)}
-}}
-
 \section{Methods}{
 
 \describe{
@@ -51,3 +37,250 @@ Constructing nodes
 }
 
 \keyword{node}
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{id}}{character; unique id}
+
+\item{\code{env}}{character; name of a environemnt (container or group of objects)}
+
+\item{\code{name}}{character; object's name}
+
+\item{\code{desc}}{character; description}
+
+\item{\code{depends}}{character; vector of uppstream nodes (other nodes this node is depending on)}
+}
+\if{html}{\out{</div>}}
+}
+\section{Methods}{
+\subsection{Public methods}{
+\itemize{
+\item \href{#method-vis_params_process}{\code{node$vis_params_process()}}
+\item \href{#method-set_id}{\code{node$set_id()}}
+\item \href{#method-set_persistence}{\code{node$set_persistence()}}
+\item \href{#method-print}{\code{node$print()}}
+\item \href{#method-label}{\code{node$label()}}
+\item \href{#method-title}{\code{node$title()}}
+\item \href{#method-new}{\code{node$new()}}
+\item \href{#method-store_state}{\code{node$store_state()}}
+\item \href{#method-update_definition}{\code{node$update_definition()}}
+\item \href{#method-set_upstream}{\code{node$set_upstream()}}
+\item \href{#method-set_downstream}{\code{node$set_downstream()}}
+\item \href{#method-connect_to}{\code{node$connect_to()}}
+\item \href{#method-connect}{\code{node$connect()}}
+\item \href{#method-get}{\code{node$get()}}
+\item \href{#method-remove}{\code{node$remove()}}
+\item \href{#method-check_trigger_condition}{\code{node$check_trigger_condition()}}
+\item \href{#method-check_triggers}{\code{node$check_triggers()}}
+\item \href{#method-reset_triggers}{\code{node$reset_triggers()}}
+\item \href{#method-eval}{\code{node$eval()}}
+\item \href{#method-make}{\code{node$make()}}
+\item \href{#method-clone}{\code{node$clone()}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-vis_params_process"></a>}}
+\subsection{Method \code{vis_params_process()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$vis_params_process(params)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-set_id"></a>}}
+\subsection{Method \code{set_id()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$set_id(id, name, env)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-set_persistence"></a>}}
+\subsection{Method \code{set_persistence()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$set_persistence(persistence)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-print"></a>}}
+\subsection{Method \code{print()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$print(...)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-label"></a>}}
+\subsection{Method \code{label()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$label()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-title"></a>}}
+\subsection{Method \code{title()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$title()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-new"></a>}}
+\subsection{Method \code{new()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$new(
+  id = NULL,
+  name = NULL,
+  env = NULL,
+  desc = NULL,
+  tags = NULL,
+  depends = NULL,
+  trigger_defchange = NULL,
+  trigger_condition = NULL,
+  definition_hash = NULL,
+  persistence = list(enabled = FALSE),
+  .last_evaluated = NULL,
+  .last_changed = NULL,
+  .trigger_defchange = NULL,
+  vis_params = NULL,
+  store = TRUE,
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-store_state"></a>}}
+\subsection{Method \code{store_state()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$store_state(public_fields = NULL, private_fields = NULL)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-update_definition"></a>}}
+\subsection{Method \code{update_definition()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$update_definition(
+  id = NULL,
+  type = NULL,
+  desc = NULL,
+  tags = NULL,
+  depends = NULL,
+  definition_hash = NULL,
+  trigger_condition = NULL,
+  vis_params = NULL,
+  ...,
+  store = TRUE,
+  verbose = TRUE
+)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-set_upstream"></a>}}
+\subsection{Method \code{set_upstream()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$set_upstream(obj)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-set_downstream"></a>}}
+\subsection{Method \code{set_downstream()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$set_downstream(obj)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-connect_to"></a>}}
+\subsection{Method \code{connect_to()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$connect_to(id)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-connect"></a>}}
+\subsection{Method \code{connect()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$connect(verbose = TRUE)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get"></a>}}
+\subsection{Method \code{get()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$get()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-remove"></a>}}
+\subsection{Method \code{remove()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$remove()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-check_trigger_condition"></a>}}
+\subsection{Method \code{check_trigger_condition()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$check_trigger_condition()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-check_triggers"></a>}}
+\subsection{Method \code{check_triggers()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$check_triggers(verbose = TRUE, verbose_prefix = "")}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-reset_triggers"></a>}}
+\subsection{Method \code{reset_triggers()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$reset_triggers()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-eval"></a>}}
+\subsection{Method \code{eval()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$eval(verbose = TRUE, verbose_prefix = "")}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-make"></a>}}
+\subsection{Method \code{make()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$make(force = FALSE, verbose = TRUE, verbose_prefix = "")}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-clone"></a>}}
+\subsection{Method \code{clone()}}{
+The objects of this class are cloneable with this method.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$clone(deep = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{deep}}{Whether to make a deep clone.}
+}
+\if{html}{\out{</div>}}
+}
+}
+}
