@@ -62,6 +62,11 @@ get_id.rflow <- function(x) {
   ls(x)
 }
 
+#' @export
+get_id.node_list <- function(x) {
+  sapply(x, get_id)
+}
+
 # @param x
 # @param id_old
 # @param id_new
@@ -204,15 +209,35 @@ depends.node <- function(x, inverse = FALSE, results = character()) {
   direction <- if (isTRUE(inverse)) "upstream" else "downstream"
 
   if (!length(x[[direction]])) {
-    return(list())
+    return(structure(list(), class = c("node_list", "list")))
   } else {
     return(
-      c(
-        results,
-        x[[direction]],
-        unlist(sapply(x[[direction]], depends, inverse = inverse))
+      structure(
+        c(
+          results,
+          x[[direction]],
+          unlist(sapply(x[[direction]], depends, inverse = inverse))
+        ), 
+        class = c("node_list", "list")
       )
     )
   }
 }
 
+#' @export
+c.node_list <- function(...) {
+  structure(c(...), class = "node_list")
+}
+
+#' @export
+print.node_list <- function(x, ...) {
+  print(get_id(x), ...)
+}
+
+#' @export
+as.list.node_list <- function(x) {
+  y <- x
+  class(y) = "list"
+  
+  y
+}
