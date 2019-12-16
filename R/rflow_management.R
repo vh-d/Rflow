@@ -209,6 +209,7 @@ load_nodes <- function(x, ...) {
 }
 
 
+#' @param x an rflow object
 #' @param conflict logical; How to resolve conflict when an object of the same id already exists in the rflow?
 #' @param verbose logical; print verbose output?
 #' @rdname load_nodes
@@ -221,19 +222,20 @@ load_nodes.rflow <- function(
 ) {
 
   obj_defs <-
-    load_node_definitions(
+    nodes_from_toml(
       path = x$.def_path,
       modified_since = x$.last_updated,
       verbose = verbose)
 
   if (length(obj_defs)) {
-    res <- add_nodes(
-      objs        = obj_defs,
-      rflow       = x,
-      conflict    = conflict,
-      cache       = list(path = x$.cache$path),
-      verbose     = verbose
-    )
+    res <- 
+      add_nodes(
+        objs        = obj_defs,
+        rflow       = x,
+        conflict    = conflict,
+        cache       = list(path = x$.cache$path),
+        verbose     = verbose
+      )
   } else {
     res <- NULL
   }
@@ -244,6 +246,43 @@ load_nodes.rflow <- function(
 }
 
 
+#' Create a list of nodes' definitions
+#'
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+node_definitions <- function(...) {
+  structure(list(...), class = c("node_definitions", "list"))
+}
+
+
+#' Load nodes' definitions from an R script.
+#'
+#' @param file path to R script file
+#' @param encoding passed to parse()
+#' @param ... args passed to source()
+#'
+# @seealso \code(\link(add_nodes)), \code(\link(add_node)
+#' @export
+nodes_from_r_script <- function(file, encoding = "UTF-8", ...) {
+  
+  tempenv <- new.env()
+  result <- source("../test_nodes_as_r_script.R", local = tempenv, encoding = encoding, ...)
+
+  node_defs <- 
+    if (isTRUE(is(result$value, "node_definitions"))) {
+      result$value
+    } else 
+      mget(ls(tempenv), tempenv) # could be as.list() but we would have to drop all potential hidden objects firs
+  
+  node_defs <- process_obj_defs(node_defs)
+  
+  return(node_defs)
+}
+
 
 #' load DAG's objects' definition from TOML files
 #'
@@ -251,7 +290,7 @@ load_nodes.rflow <- function(
 #' @param modified_since a datetime object to keep only newly modified files
 #' @param verbose logical; print verbose output?
 #' @export
-load_node_definitions <- function(path, modified_since = NULL, verbose = TRUE) {
+nodes_from_toml <- function(path, modified_since = NULL, verbose = TRUE) {
 
   if (!requireNamespace("RcppTOML")) stop("Package RcppTOML not available!")
 
