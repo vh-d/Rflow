@@ -549,9 +549,19 @@ r_node <- R6::R6Class(
       saveRDS(object = self$get(), file = file.path(self$cache$path, self$cache$file))
     },
 
-    cache_restore = function() {
-      value <- readRDS(file.path(self$cache$path, self$cache$file))
-      assign(self$name, value, pos = self$r_env)
+    cache_restore = function(delayed = getOption("RFLOW_DELAYED_CACHE_LOAD", default = TRUE)) {
+      if (isTRUE(delayed))
+        delayedAssign(
+          x     = self$name,
+          value = readRDS(file.path(self$cache$path, self$cache$file)),
+          pos   = self$r_env
+        )
+      else
+        assign(
+          x     = self$name,
+          value = readRDS(file.path(self$cache$path, self$cache$file)),
+          pos   = self$r_env
+        )
     },
 
     print = function(...) {
