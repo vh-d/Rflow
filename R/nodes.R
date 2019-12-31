@@ -631,7 +631,7 @@ r_node <- R6::R6Class(
                 self$check_hash()
               },
               error = function(e) {
-                warning("Cache for self$id could not be recovered.\n")
+                warning("Cache for ", self$id, " could not be recovered.\n")
                 self$hash <- NULL # any hash loaded from stored state is meaningless now
               }
             )
