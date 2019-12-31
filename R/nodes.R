@@ -849,11 +849,6 @@ db_node <- R6::R6Class(
         }
 
         self$connection <- solve_connection(connection)
-        # if (is(connection, "DBIconnection")) connection else
-        #   if (is.character(connection)) {
-        #     if (is(get(connection), "DBIconnection")) get(connection) else
-        #       stop(connection, " not a DBIconnection object")
-        #   } else stop("Connection is neither DBI connection nor a name of a DBI connection object")
 
         self$auto_remove <- auto_remove
 
