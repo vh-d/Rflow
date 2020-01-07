@@ -145,6 +145,8 @@ Constructing nodes
   .last_changed = NULL,
   .trigger_defchange = NULL,
   vis_params = NULL,
+  logging = FALSE,
+  loggers = NULL,
   store = TRUE,
   ...
 )}\if{html}{\out{</div>}}
@@ -174,6 +176,8 @@ Constructing nodes
   vis_params = NULL,
   ...,
   store = TRUE,
+  logging = NULL,
+  loggers = NULL,
   verbose = TRUE
 )}\if{html}{\out{</div>}}
 }

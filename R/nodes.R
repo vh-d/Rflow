@@ -65,6 +65,9 @@ node <- R6::R6Class(
     persistence        = NULL,
     trigger_manual     = FALSE,
     trigger_condition  = NULL,
+    
+    logging = NULL,
+    loggers = list(),
 
     vis_params = NULL,
 
@@ -100,7 +103,7 @@ node <- R6::R6Class(
 
       invisible(TRUE)
     },
-
+    
     print = function(...) {
       cat("<", class(self)[1], "> ", crayon::red(self$id), ": ", self$name,  "\n", sep = "")
       if (length(self$desc)) cat("  desc: ", crayon::italic(self$desc),         "\n", sep = "")
@@ -163,6 +166,8 @@ node <- R6::R6Class(
 
         vis_params = NULL,
 
+        logging = FALSE,
+        loggers = NULL,
         store   = TRUE,
         ...
       ) {
@@ -172,6 +177,11 @@ node <- R6::R6Class(
         self$env     <- env
         self$desc    <- desc
 
+        self$logging <- isTRUE(logging)
+        add_loggers(self, loggers)
+        
+        log_record(self, self$id, "Initialization")
+        
         self$definition_hash <- definition_hash
 
         self$set_persistence(persistence)
@@ -210,6 +220,8 @@ node <- R6::R6Class(
       public_fields  = NULL,
       private_fields = NULL
     ) {
+      
+      log_record(self, self$id, "Writing to persistence storage")
 
       public_fields  <-
         unique(
@@ -252,13 +264,20 @@ node <- R6::R6Class(
         depends = NULL,
         definition_hash = NULL,
         trigger_condition = NULL,
-
         vis_params = NULL,
 
         ...,
-        store  = TRUE,
+        store   = TRUE,
+        logging = NULL,
+        loggers = NULL,
         verbose = TRUE
       ) {
+        
+        self$logging <- isTRUE(logging)
+        add_loggers(self, loggers)
+        
+        log_record(self, self$id, "Updating definition")
+        
         self$definition_hash <- definition_hash
 
         # graphics params need to be processed before checking
@@ -369,12 +388,14 @@ node <- R6::R6Class(
 
     # to reset triggers (e.g. after successfull evaluation)
     reset_triggers = function() {
+      log_record(self, self$id, "Resetting triggers.")
+      
       private$.trigger_defchange <- FALSE
-      self$trigger_manual    <- FALSE
+      self$trigger_manual        <- FALSE
 
       # make changes persistent
       if (self$persistence$enabled) self$store_state()
-
+        
       return(invisible(TRUE))
     },
 
@@ -396,17 +417,22 @@ node <- R6::R6Class(
     # in most cases, this is not supposed to be overloaded in custom subclasses
     make = function(force = FALSE, verbose = TRUE, verbose_prefix = "") {
 
+      log_record(self, "Solving make")
       if (verbose) {
         cat(verbose_prefix, "\u250C Solving node ", crayon::red(crayon::bold(self$id)), "\n", sep = "")
       }
 
       # solve/make upstream nodes first
-      if (length(self$upstream) != length(self$depends)) self$connect() # check that it's connected to upstream
-
+      if (length(self$upstream) != length(self$depends)) {
+        log_record(self, "Connecting to upstream nodes")
+        self$connect() # check that it's connected to upstream
+      }
+      
       # do not evaluate unless triggered
       results <- FALSE
 
       # collect triggers from upstream
+      log_record(self, "Resolving upstream nodes")
       upstream_changed_ids <- character()
       for (y in self[["upstream"]]) {
         # upsream can trigger me if it has changed since my last eval
@@ -423,17 +449,21 @@ node <- R6::R6Class(
 
       triggered <-
         if (isTRUE(force)) { # forced evaluation
+          log_record(self, "Triggered by manual trigger")
           if (verbose) notify_trigger(self$id, trigger = "manual trigger",                verbose_prefix = paste0(verbose_prefix, "\u2514 "))
           TRUE
         } else if (!length(self$last_evaluated) || is.na(self$last_evaluated)) {
+          log_record(self, "Triggered by missing datetime of last evaluation")
           if (verbose) notify_trigger(self$id, trigger = "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u2514 "))
           TRUE
         } else if (!isFALSE(results)) {
+          log_record(self, paste0("Triggered by changes of upstream nodes' values(", paste0(upstream_changed_ids, collapse = ", "), ")"))
           if (verbose) notify_trigger(self$id, trigger = paste0("changes in upstream nodes (", paste0(upstream_changed_ids, collapse = ", "), ")"), verbose_prefix = paste0(verbose_prefix, "\u2514 "))
           TRUE
         } else if (!isFALSE(self$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) {
           TRUE
         } else {
+          log_record(self, "Not triggered")
           if (verbose) cat(verbose_prefix, "\u2514 ", crayon::silver(self$id, " not triggered.", sep = ""), "\n", sep = "")
           return(invisible(FALSE))
         }
@@ -515,6 +545,9 @@ r_node <- R6::R6Class(
     # triggers  = NULL, # every node has a list of triggers that are checked before evaluation
 
     cache_setup = function(cache) {
+      
+      log_record(self, self$id, "Setting up cache")
+      
       self$cache <-
         if (is.list(cache) && length(cache$path)) {
           if (dir.exists(cache$path)) {
@@ -546,24 +579,29 @@ r_node <- R6::R6Class(
     },
 
     cache_write = function() {
+      log_record(self, self$id, "Writing cache")
       saveRDS(object = self$get(), file = file.path(self$cache$path, self$cache$file))
     },
 
     cache_restore = function(delayed = getOption("RFLOW_DELAYED_CACHE_LOAD", default = TRUE)) {
-      if (isTRUE(delayed))
+      
+      if (isTRUE(delayed)) {
+        log_record(self, self$id, "Restoring value from cache (immediate)")
         delayedAssign(
           x     = self$name,
           value = readRDS(file.path(self$cache$path, self$cache$file)),
           pos   = self$r_env
         )
-      else
+      } else {
+        log_record(self, self$id, "Restoring value from cache (delayed)")
         assign(
           x     = self$name,
           value = readRDS(file.path(self$cache$path, self$cache$file)),
           pos   = self$r_env
         )
+      }
     },
-
+    
     print = function(...) {
       super$print()
       cat("  cache: \n")
@@ -696,13 +734,16 @@ r_node <- R6::R6Class(
       # for referencing other objects in rflow
       .RFLOW <- parent.env(self)
 
+      log_record(self, self$id, "Evaluation started")
       assign(self$name, eval(self$r_expr), pos = self$r_env)
-
       private$.last_evaluated <- Sys.time()
 
+      log_record(self, self$id, "Evaluation finished")
+      
       # checking hash before signalling change to parent
       changed <- self$check_hash()
 
+      if (changed) log_record(self, self$id, "Value has changed")
       if (verbose) {
         cat(verbose_prefix, crayon::red(self$id), ": done", if (changed) crayon::yellow(" (value has changed)"), ".\n", sep = "")
       }

@@ -2,6 +2,9 @@
 #' Initialize a new DAG
 #'
 #' @param path path to rflow home folder. Nodes' definitions are searched for in this folder, cache and other data is saved into...
+#' @param caching logical;
+#' @param persistence logical;
+#' @param logging logical;
 #'
 #' @return A new rflow object.
 #' @export
@@ -9,40 +12,61 @@
 #' @examples
 #' RF <- new_rflow()
 new_rflow <- function(
-  path = NULL
+  path = NULL,
+  cache       = TRUE,
+  persistence = TRUE,
+  logging     = TRUE
 ) {
   result <- new.env()
   class(result) <- c("rflow", class(result))
-
+  
+  result[[".persistence"]] <- list(enabled = FALSE)
+  result[[".cache"]]       <- list(enabled = FALSE)
+  result[[".logging"]]     <- FALSE
+  result[[".loggers"]]     <- list()
+  
   if (length(path)) {
     result[[".def_path"]] <- path
-
-    persistence_path <- file.path(path, ".rflow", "persistence")
-    if (!dir.exists(persistence_path)) dir.create(persistence_path, recursive = TRUE)
-    .persistence <- list(
-      enabled = TRUE,
-      path    = persistence_path
-    )
-
-    cache_path <- file.path(path, ".rflow", "cache")
-    if (!dir.exists(cache_path)) dir.create(cache_path, recursive = TRUE)
-    .cache <- list(
-      enabled = TRUE,
-      path    = cache_path
-    )
-
-  } else {
-    .persistence <- list(enabled = FALSE)
-    .cache       <- list(enabled = FALSE)
+    
+    if (isTRUE(persistence)) {
+      persistence_path <- file.path(path, ".rflow", "persistence")
+      if (!dir.exists(persistence_path)) dir.create(persistence_path, recursive = TRUE)
+      
+      result[[".persistence"]] <- 
+        list(
+          enabled = TRUE,
+          path    = persistence_path
+        )
+    }
+    
+    if (isTRUE(cache)) {
+      cache_path <- file.path(path, ".rflow", "cache")
+      if (!dir.exists(cache_path)) dir.create(cache_path, recursive = TRUE)
+      
+      result[[".cache"]] <- 
+        list(
+          enabled = TRUE,
+          path    = cache_path
+        )
+    }
+    
+    if (isTRUE(logging)) {
+      log_path <- file.path(path, ".rflow", "log")
+      if (!dir.exists(log_path)) dir.create(log_path, recursive = TRUE)
+      log_file_path <- file.path(log_path, "log.csv")
+      
+      file_handler <- handler_file(path = log_file_path)
+      
+      result[[".logging"]] <- TRUE
+      result[[".loggers"]] <- list(default = logger(name = "RFLOW", handlers = list(file_handler)))
+    }
+    
   }
-
-  result[[".persistence"]] <- .persistence
-  result[[".cache"]]       <- .cache
-
+  
   return(result)
 }
 
-
+  
 #' @export
 print.rflow <- function(x, ...) {
   cat("<rflow>\n")
@@ -51,6 +75,7 @@ print.rflow <- function(x, ...) {
   cat("  path: ", x$.def_path, "\n", sep = "")
   cat("  cache enabled: ",       isTRUE(x$.cache$enabled), "\n",
       "  persistence enabled: ", isTRUE(x$.persistence$enabled),"\n", 
+      "  logging enabled: ", isTRUE(x$.logging),"\n", 
       "  nodes: ", paste0(crayon::red(head(ls(x))), collapse = ", "), ", ...",
       sep = "")
 }
@@ -423,10 +448,25 @@ add_node.list <- function(
     if (recovering) {
       if (verbose) cat(" from a saved state...\n")
       saved_state   <- load_state_of_node(path = fp)
-      initiated_obj <- as_node(saved_state, persistence = rflow$.persistence, ...)
+      initiated_obj <- 
+        as_node(
+          saved_state, 
+          persistence = rflow[[".persistence"]], 
+          logging     = rflow[[".logging"]], 
+          loggers      = rflow[[".loggers"]], 
+          ...
+        )
     } else {
       if (verbose) cat(" as a new object...\n")
-      initiated_obj <- as_node(x, persistence = rflow$.persistence, definition_hash = definition_hash, ...)
+      initiated_obj <- 
+        as_node(
+          x, 
+          persistence     = rflow[[".persistence"]], 
+          logging         = rflow[[".logging"]], 
+          loggers          = rflow[[".loggers"]], 
+          definition_hash = definition_hash, 
+          ...
+        )
     }
 
     # assign reference
