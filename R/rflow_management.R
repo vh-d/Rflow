@@ -19,54 +19,55 @@ new_rflow <- function(
 ) {
   result <- new.env()
   class(result) <- c("rflow", class(result))
-  
+
   result[[".persistence"]] <- list(enabled = FALSE)
   result[[".cache"]]       <- list(enabled = FALSE)
   result[[".logging"]]     <- FALSE
   result[[".loggers"]]     <- list()
-  
+
   if (length(path)) {
     result[[".def_path"]] <- path
-    
+
     if (isTRUE(persistence)) {
       persistence_path <- file.path(path, ".rflow", "persistence")
       if (!dir.exists(persistence_path)) dir.create(persistence_path, recursive = TRUE)
-      
-      result[[".persistence"]] <- 
+
+      result[[".persistence"]] <-
         list(
           enabled = TRUE,
           path    = persistence_path
         )
     }
-    
+
     if (isTRUE(cache)) {
       cache_path <- file.path(path, ".rflow", "cache")
       if (!dir.exists(cache_path)) dir.create(cache_path, recursive = TRUE)
-      
-      result[[".cache"]] <- 
+
+      result[[".cache"]] <-
         list(
           enabled = TRUE,
           path    = cache_path
         )
     }
-    
+
     if (isTRUE(logging)) {
       log_path <- file.path(path, ".rflow", "log")
       if (!dir.exists(log_path)) dir.create(log_path, recursive = TRUE)
       log_file_path <- file.path(log_path, "log.csv")
-      
+
       file_handler <- handler_file(path = log_file_path)
-      
+
       result[[".logging"]] <- TRUE
       result[[".loggers"]] <- list(default = logger(name = "RFLOW", handlers = list(file_handler)))
+      log_record(result, "Rflow initialized")
     }
-    
+
   }
-  
+
   return(result)
 }
 
-  
+
 #' @export
 print.rflow <- function(x, ...) {
   cat("<rflow>\n")
@@ -74,8 +75,8 @@ print.rflow <- function(x, ...) {
   if (length(x$.desc)) cat("  desc: ", crayon::italic(self$desc),         "\n", sep = "")
   cat("  path: ", x$.def_path, "\n", sep = "")
   cat("  cache enabled: ",       isTRUE(x$.cache$enabled), "\n",
-      "  persistence enabled: ", isTRUE(x$.persistence$enabled),"\n", 
-      "  logging enabled: ", isTRUE(x$.logging),"\n", 
+      "  persistence enabled: ", isTRUE(x$.persistence$enabled),"\n",
+      "  logging enabled: ", isTRUE(x$.logging),"\n",
       "  nodes: ", paste0(crayon::red(head(ls(x))), collapse = ", "), ", ...",
       sep = "")
 }
@@ -126,6 +127,8 @@ clean_cache <- function(x, ...) {
 #' @export
 clean_cache.rflow <- function(x, ...) {
 
+  log_record(x, "Cleaning cache")
+
   # warn if not defined and return
   if (!length(x$.cache$path)) {
     warning("Cache dir not defined!")
@@ -148,6 +151,8 @@ clean_cache.rflow <- function(x, ...) {
 #' @method clean_cache node
 #' @export
 clean_cache.node <- function(x, ...) {
+
+  log_record(x, "Cleaning cache")
 
   # warn if not defined and return
   if (!length(x$cache$path)) {
@@ -183,6 +188,8 @@ clean_persistence <- function(x, ...) {
 #' @export
 clean_persistence.rflow <- function(x) {
 
+  log_record(x, "Cleaning persistence storage")
+
   # warn if not defined and return
   if (!length(x$.persistence$path)) {
     warning("Persistence storage folder not defined!")
@@ -205,6 +212,8 @@ clean_persistence.rflow <- function(x) {
 #' @method clean_persistence node
 #' @export
 clean_persistence.node <- function(x) {
+
+  log_record(x, "Cleaning persistence storage")
 
   # warn if not defined and return
   if (!length(x$persistence$path)) {
@@ -253,7 +262,7 @@ load_nodes.rflow <- function(
       verbose = verbose)
 
   if (length(obj_defs)) {
-    res <- 
+    res <-
       add_nodes(
         objs        = obj_defs,
         rflow       = x,
@@ -273,7 +282,7 @@ load_nodes.rflow <- function(
 
 #' Create a list of nodes' definitions
 #'
-#' @param ... 
+#' @param ...
 #'
 #' @return
 #' @export
@@ -293,18 +302,18 @@ node_definitions <- function(...) {
 # @seealso \code(\link(add_nodes)), \code(\link(add_node)
 #' @export
 nodes_from_r_script <- function(file, encoding = "UTF-8", ...) {
-  
+
   tempenv <- new.env()
   result <- source("../test_nodes_as_r_script.R", local = tempenv, encoding = encoding, ...)
 
-  node_defs <- 
+  node_defs <-
     if (isTRUE(is(result$value, "node_definitions"))) {
       result$value
-    } else 
+    } else
       mget(ls(tempenv), tempenv) # could be as.list() but we would have to drop all potential hidden objects firs
-  
+
   node_defs <- process_obj_defs(node_defs)
-  
+
   return(node_defs)
 }
 
@@ -417,7 +426,8 @@ add_node.list <- function(
   ...,
   conflict = "update",
   connect  = FALSE,
-  verbose  = TRUE) {
+  verbose  = TRUE
+) {
 
   # extract object's id
   id <- get_id(x)
@@ -448,23 +458,23 @@ add_node.list <- function(
     if (recovering) {
       if (verbose) cat(" from a saved state...\n")
       saved_state   <- load_state_of_node(path = fp)
-      initiated_obj <- 
+      initiated_obj <-
         as_node(
-          saved_state, 
-          persistence = rflow[[".persistence"]], 
-          logging     = rflow[[".logging"]], 
-          loggers      = rflow[[".loggers"]], 
+          saved_state,
+          persistence = rflow[[".persistence"]],
+          logging     = rflow[[".logging"]],
+          loggers      = rflow[[".loggers"]],
           ...
         )
     } else {
       if (verbose) cat(" as a new object...\n")
-      initiated_obj <- 
+      initiated_obj <-
         as_node(
-          x, 
-          persistence     = rflow[[".persistence"]], 
-          logging         = rflow[[".logging"]], 
-          loggers          = rflow[[".loggers"]], 
-          definition_hash = definition_hash, 
+          x,
+          persistence     = rflow[[".persistence"]],
+          logging         = rflow[[".logging"]],
+          loggers          = rflow[[".loggers"]],
+          definition_hash = definition_hash,
           ...
         )
     }
@@ -650,6 +660,8 @@ make.rflow <- function(
   force = FALSE,
   verbose = TRUE
 ) {
+
+  log_record(rflow, "Make", sys_call_formatted())
   if (verbose) cat(rep("\u2500", 3), " Make ", rep("\u2500", 25), "\n\n", sep = "")
 
   E <- edges(rflow)
@@ -706,10 +718,12 @@ delete <- function(x, ...) {
 #' @export
 #' @method delete node
 delete.node <- function(x, completely = FALSE, cache = FALSE | completely, persistency = FALSE | completely, value = FALSE | completely, ...) {
+
   if (isTRUE(cache)) clean_cache(x)
   if (isTRUE(persistency)) clean_persistence(x)
   if (isTRUE(value)) x$remove()
 
+  log_record(x, "Removing node object")
   rm(list = x$id, envir = parent.env(x))
 
   return(TRUE)

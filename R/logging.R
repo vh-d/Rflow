@@ -10,11 +10,11 @@ logger <- function(name = "ROOT", enabled = TRUE, handlers = NULL) {
         "name"     = as.character(name),
         "enabled"  = isTRUE(enabled),
         "handlers" = as.list(handlers)
-      ), 
+      ),
       envir = new.env(parent = emptyenv())
     )
   )
-  
+
   return(new_logger)
 }
 
@@ -46,14 +46,14 @@ add_handler.handler <- function(x, y) {
 #' @export
 add_handler.logger.handler <- function(logger, handler) {
   logger[["handlers"]] <- unique(c(handler, handler[["handlers"]]))
-  
+
   invisible(TRUE)
 }
 
 #' @export
 add_handler.handler.logger <- function(handler, logger) {
   logger[["handlers"]] <- unique(c(handler, handler[["handlers"]]))
-  
+
   invisible(TRUE)
 }
 
@@ -64,18 +64,18 @@ log_record <- function(x, ...) {
 
 #' @export
 log_record.logger <- function(logger, ...) {
-  
+
   # distribute record to all handlers
   for (handler in logger[["handlers"]]) {
     log_record(handler, format(Sys.time()), logger[["name"]], ...)
   }
-  
+
   invisible(TRUE)
 }
 
 #' @export
 log_record.rflow <- function(rflow, ...) {
-  log_record(rflow[[".loggers"]], ...)
+  log_record(rflow[[".loggers"]], "RFLOW", ...)
 }
 
 #' @export
@@ -105,7 +105,7 @@ handler_file <- function(path, open = TRUE, enable = TRUE) {
   new_handler[["path"]] <- path
   new_handler[["enabled"]] <- isTRUE(enable)
   new_handler[["con"]] <- if (isTRUE(open)) file(path, "a+", encoding = "UTF-8", blocking = TRUE)
-  
+
   return(new_handler)
 }
 
@@ -118,7 +118,7 @@ close.handler_file <- function(x) {
 #' @export
 open.handler_file <- function(x) {
   x[["con"]] <- file(x[["path"]])
-  
+
   invisible(TRUE)
 }
 
@@ -139,3 +139,4 @@ log_record.handler_file <- function(handler, ...) {
 log_record.node <- function(x, ...) {
   if (!isFALSE(x$logging)) log_record(x$loggers, x$id, ...)
 }
+

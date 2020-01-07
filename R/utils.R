@@ -63,6 +63,26 @@ deescape_quotes <- function(x) {
 }
 
 
+escape_special <- function(x) {
+  x -> .
+  . <- gsub("\n", "\\n", ., fixed = TRUE)
+  . <- gsub("\t", "\\t", ., fixed = TRUE)
+
+  .
+}
+
+#' @export
+sys_call_formatted <- function(which = 1) {
+  . <- sys.call(which = 1)
+  . <- as.expression(.)
+  . <- as.character(.)
+  . <- paste0(., collapse = "")
+  . <- escape_special(.)
+
+  .
+}
+
+
 sql_structure <- function(x, ...) {
   UseMethod("sql_structure", x)
 }

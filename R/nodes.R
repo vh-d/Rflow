@@ -65,7 +65,7 @@ node <- R6::R6Class(
     persistence        = NULL,
     trigger_manual     = FALSE,
     trigger_condition  = NULL,
-    
+
     logging = NULL,
     loggers = list(),
 
@@ -103,7 +103,7 @@ node <- R6::R6Class(
 
       invisible(TRUE)
     },
-    
+
     print = function(...) {
       cat("<", class(self)[1], "> ", crayon::red(self$id), ": ", self$name,  "\n", sep = "")
       if (length(self$desc)) cat("  desc: ", crayon::italic(self$desc),         "\n", sep = "")
@@ -179,9 +179,9 @@ node <- R6::R6Class(
 
         self$logging <- isTRUE(logging)
         add_loggers(self, loggers)
-        
+
         log_record(self, self$id, "Initialization")
-        
+
         self$definition_hash <- definition_hash
 
         self$set_persistence(persistence)
@@ -273,12 +273,12 @@ node <- R6::R6Class(
         loggers = NULL,
         verbose = TRUE
       ) {
-        
+
         self$logging <- isTRUE(logging)
         add_loggers(self, loggers)
-        
+
         log_record(self, self$id, "Updating definition")
-        
+
         self$definition_hash <- definition_hash
 
         # graphics params need to be processed before checking
@@ -390,13 +390,13 @@ node <- R6::R6Class(
     # to reset triggers (e.g. after successfull evaluation)
     reset_triggers = function() {
       log_record(self, self$id, "Resetting triggers.")
-      
+
       private$.trigger_defchange <- FALSE
       self$trigger_manual        <- FALSE
 
       # make changes persistent
       if (self$persistence$enabled) self$store_state()
-        
+
       return(invisible(TRUE))
     },
 
@@ -428,7 +428,7 @@ node <- R6::R6Class(
         log_record(self, "Connecting to upstream nodes")
         self$connect() # check that it's connected to upstream
       }
-      
+
       # do not evaluate unless triggered
       results <- FALSE
 
@@ -546,9 +546,9 @@ r_node <- R6::R6Class(
     # triggers  = NULL, # every node has a list of triggers that are checked before evaluation
 
     cache_setup = function(cache) {
-      
+
       log_record(self, self$id, "Setting up cache")
-      
+
       self$cache <-
         if (is.list(cache) && length(cache$path)) {
           if (dir.exists(cache$path)) {
@@ -585,7 +585,7 @@ r_node <- R6::R6Class(
     },
 
     cache_restore = function(delayed = getOption("RFLOW_DELAYED_CACHE_LOAD", default = TRUE)) {
-      
+
       if (isTRUE(delayed)) {
         log_record(self, self$id, "Restoring value from cache (immediate)")
         delayedAssign(
@@ -602,7 +602,7 @@ r_node <- R6::R6Class(
         )
       }
     },
-    
+
     print = function(...) {
       super$print()
       cat("  cache: \n")
@@ -740,7 +740,7 @@ r_node <- R6::R6Class(
       private$.last_evaluated <- Sys.time()
 
       log_record(self, self$id, "Evaluation finished")
-      
+
       # checking hash before signalling change to parent
       changed <- self$check_hash()
 
