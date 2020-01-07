@@ -16,7 +16,7 @@ as_node.list <- function(
   type = if (!is.null(x$type)) x$type else "r_node",  # if not given type is r_node by default
   ... # other arguments to the initialize() constructor
 ) {
-  do.call(get(type)$new, args = c(x, list(...)))
+  do.call(get(type)$new, args = union.list(x, list(...)))
 }
 
 #' @export
