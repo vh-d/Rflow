@@ -220,7 +220,7 @@ node <- R6::R6Class(
       public_fields  = NULL,
       private_fields = NULL
     ) {
-      
+
       log_record(self, self$id, "Writing to persistence storage")
 
       public_fields  <-
@@ -229,6 +229,7 @@ node <- R6::R6Class(
             "id", "name", "env",
             "desc", "tags",
             "depends",
+            "logging",
             "definition_hash",
             "trigger_condition",
             "vis_params",
