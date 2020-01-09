@@ -238,6 +238,12 @@ as_r_expr <- function(x) {
 
 #' @export
 #' @rdname as_r_expr
+as_r_expr.NULL <- function(x) {
+  return(NULL)
+}
+
+#' @export
+#' @rdname as_r_expr
 as_r_expr.default <- function(x) {
   warning("Coercing ", substitute(x), " to a character")
   as_r_expr(as.character(x))

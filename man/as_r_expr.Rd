@@ -2,12 +2,15 @@
 % Please edit documentation in R/job.R
 \name{as_r_expr}
 \alias{as_r_expr}
+\alias{as_r_expr.NULL}
 \alias{as_r_expr.default}
 \alias{as_r_expr.expression}
 \alias{as_r_expr.character}
 \title{Returns R expression from either R expression or parsed R code}
 \usage{
 as_r_expr(x)
+
+\method{as_r_expr}{`NULL`}(x)
 
 \method{as_r_expr}{default}(x)
 
