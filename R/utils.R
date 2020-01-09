@@ -104,8 +104,8 @@ null2na <- function(x) if (is.null(x)) return(NA) else x
 
 
 firstnotnull <- function(...) {
+  # if (is.null(substitute(...))) return(NULL)
   i <- sapply(list(...), is.null)
-
-  return(list(...)[[min(which(!i))]])
+  if (any(!i)) return(list(...)[[min(which(!i))]]) else NULL
 }
 
