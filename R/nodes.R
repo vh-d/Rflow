@@ -693,9 +693,10 @@ r_node <- R6::R6Class(
         return(invisible(TRUE))
       },
 
-    store_state = function() {
+    store_state = function(public_fields = NULL, private_fields = NULL) {
       super$store_state(
-        public_fields  = c("r_expr", "hash")
+        public_fields  = unique(public_fields, c("r_expr", "hash")),
+        private_fields = private_fields
       )
     },
 
@@ -862,8 +863,8 @@ db_node <- R6::R6Class(
     mode       = NULL,
     driver     = NULL,
     connection = NULL,
+    read_args  = NULL,
     sql        = NULL,
-
     r_expr     = NULL,
 
     auto_remove = NULL,
@@ -877,6 +878,7 @@ db_node <- R6::R6Class(
         r_code   = NULL,
         r_expr   = NULL,  # R expression
         connection = NULL,
+        read_args = NULL,
         .last_evaluated = NULL,
         type     = NULL,
         store    = TRUE
@@ -891,7 +893,7 @@ db_node <- R6::R6Class(
         }
 
         self$connection <- solve_connection(connection)
-
+        self$read_args <- read_args
         self$auto_remove <- auto_remove
 
         # TODO: we need to handle situations when node is modified from R job to SQL job
@@ -914,9 +916,10 @@ db_node <- R6::R6Class(
         return(invisible(TRUE))
       },
 
-    store_state = function() {
+    store_state = function(public_fields = NULL, private_fields = NULL) {
       super$store_state(
-        public_fields  = c("r_expr", "sql", "mode", "auto_remove")
+        public_fields  = unique(public_fields, c("read_args", "r_expr", "sql", "mode", "auto_remove")),
+        private_fields = private_fields
       )
     },
 
@@ -929,6 +932,7 @@ db_node <- R6::R6Class(
         r_code   = NULL,
         r_expr   = NULL,  # R expression (from r_code)
         connection = NULL,
+        read_args = NULL,
         store    = TRUE,
         verbose  = FALSE
       ) {
@@ -939,6 +943,7 @@ db_node <- R6::R6Class(
         }
 
         self$connection <- solve_connection(connection)
+        self$read_args  <- read_args
 
         if (length(auto_remove) && !identical(self$auto_remove, auto_remove)) {
           self$auto_remove <- auto_remove
@@ -1101,9 +1106,19 @@ db_node <- R6::R6Class(
       )
     },
 
-    get = function() {
+    get = function(...) {
       if (self$exists()) {
-        return(DBI::dbReadTable(conn = self$connection, name = self$name))
+        do.call(
+          DBI::dbReadTable,
+          args = union.list(
+            self$read_args,
+            list(
+              conn = self$connection,
+              name = self$name,
+              ...
+            )
+          )
+        )
       } else {
         warning("Object ", self$id, " (", self$name, ")", " does not exist.")
         return(NULL)
@@ -1167,7 +1182,17 @@ accdb_node <- R6::R6Class(
 
     get = function() {
       if (self$exists()) {
-        return(odbc32::sqlFetch(con = self$connection, name = self$name))
+        do.call(
+          odbc32::sqlFetch,
+          args = union.list(
+            self$read_args,
+            list(
+              con = self$connection,
+              name = self$name,
+              ...
+            )
+          )
+        )
       } else {
         warning("Object ", self$id, " (", self$name, ")", " does not exist.")
         return(NULL)
@@ -1280,9 +1305,10 @@ excel_sheet <- R6::R6Class(
         return(invisible(TRUE))
       },
 
-    store_state = function() {
+    store_state = function(public_fields = NULL, private_fields = NULL) {
       super$store_state(
-        public_fields  = c("path", "sheet", "hash")
+        public_fields  = unique(public_fields, c("path", "sheet", "read_args", "hash")),
+        private_fields = private_fields
       )
     },
 
@@ -1321,9 +1347,19 @@ excel_sheet <- R6::R6Class(
       return(FALSE)
     },
 
-    get = function() {
+    get = function(...) {
       if (self$exists()) {
-        do.call(openxlsx::read.xlsx, args = c(list(xlsxFile = self$path, sheet = self$sheet), self$read_args))
+        do.call(
+          openxlsx::read.xlsx,
+          args = union.list(
+            self$read_args,
+            list(
+              xlsxFile = self$path,
+              sheet    = self$sheet,
+              ...
+            ),
+          )
+        )
       } else stop(self$id, ": sheet '", self$sheet, "' does not exists in ", self$path)
     },
 
@@ -1448,9 +1484,10 @@ file_node <- R6::R6Class(
         return(invisible(TRUE))
       },
 
-    store_state = function() {
+    store_state = function(public_fields = NULL, private_fields = NULL) {
       super$store_state(
-        public_fields  = c("r_expr", "path", "hash")
+        public_fields  = unique(public_fields, c("r_expr", "path", "hash")),
+        private_fields = private_fields
       )
     },
 
@@ -1611,12 +1648,19 @@ csv_node <- R6::R6Class(
         return(invisible(TRUE))
       },
 
-    get = function() {
+    store_state = function(public_fields = NULL, private_fields = NULL) {
+      super$store_state(
+        public_fields  = unique(public_fields, "read_args"),
+        private_fields = private_fields
+      )
+    },
+
+    get = function(...) {
       do.call(
         if (requireNamespace("data.table")) data.table::fread else read.csv,
-        args = c(
-          list(file = self$path),
-          self$read_args
+        args = union.list(
+          self$read_args,
+          list(file = self$path, ...)
         )
       )
     }
