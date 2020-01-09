@@ -1625,6 +1625,7 @@ file_node <- R6::R6Class(
 
 # csv_node ----------------------------------------------------------------
 # basically a file node with get() function implemented
+#' @export
 csv_node <- R6::R6Class(
 
   classname = "csv_node",
@@ -1636,8 +1637,8 @@ csv_node <- R6::R6Class(
     initialize =
       function(
         ...,
-        store     = TRUE,
-        read_args = NULL
+        read_args = NULL,
+        store     = TRUE
       ) {
         super$initialize(..., store = FALSE)
 
@@ -1657,7 +1658,7 @@ csv_node <- R6::R6Class(
 
     get = function(...) {
       do.call(
-        if (requireNamespace("data.table")) data.table::fread else read.csv,
+        data.table::fread,
         args = union.list(
           self$read_args,
           list(file = self$path, ...)
