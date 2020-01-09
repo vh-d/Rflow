@@ -10,7 +10,6 @@ test_that("nodes can be initiated", {
 
   node1 <- Rflow::node$new(id = "node1")
   expect_s3_class(object = node1, class = "node")
-  expect_s3_class(object = node1, class = "R6")
 
   expect_is(node1$persistence, "list")
   expect_false(node1$persistence$enabled)
@@ -46,7 +45,6 @@ test_that("nodes can be initiated", {
   node1 <- Rflow::r_node$new(id = "node1", r_expr = expression_r(1))
   expect_s3_class(object = node1, class = "r_node")
   expect_s3_class(object = node1, class = "node")
-  expect_s3_class(object = node1, class = "R6")
 
   expect_is(node1$persistence, "list")
   expect_false(node1$persistence$enabled)
@@ -92,7 +90,6 @@ test_that("nodes can be initiated", {
   node1 <- Rflow::file_node$new(id = "node1", r_expr = expression_r(1), path = tmp_file)
   expect_s3_class(object = node1, class = "file_node")
   expect_s3_class(object = node1, class = "node")
-  expect_s3_class(object = node1, class = "R6")
 
   expect_is(node1$persistence, "list")
   expect_false(node1$persistence$enabled)
@@ -117,13 +114,44 @@ test_that("nodes can be initiated", {
   node1 <- Rflow::excel_sheet$new(id = "node1", path = tmp_file)
   expect_s3_class(object = node1, class = "excel_sheet")
   expect_s3_class(object = node1, class = "node")
-  expect_s3_class(object = node1, class = "R6")
 
-  expect_is(node1$persistence, "list")
   expect_false(node1$persistence$enabled)
 
   expect_null(node1$depends)
   expect_null(node1$trigger_condition)
   expect_true(is.null(node1$last_evaluated) || is.na(node1$last_evaluated))
+
+  data("iris")
+  iris$Species <- as.character(iris$Species)
+  openxlsx::write.xlsx(iris, tmp_file)
+  iris_from_file <- node1$get()
+  expect_identical(iris, iris_from_file, "Data can be restored.")
+})
+
+
+context("Constructing csv file nodes")
+
+test_that("nodes can be initiated", {
+  expect_error(Rflow::csv_node$new(),               regexp = "[Mm]issing", info = "initialization requires id or env + name")
+  expect_error(Rflow::csv_node$new(name = "node1"), regexp = "[Mm]issing", info = "initialization requires id or env + name")
+  expect_error(Rflow::csv_node$new(env  = "env1"),  regexp = "[Mm]issing", info = "initialization requires id or env + name")
+  expect_error(Rflow::csv_node$new(id = "node1"),   regexp = "[Mm]issing", info = "initialization requires file path")
+
+  tmp_file <- tempfile()
+
+  node1 <- Rflow::csv_node$new(id = "node1", path = tmp_file)
+  expect_s3_class(object = node1, class = "csv_node")
+  expect_s3_class(object = node1, class = "node")
+
+  expect_false(node1$persistence$enabled)
+
+  expect_null(node1$depends)
+  expect_null(node1$trigger_condition)
+  expect_true(is.null(node1$last_evaluated) || is.na(node1$last_evaluated))
+
+  data("iris")
+  write.csv(x = iris, file = tmp_file, row.names = FALSE)
+  iris_from_file <- as.data.frame(node1$get(stringsAsFactors = TRUE))
+  expect_identical(iris, iris_from_file, "Data can be restored.")
 })
 
