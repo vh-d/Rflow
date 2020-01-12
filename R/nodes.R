@@ -907,7 +907,7 @@ db_node <- R6::R6Class(
           self$mode <- "SQL"
           self$sql <- sql_structure(sql_code)
         } else
-          warning(id, ": no R expression/code or SQL code!")
+          warning(self$id, ": no R expression/code or SQL code!")
 
         private$.last_evaluated <- if (length(.last_evaluated)) .last_evaluated else as.POSIXct(NA)
 
