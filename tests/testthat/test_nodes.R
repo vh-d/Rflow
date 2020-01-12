@@ -1,7 +1,7 @@
 
 # node --------------------------------------------------------------------
 
-context("Constructing generic node object")
+context("generic node object")
 
 test_that("nodes can be initiated", {
   expect_error(Rflow::node$new(),               regexp = "[Mm]issing", info = "initialization requires id or env + name")
@@ -11,9 +11,6 @@ test_that("nodes can be initiated", {
   node1 <- Rflow::node$new(id = "node1")
   expect_s3_class(object = node1, class = "node")
 
-  expect_is(node1$persistence, "list")
-  expect_false(node1$persistence$enabled)
-
   expect_null(node1$depends)
   expect_null(node1$trigger_condition)
 
@@ -21,21 +18,12 @@ test_that("nodes can be initiated", {
   expect_equal(node12$id, "env.node12", info = "Nodes can be initialize with name/env pair instead of id")
 })
 
-test_that("nodes can be initiated with persistence", {
-  tmp_rflow_dir <- tempdir()
-  node2 <- Rflow::node$new(id = "node2", persistence = list(path = tmp_rflow_dir))
-
-  expect_is(node2$persistence, "list")
-  expect_true(node2$persistence$enabled)
-
-})
-
 
 
 # r_node ------------------------------------------------------------------
 
 
-context("Constructing r_node objects")
+context("r_node objects")
 
 test_that("nodes can be initiated", {
   expect_error(Rflow::r_node$new(),               regexp = "[Mm]issing", info = "initialization requires id or env + name")
@@ -54,30 +42,11 @@ test_that("nodes can be initiated", {
   expect_true(is.null(node1$last_evaluated) || is.na(node1$last_evaluated))
 })
 
-test_that("nodes can be initiated with persistence", {
-  tmp_rflow_dir <- tempdir()
-  node2 <- Rflow::r_node$new(id = "node2", r_expr = expression_r(1), persistence = list(path = tmp_rflow_dir))
-  expect_is(node2$persistence, "list")
-  expect_true(node2$persistence$enabled)
-  expect_equal(node2$persistence$path, tmp_rflow_dir)
-  expect_true(file.exists(file.path(node2$persistence$path, node2$persistence$file)))
-})
-
-test_that("nodes can be initiated with caching", {
-  tmp_rflow_dir <- tempdir()
-  node3 <- Rflow::r_node$new(id = "node3", r_expr = expression_r(1), cache = list(path = tmp_rflow_dir), verbose = FALSE)
-  expect_true(node3$cache$enabled)
-  expect_equal(node3$cache$path, tmp_rflow_dir)
-  expect_error(node3$cache_write(), info = "cache cannot be written without existing value")
-  # expect_true(file.exists(file.path(node3$cache$path, node3$cache$file)))
-})
-
-
 
 # file_node ---------------------------------------------------------------
 
 
-context("Constructing file_node objects")
+context("file_node objects")
 
 test_that("nodes can be initiated", {
   expect_error(Rflow::file_node$new(),               regexp = "[Mm]issing", info = "initialization requires id or env + name")
@@ -129,9 +98,13 @@ test_that("nodes can be initiated", {
 })
 
 
-context("Constructing csv file nodes")
 
-test_that("nodes can be initiated", {
+# csv_node ----------------------------------------------------------------
+
+
+context("csv file nodes")
+
+test_that("csv nodes can be initiated", {
   expect_error(Rflow::csv_node$new(),               regexp = "[Mm]issing", info = "initialization requires id or env + name")
   expect_error(Rflow::csv_node$new(name = "node1"), regexp = "[Mm]issing", info = "initialization requires id or env + name")
   expect_error(Rflow::csv_node$new(env  = "env1"),  regexp = "[Mm]issing", info = "initialization requires id or env + name")
@@ -153,5 +126,70 @@ test_that("nodes can be initiated", {
   write.csv(x = iris, file = tmp_file, row.names = FALSE)
   iris_from_file <- as.data.frame(node1$get(stringsAsFactors = TRUE))
   expect_identical(iris, iris_from_file, "Data can be restored.")
+})
+
+
+# excel_sheet ----------------------------------------------------------------
+
+
+context("Excel sheet nodes")
+
+test_that("csv nodes can be initiated", {
+  expect_error(Rflow::excel_sheet$new(),               regexp = "[Mm]issing", info = "initialization requires id or env + name")
+  expect_error(Rflow::excel_sheet$new(name = "node1"), regexp = "[Mm]issing", info = "initialization requires id or env + name")
+  expect_error(Rflow::excel_sheet$new(env  = "env1"),  regexp = "[Mm]issing", info = "initialization requires id or env + name")
+  expect_error(Rflow::excel_sheet$new(id = "node1"),   regexp = "[Mm]issing", info = "initialization requires file path")
+
+  tmp_file <- tempfile()
+
+  node1 <- Rflow::excel_sheet$new(id = "node1", path = tmp_file)
+  expect_s3_class(object = node1, class = "excel_sheet")
+  expect_s3_class(object = node1, class = "node")
+
+  expect_false(node1$persistence$enabled)
+
+  expect_null(node1$depends)
+  expect_null(node1$trigger_condition)
+  expect_true(is.null(node1$last_evaluated) || is.na(node1$last_evaluated))
+
+  data("iris")
+  iris$Species <- as.character(iris$Species)
+  openxlsx::write.xlsx(x = iris, file = tmp_file, row.names = FALSE)
+  iris_from_file <- as.data.frame(node1$get())
+  expect_identical(iris, iris_from_file, "Data can be restored.")
+})
+
+
+
+# db_node -----------------------------------------------------------------
+
+context("db nodes")
+
+test_that("db nodes can be initiated", {
+  expect_error(Rflow::db_node$new(),               regexp = "[Mm]issing", info = "initialization requires id or env + name")
+  expect_error(Rflow::db_node$new(name = "node1"), regexp = "[Mm]issing", info = "initialization requires id or env + name")
+  expect_error(Rflow::db_node$new(env  = "env1"),  regexp = "[Mm]issing", info = "initialization requires id or env + name")
+  expect_error(Rflow::db_node$new(id   = "node1"), regexp = "solve_connection", info = "initialization requires connectionobject")
+
+  db1 <<- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+  # on.exit(DBI::dbDisconnect(db1))
+
+  expect_warning(node1 <- Rflow::db_node$new(env = "db1", name = "node1"), regexp = "expression")
+  expect_s3_class(object = node1, class = "db_node")
+  expect_s3_class(object = node1, class = "node")
+
+  expect_false(node1$persistence$enabled)
+
+  expect_null(node1$depends)
+  expect_null(node1$trigger_condition)
+  expect_true(is.null(node1$last_evaluated) || is.na(node1$last_evaluated))
+
+  data("iris")
+  iris$Species <- as.character(iris$Species)
+  DBI::dbWriteTable(conn = node1$connection, value = iris, name = "node1", connection = db1)
+  iris_from_db <- as.data.frame(node1$get())
+  expect_identical(iris, iris_from_db, "Data can be restored.")
+
+  DBI::dbDisconnect(db1)
 })
 
