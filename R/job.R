@@ -294,8 +294,10 @@ as_r_expr.character <- function(x) {
 #' @export
 #' @seealso \code{\link[base]{expression}}
 #' @examples
+#' \dontrun{
 #' identical(expression(1+1), expression_r(1+1))
 #' identical(expression({1+1}), expression_r({1+1}))
+#' }
 expression_r <- function(x){
   # simulate behaviour of expression() (but accept only one argument)
   exprs <- match.call(expand.dots = TRUE)
@@ -311,8 +313,6 @@ expression_r <- function(x){
 #' @param verbose_prefix prefix to be added after every new-line symbol
 #'
 #' @return
-#'
-#' @examples
 add_prefix <- function(x, prefix = "", color_main = NULL, color_prefix = NULL) {
   . <- unlist(crayon::col_strsplit(x, split = "\n", fixed = TRUE))
   . <- paste0(prefix, .)

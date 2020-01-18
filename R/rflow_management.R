@@ -10,7 +10,9 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' RF <- new_rflow()
+#' }
 new_rflow <- function(
   path = NULL,
   cache       = TRUE,
@@ -286,8 +288,6 @@ load_nodes.rflow <- function(
 #'
 #' @return
 #' @export
-#'
-#' @examples
 node_definitions <- function(...) {
   structure(list(...), class = c("node_definitions", "list"))
 }
