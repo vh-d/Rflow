@@ -1,6 +1,10 @@
 # logger ------------------------------------------------------------------
 
-
+#' logger constructor
+#' @param name name of the logger
+#' @param enabled logical; enable the logger on initialization?
+#' @param handlers a list of handlers can be supplied
+#'
 #' @export
 logger <- function(name = "ROOT", enabled = TRUE, handlers = NULL) {
   new_logger <- structure(
@@ -28,6 +32,10 @@ print.logger <- function(x) {
 
 
 
+#' Add a handler to a logger
+#' @param x logger
+#' @param y handler
+#'
 #' @export
 add_handler <- function(x, y) {
   UseMethod("add_handler", x)
@@ -57,11 +65,17 @@ add_handler.handler.logger <- function(handler, logger) {
   invisible(TRUE)
 }
 
+#' Log a record/message
+#' @param x an object of class that supprt logging
+#' @param ... args passed to a logger
+#' @rdname log_record
+#'
 #' @export
 log_record <- function(x, ...) {
   UseMethod("log_record", x)
 }
 
+#' @rdname log_record
 #' @export
 log_record.logger <- function(logger, ...) {
 
@@ -73,11 +87,13 @@ log_record.logger <- function(logger, ...) {
   invisible(TRUE)
 }
 
+#' @rdname log_record
 #' @export
 log_record.rflow <- function(rflow, ...) {
   log_record(rflow[[".loggers"]], "RFLOW", ...)
 }
 
+#' @rdname log_record
 #' @export
 log_record.list <- function(x, ...) {
   for (i in x) {
@@ -85,6 +101,11 @@ log_record.list <- function(x, ...) {
   }
 }
 
+
+#' Add loggers to an object
+#' @param x a node object
+#' @param loggers a list of loggers
+#'
 #' @export
 add_loggers <- function(x, loggers) {
   UseMethod("add_loggers", x)
@@ -95,10 +116,20 @@ add_loggers.node <- function(x, loggers) {
   x$loggers <- unique(c(list(), x$loggers, loggers))
 }
 
+
+
+
 # handler -----------------------------------------------------------------
 
 
 
+#' Handler constructors
+#' @param path to a log file
+#' @param open logical; open the connection immediately
+#' @param enable logical; enable the handler
+#'
+#' @rdname handler_contructors
+#'
 #' @export
 handler_file <- function(path, open = TRUE, enable = TRUE) {
   new_handler <- structure(new.env(), class = c("handler_file", "handler"))
