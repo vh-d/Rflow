@@ -142,7 +142,7 @@ handler_file <- function(path, open = TRUE, enable = TRUE) {
 
 #' @export
 close.handler_file <- function(x) {
-  close(x[["con"]])
+  if (has_open_con(x)) close(x[["con"]]) else invisible(0L)
 }
 
 

@@ -1,6 +1,14 @@
 
 context("Test logging")
 
+readAndClose <- function(path) {
+  con <- file(path)
+  res <- readLines(con)
+  close(con)
+
+  res
+}
+
 tmpf1 <- tempfile()
 tmpf2 <- tempfile()
 
@@ -34,7 +42,7 @@ test_that("Log messages get to the log files", {
   log_record(logger1, m1)
 
   close(fh1$con)
-  obs_log <- readLines(file(fh1$path))
+  obs_log <- readAndClose(fh1$path)
   expect_length(obs_log, 1L) # Log file has exacatly one line of text
   expect_true(any(grepl(m1, obs_log, fixed = TRUE)))
 
@@ -42,12 +50,12 @@ test_that("Log messages get to the log files", {
   log_record(logger12, m2)
 
   close(fh1$con)
-  obs_log <- readLines(file(fh1$path))
+  obs_log <- readAndClose(fh1$path)
   expect_length(obs_log, 2) # the first log now received both messages
   expect_true(any(grepl(m2, obs_log, fixed = TRUE)))
 
   close(fh2$con)
-  obs_log <- readLines(file(fh2$path))
+  obs_log <- readAndClose(fh2$path)
   expect_length(obs_log, 1) # the second log received only the second message
   expect_false(any(grepl(m1, obs_log, fixed = TRUE)))
   expect_true( any(grepl(m2, obs_log, fixed = TRUE)))
