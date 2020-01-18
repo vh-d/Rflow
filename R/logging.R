@@ -135,7 +135,7 @@ handler_file <- function(path, open = TRUE, enable = TRUE) {
   new_handler <- structure(new.env(), class = c("handler_file", "handler"))
   new_handler[["path"]] <- path
   new_handler[["enabled"]] <- isTRUE(enable)
-  new_handler[["con"]] <- if (isTRUE(open)) file(path, "a+", encoding = "UTF-8", blocking = TRUE)
+  new_handler[["con"]] <- if (isTRUE(open)) file(path, "a", encoding = "UTF-8", blocking = FALSE)
 
   return(new_handler)
 }
@@ -148,26 +148,37 @@ close.handler_file <- function(x) {
 
 #' @export
 open.handler_file <- function(x) {
-  x[["con"]] <- file(x[["path"]])
+  x[["con"]] <- file(x[["path"]], open = "a", encoding = "UTF-8")
 
   invisible(TRUE)
+}
+
+has_open_con <- function(x, ...) {
+  UseMethod("has_open_con", x)
+}
+
+has_open_con.handler_file <- function(x, ...) {
+  tryCatch(isTRUE(isOpen(x[["con"]])), error = function(e) FALSE)
 }
 
 #' @export
 print.handler_file <- function(x) {
   cat("<log file handler>\n", sep = "")
-  cat("  enabled: ", x$enabled, "\n", sep = "")
-  cat("  path: ", x$path, "\n", sep = "")
-  cat("  open: ", tryCatch(isOpen(x$con), error = function(e) FALSE), "\n", sep = "")
+  cat("  enabled: ", x[["enabled"]], "\n", sep = "")
+  cat("  path: ", x[["path"]], "\n", sep = "")
+  cat("  open: ", isOpen.handler_file(x), "\n", sep = "")
 }
 
 #' @export
 log_record.handler_file <- function(handler, ...) {
-  writeLines(con = handler[["con"]], text = paste(..., sep = ":", collapse = ", "))
+  if (!has_open_con(handler)) open(handler)
+  text <- paste(..., sep = ":", collapse = ", ")
+  # print(text)
+  writeLines(con = handler[["con"]], text = text)
 }
 
 #' @export
 log_record.node <- function(x, ...) {
-  if (!isFALSE(x$logging)) log_record(x$loggers, x$id, ...)
+  if (!isFALSE(x[["logging"]])) log_record(x$loggers, x$id, ...)
 }
 
