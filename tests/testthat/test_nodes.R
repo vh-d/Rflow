@@ -20,29 +20,6 @@ test_that("nodes can be initiated", {
 
 
 
-# r_node ------------------------------------------------------------------
-
-
-context("r_node objects")
-
-test_that("nodes can be initiated", {
-  expect_error(Rflow::r_node$new(),               regexp = "[Mm]issing", info = "initialization requires id or env + name")
-  expect_error(Rflow::r_node$new(name = "node1"), regexp = "[Mm]issing", info = "initialization requires id or env + name")
-  expect_error(Rflow::r_node$new(env  = "env1"),  regexp = "[Mm]issing", info = "initialization requires id or env + name")
-
-  node1 <- Rflow::r_node$new(id = "node1", r_expr = expression_r(1))
-  expect_s3_class(object = node1, class = "r_node")
-  expect_s3_class(object = node1, class = "node")
-
-  expect_is(node1$persistence, "list")
-  expect_false(node1$persistence$enabled)
-
-  expect_null(node1$depends)
-  expect_null(node1$trigger_condition)
-  expect_true(is.null(node1$last_evaluated) || is.na(node1$last_evaluated))
-})
-
-
 # file_node ---------------------------------------------------------------
 
 
