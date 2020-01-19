@@ -22,5 +22,7 @@ A new rflow object.
 Initialize a new DAG
 }
 \examples{
+\dontrun{
 RF <- new_rflow()
+}
 }

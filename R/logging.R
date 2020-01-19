@@ -119,11 +119,13 @@ add_loggers.node <- function(x, loggers) {
 
 
 
-# handler -----------------------------------------------------------------
+# handlers -----------------------------------------------------------------
 
 
 
-#' Handler constructors
+# __ file -----------------------------------------------------------------
+
+#' File handler
 #' @param path to a log file
 #' @param open logical; open the connection immediately
 #' @param enable logical; enable the handler
@@ -176,6 +178,41 @@ log_record.handler_file <- function(handler, ...) {
   # print(text)
   writeLines(con = handler[["con"]], text = text)
 }
+
+
+
+# __ terminal -------------------------------------------------------------
+
+
+#' Terminal log handler
+#' @param enable logical
+#'
+#' @export
+handler_terminal <- function(enable = TRUE) {
+  new_handler <- structure(new.env(), class = c("handler_terminal", "handler"))
+  new_handler[["enabled"]] <- isTRUE(enable)
+
+  return(new_handler)
+}
+
+
+#' @export
+print.handler_terminal <- function(x) {
+  cat("<terminal log handler>\n", sep = "")
+  cat("  enabled: ", x[["enabled"]], "\n", sep = "")
+}
+
+
+#' @export
+log_record.handler_terminal <- function(handler, ...) {
+  text <- paste(..., sep = ":", collapse = ", ")
+  writeLines(con = stdout(), text = text)
+}
+
+
+
+# other -------------------------------------------------------------------
+
 
 #' @export
 log_record.node <- function(x, ...) {

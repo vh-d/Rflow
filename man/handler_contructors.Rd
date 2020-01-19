@@ -2,7 +2,7 @@
 % Please edit documentation in R/logging.R
 \name{handler_file}
 \alias{handler_file}
-\title{Handler constructors}
+\title{File handler}
 \usage{
 handler_file(path, open = TRUE, enable = TRUE)
 }
@@ -14,5 +14,5 @@ handler_file(path, open = TRUE, enable = TRUE)
 \item{enable}{logical; enable the handler}
 }
 \description{
-Handler constructors
+File handler
 }

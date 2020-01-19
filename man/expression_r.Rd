@@ -16,8 +16,10 @@ expression_r(x)
 Expression with source code references stripped off
 }
 \examples{
+\dontrun{
 identical(expression(1+1), expression_r(1+1))
 identical(expression({1+1}), expression_r({1+1}))
+}
 }
 \seealso{
 \code{\link[base]{expression}}
