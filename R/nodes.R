@@ -695,7 +695,7 @@ r_node <- R6::R6Class(
 
     store_state = function(public_fields = NULL, private_fields = NULL) {
       super$store_state(
-        public_fields  = unique(public_fields, c("r_expr", "hash")),
+        public_fields  = unique(c(public_fields, c("r_expr", "hash"))),
         private_fields = private_fields
       )
     },
@@ -918,7 +918,7 @@ db_node <- R6::R6Class(
 
     store_state = function(public_fields = NULL, private_fields = NULL) {
       super$store_state(
-        public_fields  = unique(public_fields, c("read_args", "r_expr", "sql", "mode", "auto_remove")),
+        public_fields  = unique(c(public_fields, c("read_args", "r_expr", "sql", "mode", "auto_remove"))),
         private_fields = private_fields
       )
     },
@@ -1307,7 +1307,7 @@ excel_sheet <- R6::R6Class(
 
     store_state = function(public_fields = NULL, private_fields = NULL) {
       super$store_state(
-        public_fields  = unique(public_fields, c("path", "sheet", "read_args", "hash")),
+        public_fields  = unique(c(public_fields, c("path", "sheet", "read_args", "hash"))),
         private_fields = private_fields
       )
     },
@@ -1486,7 +1486,7 @@ file_node <- R6::R6Class(
 
     store_state = function(public_fields = NULL, private_fields = NULL) {
       super$store_state(
-        public_fields  = unique(public_fields, c("r_expr", "path", "hash")),
+        public_fields  = unique(c(public_fields, c("r_expr", "path", "hash"))),
         private_fields = private_fields
       )
     },
@@ -1651,7 +1651,7 @@ csv_node <- R6::R6Class(
 
     store_state = function(public_fields = NULL, private_fields = NULL) {
       super$store_state(
-        public_fields  = unique(public_fields, "read_args"),
+        public_fields  = unique(c(public_fields, "read_args")),
         private_fields = private_fields
       )
     },
