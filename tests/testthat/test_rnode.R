@@ -58,9 +58,39 @@ test_that("has a target that just exists or became existing after a succesfull e
   expect_output(res <- testnode$eval(), "Evaluating.*done")
   expect_true(res)
   expect_true(testnode$exists())
+  expect_identical(.GlobalEnv[["RDATA"]][["r1"]], 1)
+  expect_identical(testnode$get(), 1)
+  expect_identical(testnode$value, 1)
 })
 
 
-# test_that("is persistent (stores all properties needed for re-initialization into the same state)", {
-#
-# })
+test_that("is persistent (stores all properties needed for re-initialization into the same state)", {
+
+  cache_dir  <- tempdir()
+  persist_dir <- tempdir()
+
+  testnode <<-
+    Rflow::r_node$new(
+      env = "RDATA",
+      name = "r2",
+      r_expr = expression_r(1:10),
+      persistence = list(path = persist_dir),
+      store = TRUE
+    )
+
+  expect_true(testnode$persistence$enabled)
+  fp <- file.path(testnode$persistence$path, testnode$persistence$file)
+  expect_true(file.exists(fp))
+
+  readRDS(fp)
+
+  testnode_restored <- as_node(Rflow:::load_state_of_node(fp))
+  # all.equal(testnode, testnode_restored)
+
+  expect_identical(testnode$id, testnode_restored$id)
+  expect_identical(testnode$env, testnode_restored$env)
+  expect_identical(testnode$name, testnode_restored$name)
+  expect_identical(testnode$r_env, testnode_restored$r_env)
+  expect_identical(testnode$r_expr, testnode_restored$r_expr)
+
+})
