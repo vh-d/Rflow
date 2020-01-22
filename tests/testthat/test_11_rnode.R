@@ -136,3 +136,4 @@ test_that("caching works", {
   expect_identical(testnode$get(), 1:10)
   expect_identical(testnode$value, 1:10)
 })
+
