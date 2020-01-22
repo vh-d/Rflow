@@ -378,6 +378,8 @@ node <- R6::R6Class(
     # run checks that triggers evaluation
     # note that the order of checking the triggers is important (short circuit)
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
+      log_record(self, self$id, "Checking triggers")
+      
       if (!isFALSE(self$trigger_defchange))         {if (verbose) notify_trigger(self$id, "change in eval. expression", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
       if (!isFALSE(self$trigger_manual))            {if (verbose) notify_trigger(self$id, "manual trigger", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
       if (!isFALSE(self$check_trigger_condition())) {if (verbose) notify_trigger(self$id, "custom trigger condition", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
@@ -389,7 +391,7 @@ node <- R6::R6Class(
 
     # to reset triggers (e.g. after successfull evaluation)
     reset_triggers = function() {
-      log_record(self, self$id, "Resetting triggers.")
+      log_record(self, self$id, "Resetting triggers")
 
       private$.trigger_defchange <- FALSE
       self$trigger_manual        <- FALSE
@@ -768,6 +770,7 @@ r_node <- R6::R6Class(
     check_hash = function() {
       if (!self$exists()) return(NA) # TODO: or NULL?
 
+      log_record(self, self$id, "Computing hash")
       hash <- digest::digest(object = self$get(), file = FALSE, algo = "md5")
       changed <- !isTRUE(self$hash$hash == hash)
 
@@ -776,7 +779,10 @@ r_node <- R6::R6Class(
           hash = hash,
           time = Sys.time()
         )
-
+      
+      log_record(self, self$id, "hash changed:", changed)
+      if (self$persistence$enabled) self$store_state()
+      
       return(changed)
     },
 
@@ -986,9 +992,12 @@ db_node <- R6::R6Class(
       },
 
     execute_sql = function(verbose = TRUE, verbose_prefix = "") {
+      
+      log_record(self, self$id, "Executing SQL statement")
       if (verbose) {
-        cat(verbose_prefix, crayon::red(self$id), ": Evaluating SQL statements:\n", sep = "")
+        cat(verbose_prefix, crayon::red(self$id), ": Executing SQL statements:\n", sep = "")
       }
+      
       sapply(self$sql,
              function(sql_statement) {
                if (verbose) {
@@ -1017,7 +1026,7 @@ db_node <- R6::R6Class(
       # remove target object before rebuilding it
       if (self$auto_remove) self$remove(verbose = verbose, verbose_prefix = verbose_prefix_inc)
 
-      if (self$mode == "SQL") {
+      if (self$mode == "SQL") {  
         self$execute_sql(verbose = verbose, verbose_prefix = verbose_prefix_inc)
       } else {
         if (verbose) {
@@ -1045,7 +1054,8 @@ db_node <- R6::R6Class(
     },
 
     # check that the target object exists in the database
-    exists = function() {
+    exists = function() {   
+      log_record(self, self$id, "Checking existence of target DB object.")
       DBI::dbExistsTable(conn = self$connection, name = self$name)
     },
 
@@ -1108,6 +1118,7 @@ db_node <- R6::R6Class(
 
     get = function(...) {
       if (self$exists()) {
+        log_record(self, sefl$id, "Fetching data from DB.")
         do.call(
           DBI::dbReadTable,
           args = union.list(
@@ -1131,6 +1142,7 @@ db_node <- R6::R6Class(
 
         if (verbose) notify_removal(self$id, verbose_prefix = verbose_prefix)
 
+        log_record(self, sefl$id, "Attempting to remove the target table from DB.")
         msg <-
           tryCatch(
             expr  = list(result = DBI::dbRemoveTable(conn = self$connection, name = self$name)),
@@ -1139,6 +1151,7 @@ db_node <- R6::R6Class(
 
         # try as if it was a VIEW
         if (msg$result == -1L) {
+          log_record(self, sefl$id, "Removing not succesfull. Trying removing a view.")
           msg <-
             tryCatch(
               expr  = list(result = DBI::dbExecute(conn = self$connection, statement = paste0("DROP VIEW ", self$name))),
@@ -1148,8 +1161,10 @@ db_node <- R6::R6Class(
 
         if (msg$result == -1L) {
           stop(msg$error1, msg$error2)
-        }
-
+        } # else:
+        
+        log_record(self, sefl$id, "Removing seems succesfull.")
+        
         return(invisible(TRUE))
 
       } else {
@@ -1177,11 +1192,13 @@ accdb_node <- R6::R6Class(
   public    = list(
 
     exists = function() {
+      log_record(self, self$id, "Checking existence of target DB object.")
       isTRUE(self$name %in% odbc32::sqlTables(self$connection)$TABLE_NAME)
     },
 
     get = function() {
       if (self$exists()) {
+        log_record(self, sefl$id, "Fetching data from DB.")
         do.call(
           odbc32::sqlFetch,
           args = union.list(
@@ -1201,9 +1218,11 @@ accdb_node <- R6::R6Class(
 
     remove = function(verbose = TRUE, verbose_prefix = "") {
       if (self$exists()) {
+        log_record(self, sefl$id, "Attempting to remove the target table from DB.")
         if (verbose) notify_removal(self$id, verbose_prefix = verbose_prefix)
         return(invisible(odbc32::sqlDrop(con = self$connection, name = self$name)))
       } else {
+        log_record(self, sefl$id, "Attempt to remove a missing target from DB.")
         if (verbose) notify_nonexistence(self$id, verbose_prefix = verbose_prefix)
         return(invisible(FALSE))
       }
@@ -1324,6 +1343,7 @@ excel_sheet <- R6::R6Class(
     check_hash = function() {
       if (!self$exists()) return(NA) # TODO: or NULL?
 
+      log_record(self, self$id, "Computing hash")
       hash <- digest::digest(object = self$get(), algo = "md5")
       changed <- !isTRUE(self$hash$hash == hash)
 
@@ -1333,6 +1353,7 @@ excel_sheet <- R6::R6Class(
           time = Sys.time()
         )
 
+        log_record(self, self$id, "hash changed:", changed)
         if (self$persistence$enabled) self$store_state()
       }
 
