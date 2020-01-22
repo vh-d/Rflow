@@ -179,6 +179,53 @@ log_record.handler_file <- function(handler, ...) {
   writeLines(con = handler[["con"]], text = text)
 }
 
+#' Close all logs
+#'
+#' @param x 
+#'
+#' @export
+close_log <- function(x) {
+  UseMethod("close_log", x)
+}
+
+#' @export
+close_log.rflow <- function(x) {
+  close(x$.loggers)
+}
+
+#' @export
+close.list <- function(x) {
+  for (i in x) {
+    close(i)
+  }
+}
+
+#' @export
+close.logger <- function(x) {
+  close(x$handlers)
+}
+
+#' @export
+close.handler <- function(x) {
+  close(x$con)
+}
+
+#' @export
+reopen.handler_file <- function(x) {
+  close.handler_file(x)
+  open.handler_file(x)
+}
+
+
+#' @export
+reset_log <- function(x) {
+  UseMethod("reset_log", x)
+}
+
+#' @export
+reset_log.rflow <- function(x) {
+  # TBA
+}
 
 
 # __ terminal -------------------------------------------------------------

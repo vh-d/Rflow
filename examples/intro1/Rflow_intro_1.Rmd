@@ -5,7 +5,7 @@ date: "26/12/2018"
 output: github_document
 always_allow_html: yes
 params:
-  rflow: "./intro1_rflow"
+  rflow: !r if (dir.exists("./intro1_rflow")) "./intro1_rflow" else "./examples/intro1/intro1_rflow"
 ---
 
 ```{r options, include = FALSE}
@@ -224,5 +224,6 @@ DBI::dbReadTable(DB, "table3")
 
 ```{r disconnect}
 DBI::dbDisconnect(DB)
+close_log(RF)
 ```
 
