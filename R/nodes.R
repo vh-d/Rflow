@@ -557,7 +557,7 @@ r_node <- R6::R6Class(
               path    = cache$path,
               file    = filename_from_id(self$id)
             )
-          } else stop(cache$path, " does not exist.")
+          } else stop("Cannot setup a cache file: ", cache$path, " does not exist.")
         } else if (is.character(cache)) {
           if (dir.exists(cache)) {
             list(
@@ -588,10 +588,10 @@ r_node <- R6::R6Class(
 
       if (isTRUE(delayed)) {
         log_record(self, self$id, "Restoring value from cache (immediate)")
-        delayedAssign(
+        delayedAssign( 
           x     = self$name,
           value = readRDS(file.path(self$cache$path, self$cache$file)),
-          pos   = self$r_env
+          assign.env = self$r_env
         )
       } else {
         log_record(self, self$id, "Restoring value from cache (delayed)")
