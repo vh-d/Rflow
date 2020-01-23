@@ -81,7 +81,7 @@ log_record.logger <- function(logger, ...) {
 
   # distribute record to all handlers
   for (handler in logger[["handlers"]]) {
-    log_record(handler, format(Sys.time()), logger[["name"]], ...)
+    log_record(handler, format(Sys.time(), format = "%Y-%m-%d %H:%M:%OS3"), logger[["name"]], ...)
   }
 
   invisible(TRUE)
@@ -313,7 +313,7 @@ reset_log.rflow <- function(x) {
 
 
 # __ terminal -------------------------------------------------------------
-
+  
 
 #' Terminal log handler
 #' @param enable logical
