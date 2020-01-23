@@ -180,7 +180,8 @@ node <- R6::R6Class(
         self$logging <- isTRUE(logging)
         add_loggers(self, loggers)
 
-        log_record(self, self$id, "Initialization")
+        log_record(self, self$id, paste0("Starting initialization for ", paste0(class(self), collapse = " - ")))
+        log_record(self, self$id, "Generic node class initialization")
 
         self$definition_hash <- definition_hash
 
@@ -359,15 +360,18 @@ node <- R6::R6Class(
 
     # make the references to all relevant upstream objects
     connect = function(verbose = TRUE) {
+      log_record(self, "Connecting to upstream nodes")
       if (verbose) cat("Connecting ", crayon::red(self$id), " to: ", crayon::red(self$depends, collapse = " "), "\n", sep = "")
       sapply(self$depends, self$connect_to)
     },
 
     get = function() {
+      log_record(self, self$id, "Call to an empty remove() method.")
       warning("This is just empty method...")
     },
 
     remove = function() {
+      log_record(self, self$id, "Call to an empty remove() method.")
       warning("This is just empty method...")
     },
 
@@ -405,6 +409,8 @@ node <- R6::R6Class(
     # main evaluation function
     eval = function(verbose = TRUE, verbose_prefix = "") {
 
+      log_record(self, self$id, "Call to an mostly empty eval() method.")
+      
       # all triggers should be resetted now
       self$reset_triggers()
 
@@ -427,7 +433,7 @@ node <- R6::R6Class(
 
       # solve/make upstream nodes first
       if (length(self$upstream) != length(self$depends)) {
-        log_record(self, "Connecting to upstream nodes")
+        log_record(self, "Connections to upstream nodes does not match dependencies.")
         self$connect() # check that it's connected to upstream
       }
 
@@ -650,6 +656,7 @@ r_node <- R6::R6Class(
         verbose = TRUE
       ) {
         super$initialize(..., store = FALSE)
+        log_record(self, self$id, "r_node class initialization")
 
         self$r_expr <- as_r_expr(firstnotnull(r_expr, r_code))
 
@@ -890,6 +897,7 @@ db_node <- R6::R6Class(
         store    = TRUE
       ) {
         super$initialize(..., store = FALSE)
+        log_record(self, self$id, "db_node class initialization")
 
         # TODO:
         # * how to handle storage of connection when DBI connection object is given?
@@ -1279,6 +1287,7 @@ excel_sheet <- R6::R6Class(
         if (!requireNamespace("openxlsx", quietly = TRUE)) stop(self$id, " requires openxlsx package.")
 
         super$initialize(..., store = FALSE)
+        log_record(self, self$id, "excel_sheet class initialization")
 
         if (length(path)) {
           self$path <- as.character(path[1])
@@ -1355,8 +1364,10 @@ excel_sheet <- R6::R6Class(
 
         log_record(self, self$id, "hash changed:", changed)
         if (self$persistence$enabled) self$store_state()
+      } else {
+        log_record(self, self$id, "hash not changed", changed)
       }
-
+      
       return(changed)
     },
 
@@ -1370,6 +1381,7 @@ excel_sheet <- R6::R6Class(
 
     get = function(...) {
       if (self$exists()) {
+        log_record(self, sefl$id, "Fetching data from excel sheet.")
         do.call(
           openxlsx::read.xlsx,
           args = union.list(
@@ -1455,6 +1467,7 @@ file_node <- R6::R6Class(
         store    = TRUE
       ) {
         super$initialize(..., store = FALSE)
+        log_record(self, self$id, "file class initialization")
 
         self$r_expr <- as_r_expr(firstnotnull(r_expr, r_code))
 
@@ -1662,6 +1675,7 @@ csv_node <- R6::R6Class(
         store     = TRUE
       ) {
         super$initialize(..., store = FALSE)
+        log_record(self, self$id, "csv_file class initialization")
 
         self$read_args <- read_args
 
@@ -1678,13 +1692,16 @@ csv_node <- R6::R6Class(
     },
 
     get = function(...) {
-      do.call(
-        data.table::fread,
-        args = union.list(
-          self$read_args,
-          list(file = self$path, ...)
+      if (self$exists()) {
+        log_record(self, sefl$id, "Reading from csv file.")
+        do.call(
+          data.table::fread,
+          args = union.list(
+            self$read_args,
+            list(file = self$path, ...)
+          )
         )
-      )
+      } else stop(self$id, ": target file '", self$path, " does not exists.")
     }
   )
 )
