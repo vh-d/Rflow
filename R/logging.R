@@ -80,8 +80,8 @@ log_record <- function(x, ...) {
 log_record.logger <- function(logger, ...) {
 
   # distribute record to all handlers
-  for (handler in logger[["handlers"]]) {
-    log_record(handler, format(Sys.time(), format = "%Y-%m-%d %H:%M:%OS3"), logger[["name"]], ...)
+  for (h in logger[["handlers"]]) {
+    log_record(h, format(Sys.time(), format = "%Y-%m-%d %H:%M:%OS3"), logger[["name"]], ...)
   }
 
   invisible(TRUE)
@@ -90,7 +90,7 @@ log_record.logger <- function(logger, ...) {
 #' @rdname log_record
 #' @export
 log_record.rflow <- function(rflow, ...) {
-  log_record(rflow[[".loggers"]], "RFLOW", ...)
+  if (rflow[[".logging"]]) log_record(rflow[[".loggers"]], "RFLOW", ...)
 }
 
 #' @rdname log_record

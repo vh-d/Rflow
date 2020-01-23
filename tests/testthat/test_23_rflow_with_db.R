@@ -6,14 +6,15 @@ library(DBI)
 library(data.table)
 library(Rflow)
 
-params <- list(rflow = "./intro1_rflow")
+td <- tempdir(check = TRUE)
+params <- list(rflow = td)
 
 # R environment
 .GlobalEnv[["RDATA"]] <- new.env(parent = .GlobalEnv)
 
 # establish SQLite connection / environment
 DB <-  DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-RF <- new_rflow()
+RF <- new_rflow(logging = logger(handlers = list(handler_list())))
 
 node_defs <-
   list(

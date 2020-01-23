@@ -14,10 +14,10 @@
 #' RF <- new_rflow()
 #' }
 new_rflow <- function(
-  path = NULL,
+  path        = NULL,
   cache       = TRUE,
   persistence = TRUE,
-  logging     = TRUE
+  logging     = if (length(path)) TRUE else FALSE
 ) {
   result <- new.env()
   class(result) <- c("rflow", class(result))
@@ -51,22 +51,62 @@ new_rflow <- function(
           path    = cache_path
         )
     }
-
-    if (isTRUE(logging)) {
-      log_path <- file.path(path, ".rflow", "log")
-      if (!dir.exists(log_path)) dir.create(log_path, recursive = TRUE)
-      log_file_path <- file.path(log_path, "log.csv")
-
-      file_handler <- handler_file(path = log_file_path)
-
-      result[[".logging"]] <- TRUE
-      result[[".loggers"]] <- list(default = logger(name = "RFLOW", handlers = list(file_handler)))
-      log_record(result, "Rflow initialized")
-    }
-
   }
+  
+  # setup logging
+  loggers <- setup_logging(logging, path = path)
+  result[[".logging"]] <- if (length(loggers)) TRUE else FALSE
+  result[[".loggers"]] <- loggers
+  log_record(result, "Rflow initialized")
 
   return(result)
+}
+
+setup_logging <- function(logging, ...) {
+  UseMethod("setup_logging", logging)
+}
+
+setup_logging.NULL <- function(logging, ...) {
+  NULL
+}
+
+# TRUE treated as "auto" mode
+setup_logging.logical <- function(logging, path, ...) {
+  if (isTRUE(logging)) {
+    log_path <- file.path(path, ".rflow", "log")
+    if (!dir.exists(log_path)) dir.create(log_path, recursive = TRUE)
+    log_file_path <- file.path(log_path, "log.csv")
+    
+    setup_logging.character(log_file_path)
+  }
+}
+
+# character value treated as file name
+setup_logging.character <- function(logging, ...) {
+  
+  hf <- handler_file(path = logging)
+  
+  return(
+    list(
+      default = logger(name = "RFLOW", handlers = list(hf))
+    )
+  )
+}
+
+# logger object is passed in a list
+setup_logging.logger <- function(logging, ...) {
+  list(default = logging)
+}
+
+# for list apply setup on each and pass
+setup_logging.list <- function(logging, ...) {
+  loggers <- vector(mode = "list", length(logging))
+  for (i in 1:length(logging)) {
+    logger[[i]] <- logging[[i]]
+  }
+  names(loggers) <- names(logging)
+  
+  return(loggers)
 }
 
 

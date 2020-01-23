@@ -4,7 +4,12 @@
 \alias{new_rflow}
 \title{Initialize a new DAG}
 \usage{
-new_rflow(path = NULL, cache = TRUE, persistence = TRUE, logging = TRUE)
+new_rflow(
+  path = NULL,
+  cache = TRUE,
+  persistence = TRUE,
+  logging = if (length(path)) TRUE else FALSE
+)
 }
 \arguments{
 \item{path}{path to rflow home folder. Nodes' definitions are searched for in this folder, cache and other data is saved into...}

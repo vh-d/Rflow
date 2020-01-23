@@ -54,3 +54,22 @@ test_that("node definitions are processed correctly", {
   obj_process2 <- process_obj_defs(list(obj2))
   expect_equal(obj_process2, list("FOO.bar" = c(list(id = "FOO.bar"), obj)))
 })
+
+test_that("logging setup works as expected", {
+  hl <- handler_list()
+  lg <- logger(handlers = list(hl))
+  
+  log_record(lg, "Logger initiated")
+  logoutput <- as.list(lg[["handlers"]][[1]])
+  expect_length(logoutput, 1)
+  
+  rf1 <- Rflow::new_rflow(logging = lg)
+  logoutput <- as.list(lg[["handlers"]][[1]])
+  expect_length(logoutput, 2)
+
+  log_record(rf1, "testing message")
+  logoutput <- as.list(lg[["handlers"]][[1]])
+  expect_length(logoutput, 3)
+  expect_true(any(grepl("testing message", logoutput, fixed = TRUE)))
+  
+})

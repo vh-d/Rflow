@@ -1126,7 +1126,7 @@ db_node <- R6::R6Class(
 
     get = function(...) {
       if (self$exists()) {
-        log_record(self, sefl$id, "Fetching data from DB.")
+        log_record(self, "Fetching data from DB.")
         do.call(
           DBI::dbReadTable,
           args = union.list(
@@ -1150,7 +1150,7 @@ db_node <- R6::R6Class(
 
         if (verbose) notify_removal(self$id, verbose_prefix = verbose_prefix)
 
-        log_record(self, sefl$id, "Attempting to remove the target table from DB.")
+        log_record(self, "Attempting to remove the target table from DB.")
         msg <-
           tryCatch(
             expr  = list(result = DBI::dbRemoveTable(conn = self$connection, name = self$name)),
@@ -1159,7 +1159,7 @@ db_node <- R6::R6Class(
 
         # try as if it was a VIEW
         if (msg$result == -1L) {
-          log_record(self, sefl$id, "Removing not succesfull. Trying removing a view.")
+          log_record(self, "Removing not succesfull. Trying removing a view.")
           msg <-
             tryCatch(
               expr  = list(result = DBI::dbExecute(conn = self$connection, statement = paste0("DROP VIEW ", self$name))),
@@ -1171,7 +1171,7 @@ db_node <- R6::R6Class(
           stop(msg$error1, msg$error2)
         } # else:
         
-        log_record(self, sefl$id, "Removing seems succesfull.")
+        log_record(self, "Removing seems succesfull.")
         
         return(invisible(TRUE))
 
@@ -1206,7 +1206,7 @@ accdb_node <- R6::R6Class(
 
     get = function() {
       if (self$exists()) {
-        log_record(self, sefl$id, "Fetching data from DB.")
+        log_record(self, "Fetching data from DB.")
         do.call(
           odbc32::sqlFetch,
           args = union.list(
@@ -1226,11 +1226,11 @@ accdb_node <- R6::R6Class(
 
     remove = function(verbose = TRUE, verbose_prefix = "") {
       if (self$exists()) {
-        log_record(self, sefl$id, "Attempting to remove the target table from DB.")
+        log_record(self, "Attempting to remove the target table from DB.")
         if (verbose) notify_removal(self$id, verbose_prefix = verbose_prefix)
         return(invisible(odbc32::sqlDrop(con = self$connection, name = self$name)))
       } else {
-        log_record(self, sefl$id, "Attempt to remove a missing target from DB.")
+        log_record(self, "Attempt to remove a missing target from DB.")
         if (verbose) notify_nonexistence(self$id, verbose_prefix = verbose_prefix)
         return(invisible(FALSE))
       }
@@ -1381,7 +1381,7 @@ excel_sheet <- R6::R6Class(
 
     get = function(...) {
       if (self$exists()) {
-        log_record(self, sefl$id, "Fetching data from excel sheet.")
+        log_record(self, "Fetching data from excel sheet.")
         do.call(
           openxlsx::read.xlsx,
           args = union.list(
@@ -1693,7 +1693,7 @@ csv_node <- R6::R6Class(
 
     get = function(...) {
       if (self$exists()) {
-        log_record(self, sefl$id, "Reading from csv file.")
+        log_record(self, "Reading from csv file.")
         do.call(
           data.table::fread,
           args = union.list(
