@@ -64,18 +64,18 @@ visData <- function(rflow, tags = NULL, includeIsolated = TRUE) {
 
 #' visualize Rflow DAGs using visNetwork
 #'
-#' @param rflow an rflow objects
+#' @param x an rflow objects
 #' @param tags vector of tags for filtering nodes
 #' @param includeIsolated logical; Switch to filter isolated/lonely nodes.
 #' @param direction see visNetwork docs on hierarchical graphs
 #' @param ... args passed to visNetwork
 #'
 #' @export
-plot.rflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "LR", ...) {
+plot.rflow <- function(x, tags = NULL, includeIsolated = TRUE, direction = "LR", ...) {
 
   if (!requireNamespace("visNetwork", quietly = TRUE)) stop("visNetwork package required to plot graphs")
 
-  l <- visData(rflow = rflow, tags = tags, includeIsolated = includeIsolated)
+  l <- visData(rflow = x, tags = tags, includeIsolated = includeIsolated)
 
   visNetwork::visNetwork(
     nodes = l$dtNODES,

@@ -23,7 +23,7 @@ logger <- function(name = "ROOT", enabled = TRUE, handlers = NULL) {
 }
 
 #' @export
-print.logger <- function(x) {
+print.logger <- function(x, ...) {
   cat("<loggger>: ", x[["name"]], "\n", sep = "")
   cat("  enabled: ", x[["enabled"]], "\n", sep = "")
   cat("  handlers: ", paste0(x[["handlers"]], collapse = ", "), "\n")
@@ -187,7 +187,7 @@ as.list.handler_list <- function(x) {
 }
 
 #' @export
-print.handler_list <- function(x) {
+print.handler_list <- function(x, ...) {
   cat("<list log handler>\n", sep = "")
   cat("  enabled: ", x[["enabled"]], "\n", sep = "")
   cat("  length: ",  x[["length"]], "\n", sep = "")
@@ -227,14 +227,14 @@ handler_file <- function(path, open = TRUE, enable = TRUE) {
 }
 
 #' @export
-close.handler_file <- function(x) {
-  if (has_open_con(x)) close(x[["con"]]) else invisible(0L)
+close.handler_file <- function(x, ...) {
+  if (has_open_con(x)) close(x[["con"]], ...) else invisible(0L)
 }
 
 
 #' @export
-open.handler_file <- function(x) {
-  x[["con"]] <- file(x[["path"]], open = "a", encoding = "UTF-8")
+open.handler_file <- function(x, encoding = "UTF-8", ...) {
+  x[["con"]] <- file(x[["path"]], open = "a", encoding = encoding, ...)
 
   invisible(TRUE)
 }
@@ -248,11 +248,11 @@ has_open_con.handler_file <- function(x, ...) {
 }
 
 #' @export
-print.handler_file <- function(x) {
+print.handler_file <- function(x, ...) {
   cat("<log file handler>\n", sep = "")
   cat("  enabled: ", x[["enabled"]], "\n", sep = "")
   cat("  path: ", x[["path"]], "\n", sep = "")
-  cat("  open: ", isOpen.handler_file(x), "\n", sep = "")
+  cat("  open: ", has_open_con(x), "\n", sep = "")
 }
 
 #' @export

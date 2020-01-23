@@ -149,13 +149,13 @@ trigger_manual.node <- function(x) {
 #' @method trigger_manual character
 #' @export
 trigger_manual.character <- function(x, rflow) {
-  rflow[[id]]$trigger_manual <- TRUE
+  rflow[[x$id]]$trigger_manual <- TRUE
 }
 
 #' @method trigger_manual rflow
 #' @export
 trigger_manual.rflow <- function(rflow, x) {
-  rflow[[id]]$trigger_manual <- TRUE
+  rflow[[x$id]]$trigger_manual <- TRUE
 }
 
 #' @title Evaluates a node
@@ -203,9 +203,10 @@ depends <- function(x, ...) {
 #' @param x a node object
 #' @param inverse FALSE (default) => downtream, TRUE => upstream
 #' @param results DO NOT USE
+#' @param ... ignored
 #' @return vector of nodes' ids
 #' @export
-depends.node <- function(x, inverse = FALSE, results = character()) {
+depends.node <- function(x, inverse = FALSE, results = character(), ...) {
   direction <- if (isTRUE(inverse)) "upstream" else "downstream"
 
   if (!length(x[[direction]])) {

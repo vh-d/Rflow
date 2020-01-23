@@ -62,13 +62,13 @@ edges <- function(x) {
 }
 
 #' @export
-edges.rflow <- function(rflow) {
+edges.rflow <- function(x) {
 
   rbindlist(
     c(
       list(data.table(from = character(), to = character())),
       lapply(
-        mget(ls(rflow), envir = rflow),
+        mget(ls(x), envir = x),
         function(x) if (length(x$depends)) data.table(from = x$depends, to = x$id) else NULL
       )
     )

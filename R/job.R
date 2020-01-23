@@ -196,7 +196,7 @@ expr2fun <- function(expr, depends, envir = NULL) {
 
   . <- paste0('.RFLOW[["', depends, '"]]$get()')
   . <- lapply(., str2lang)
-  . <- setNames(., depends)
+  . <- stats::setNames(., depends)
   . -> formals(f)
 
   if (is.environment(envir)) environment(f) <- envir
@@ -311,8 +311,6 @@ expression_r <- function(x){
 #'
 #' @param x value to print
 #' @param verbose_prefix prefix to be added after every new-line symbol
-#'
-#' @return
 add_prefix <- function(x, prefix = "", color_main = NULL, color_prefix = NULL) {
   . <- unlist(crayon::col_strsplit(x, split = "\n", fixed = TRUE))
   . <- paste0(prefix, .)

@@ -114,12 +114,12 @@ setup_logging.list <- function(logging, ...) {
 print.rflow <- function(x, ...) {
   cat("<rflow>\n")
   # cat("<rflow> ", crayon::red(self$id), ": ", self$name,  "\n", sep = "")
-  if (length(x$.desc)) cat("  desc: ", crayon::italic(self$desc),         "\n", sep = "")
+  if (length(x$.desc)) cat("  desc: ", crayon::italic(x$.desc),         "\n", sep = "")
   cat("  path: ", x$.def_path, "\n", sep = "")
   cat("  cache enabled: ",       isTRUE(x$.cache$enabled), "\n",
       "  persistence enabled: ", isTRUE(x$.persistence$enabled),"\n",
       "  logging enabled: ", isTRUE(x$.logging),"\n",
-      "  nodes: ", paste0(crayon::red(head(ls(x))), collapse = ", "), ", ...",
+      "  nodes: ", paste0(crayon::red(utils::head(ls(x))), collapse = ", "), ", ...",
       sep = "")
 }
 
@@ -322,11 +322,9 @@ load_nodes.rflow <- function(
 }
 
 
-#' Create a list of nodes' definitions
+#' Construct a list of nodes' definitions
 #'
-#' @param ...
-#'
-#' @return
+#' @param ... arguments packed into a list of definitions
 #' @export
 node_definitions <- function(...) {
   structure(list(...), class = c("node_definitions", "list"))
@@ -347,7 +345,7 @@ nodes_from_r_script <- function(file, encoding = "UTF-8", ...) {
   result <- source("../test_nodes_as_r_script.R", local = tempenv, encoding = encoding, ...)
 
   node_defs <-
-    if (isTRUE(is(result$value, "node_definitions"))) {
+    if (isTRUE(methods::is(result$value, "node_definitions"))) {
       result$value
     } else
       mget(ls(tempenv), tempenv) # could be as.list() but we would have to drop all potential hidden objects firs
@@ -547,7 +545,7 @@ add_node.list <- function(
   # connect to required objects
   if (connect && (updating || initializing)) rflow[[id]]$connect()
 
-  result <- setNames(TRUE, id)
+  result <- stats::setNames(TRUE, id)
 
   return(result)
 }
@@ -641,8 +639,8 @@ connect_nodes <- function(x, ...) {
 
 #' @method connect_nodes rflow
 #' @export
-connect_nodes.rflow <- function(rflow, ...) {
-  lapply(rflow, function(x) x$connect(...))
+connect_nodes.rflow <- function(x, ...) {
+  lapply(x, function(x) x$connect(...))
 }
 
 
@@ -777,8 +775,8 @@ delete.character <- function(x, rflow, completely = FALSE, ...) {
 
 #' @export
 #' @method delete rflow
-delete.rflow <- function(rflow, x, completely = FALSE, ...) {
-  delete.node(rflow[[x]], completely = completely, ...)
+delete.rflow <- function(x, id, completely = FALSE, ...) {
+  delete.node(rflow[[id]], completely = completely, ...)
 }
 
 

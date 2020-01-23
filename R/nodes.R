@@ -1084,8 +1084,8 @@ db_node <- R6::R6Class(
       super$print()
       cat("  DBI: ", class(self$connection)[1], "\n", sep = "")
       if (length(self$sql_code))
-        cat("  SQL code:\n   ", crayon::cyan(head(paste0(self$sql_code, collapse = "; \n\n"))), "\n", sep = "") else
-          cat("  R expression:\n   ", crayon::cyan(head(deparse_nicely(self$r_expr))), "\n", sep = "")
+        cat("  SQL code:\n   ", crayon::cyan(utils::head(paste0(self$sql_code, collapse = "; \n\n"))), "\n", sep = "") else
+          cat("  R expression:\n   ", crayon::cyan(utils::head(deparse_nicely(self$r_expr))), "\n", sep = "")
     },
 
     print_sql = function(prefix = "") {
@@ -1209,7 +1209,7 @@ accdb_node <- R6::R6Class(
       isTRUE(self$name %in% odbc32::sqlTables(self$connection)$TABLE_NAME)
     },
 
-    get = function() {
+    get = function(...) {
       if (self$exists()) {
         log_record(self, "Fetching data from DB.")
         do.call(

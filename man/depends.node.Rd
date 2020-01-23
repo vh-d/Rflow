@@ -4,7 +4,7 @@
 \alias{depends.node}
 \title{List all dependencies recursively}
 \usage{
-\method{depends}{node}(x, inverse = FALSE, results = character())
+\method{depends}{node}(x, inverse = FALSE, results = character(), ...)
 }
 \arguments{
 \item{x}{a node object}
@@ -12,6 +12,8 @@
 \item{inverse}{FALSE (default) => downtream, TRUE => upstream}
 
 \item{results}{DO NOT USE}
+
+\item{...}{ignored}
 }
 \value{
 vector of nodes' ids

@@ -4,10 +4,10 @@
 \alias{plot.rflow}
 \title{visualize Rflow DAGs using visNetwork}
 \usage{
-\method{plot}{rflow}(rflow, tags = NULL, includeIsolated = TRUE, direction = "LR", ...)
+\method{plot}{rflow}(x, tags = NULL, includeIsolated = TRUE, direction = "LR", ...)
 }
 \arguments{
-\item{rflow}{an rflow objects}
+\item{x}{an rflow objects}
 
 \item{tags}{vector of tags for filtering nodes}
 

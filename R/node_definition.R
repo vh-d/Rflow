@@ -26,8 +26,8 @@ process_obj_defs <- function(obj_defs) {
         obj_id <- obj_id_inside
       }
       
-      node_env  <- env_name_from_id(obj_id)[, env[1]]
-      node_name <- env_name_from_id(obj_id)[, name[1]]
+      node_env  <- env_name_from_id(obj_id)[["env"]][1]
+      node_name <- env_name_from_id(obj_id)[["name"]][1]
       
       # node_id   <- env_names[id == "obj_id", id]
       if (!has_env_inside)

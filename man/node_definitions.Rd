@@ -2,16 +2,13 @@
 % Please edit documentation in R/rflow_management.R
 \name{node_definitions}
 \alias{node_definitions}
-\title{Create a list of nodes' definitions}
+\title{Construct a list of nodes' definitions}
 \usage{
 node_definitions(...)
 }
 \arguments{
-\item{...}{}
-}
-\value{
-
+\item{...}{arguments packed into a list of definitions}
 }
 \description{
-Create a list of nodes' definitions
+Construct a list of nodes' definitions
 }

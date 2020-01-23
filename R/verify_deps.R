@@ -130,7 +130,7 @@ detect_nodes <- function(x, rflow, found = c(), space = "", depth = 0L, depthmax
   }
 
   # node objects can be imediately reported as dependencies
-  if (is(x, "node")) {
+  if (methods::is(x, "node")) {
     if (depth == 0L)
       return(unique(unlist(c(found, x$id)))) else
         return(c(found, x$id))
