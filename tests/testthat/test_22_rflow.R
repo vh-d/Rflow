@@ -22,7 +22,7 @@ test_that("nodes can be added", {
 
 test_that("nodes can be connected", {
   rf2 <- Rflow::new_rflow()
-  .GlobalEnv[["ENV"]] <- new.env()
+  ENV <- new.env()
   expect_true(Rflow::add_node(process_obj_defs(list(list(id = "ENV.node1", r_expr = expression_r(1))))[[1]], rflow = rf2, verbose = FALSE))
   expect_true(Rflow::add_node(process_obj_defs(list(list(id = "ENV.node2", r_expr = expression_r(1), depends = "ENV.node1")))[[1]], rflow = rf2, verbose = FALSE))
 

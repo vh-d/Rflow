@@ -675,11 +675,16 @@ r_node <- R6::R6Class(
         if (is.null(self$env)) {
           self$r_env <- .GlobalEnv
         } else {
-          r_env <- get(self$env, .GlobalEnv) # other than .GlobalEnv?
-          if (!is.environment(r_env)) stop(paste(self$env, "is not an R environment object"))
+          r_env <- 
+            tryCatch(
+              get(self$env, mode = "environment"), 
+              error = function(e) 
+                dynGet(self$env, inherits = TRUE)
+            )
+          if (!is.environment(r_env)) stop(paste(self$env, "is not an R environment object")) # dynGet does not check mode
           self$r_env <- r_env
         }
-
+        
         # try restoring the object from cache
         if (self$cache$enabled)
           if (self$cache_exists()) {

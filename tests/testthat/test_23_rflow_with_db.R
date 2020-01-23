@@ -10,7 +10,7 @@ td <- tempdir(check = TRUE)
 params <- list(rflow = td)
 
 # R environment
-.GlobalEnv[["RDATA"]] <- new.env(parent = .GlobalEnv)
+RDATA <- new.env(parent = .GlobalEnv)
 
 # establish SQLite connection / environment
 DB <-  DBI::dbConnect(RSQLite::SQLite(), ":memory:")

@@ -17,9 +17,9 @@ context("R nodes")
 # library(Rflow)
 
 
-.GlobalEnv$RDATA <- new.env() # right now there has to be an existing environment to initialize r_node, it has to be in .GlobalEnv
 
 test_that("nodes can be initiated", {
+  RDATA <- new.env() # right now there has to be an existing environment to initialize r_node
   expect_error(Rflow::r_node$new(),               regexp = "[Mm]issing", info = "initialization requires id or env + name")
   expect_error(Rflow::r_node$new(name = "node1"), regexp = "[Mm]issing", info = "initialization requires id or env + name")
   expect_error(Rflow::r_node$new(env  = "env1"),  regexp = "[Mm]issing", info = "initialization requires id or env + name")
@@ -31,25 +31,26 @@ test_that("nodes can be initiated", {
   expect_s3_class(testnode, class = "r_node")
   expect_s3_class(testnode, class = "node") #nodes inherits from node
   
-  expect_identical(testnode$r_env, .GlobalEnv$RDATA, info = "constructor should connect to the declared environment")
+  expect_identical(testnode$r_env, RDATA, info = "constructor should connect to the declared environment")
 })
 
 
 test_that("has exists() method that correctly returns TRUE/FALSE", {
+  RDATA <- new.env() # right now there has to be an existing environment to initialize r_node
   testnode <- Rflow::r_node$new(env = "RDATA", name = "r1", r_expr = expression_r(1))
   
   expect_false(testnode$exists())
   
-  .GlobalEnv$RDATA[[testnode$name]] <- 1
+  RDATA[[testnode$name]] <- 1
   expect_true(testnode$exists())
   
-  remove(list = testnode$name, envir = .GlobalEnv$RDATA)
+  remove(list = testnode$name, envir = RDATA)
   expect_false(testnode$exists())
 })
 
 
 test_that("has a target that just exists or became existing after a succesfull eval()", {
-  .GlobalEnv$RDATA <- new.env() # right now there has to be an existing environment to initialize r_node
+  RDATA <- new.env() # right now there has to be an existing environment to initialize r_node
   testnode <- Rflow::r_node$new(env = "RDATA", name = "r1", r_expr = expression_r(1))
   
   expect_output(res <- testnode$eval(), "Evaluating.*done")
@@ -63,6 +64,7 @@ test_that("has a target that just exists or became existing after a succesfull e
 
 test_that("is persistent (stores all properties needed for re-initialization into the same state)", {
   
+  RDATA <- new.env() # right now there has to be an existing environment to initialize r_node
   persist_dir <- tempdir()
   
   testnode <-
@@ -90,7 +92,7 @@ test_that("is persistent (stores all properties needed for re-initialization int
   expect_identical(testnode$r_expr, testnode_restored$r_expr)
   expect_identical(testnode$hash,   testnode_restored$hash)
   
-  # remove(list = testnode$name, envir = .GlobalEnv$RDATA)
+  # remove(list = testnode$name, envir = RDATA)
   expect_false(testnode$exists())
   
   remove(testnode)
@@ -103,6 +105,7 @@ test_that("is persistent (stores all properties needed for re-initialization int
 
 test_that("caching works", {
   
+  RDATA <- new.env() # right now there has to be an existing environment to initialize r_node
   cache_dir <- tempdir(check = TRUE)
   
   expect_output(
@@ -132,7 +135,7 @@ test_that("caching works", {
   
   testnode$cache_restore()
   expect_true(testnode$exists())
-  expect_identical(.GlobalEnv$RDATA$r2, 1:10)
+  expect_identical(RDATA$r2, 1:10)
   expect_identical(testnode$get(), 1:10)
   expect_identical(testnode$value, 1:10)
 })
