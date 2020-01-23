@@ -121,6 +121,90 @@ add_loggers.node <- function(x, loggers) {
 
 # handlers -----------------------------------------------------------------
 
+# __ expanding list
+
+# Courtery of Jan Kanis at https://stackoverflow.com/a/32870310
+# expandingList <- function(capacity = 10) {
+#     buffer <- vector('list', capacity)
+#     length <- 0
+# 
+#     methods <- list()
+# 
+#     methods$double.size <- function() {
+#         buffer <<- c(buffer, vector('list', capacity))
+#         capacity <<- capacity * 2
+#     }
+# 
+#     methods$add <- function(val) {
+#         if(length == capacity) {
+#             methods$double.size()
+#         }
+# 
+#         length <<- length + 1
+#         buffer[[length]] <<- val
+#     }
+# 
+#     methods$as.list <- function() {
+#         b <- buffer[0:length]
+#         return(b)
+#     }
+# 
+#     methods
+# }
+
+#' @export
+handler_list <- function(enabled = TRUE, capacity = 10) {
+  
+    enabled <- enabled
+    buffer <- vector('list', capacity)
+    length <- 0
+    
+    double.capacity <- function() {
+        buffer <<- c(buffer, vector('list', capacity))
+        capacity <<- capacity * 2
+    }
+    
+    add <- function(val) {
+      if (!isTRUE(enabled)) return(invisible(NULL))
+      
+      if(length == capacity) {
+        double.capacity()
+      }
+      
+      length <<- length + 1
+      buffer[[length]] <<- val
+    }
+    
+    structure(
+        class = c("handler_list", "handler"),
+        environment()
+    )
+}
+
+#' @export
+as.list.handler_list <- function(x) {
+    x[["buffer"]][1:x[["length"]]]
+}
+
+#' @export
+print.handler_list <- function(x) {
+  cat("<list log handler>\n", sep = "")
+  cat("  enabled: ", x[["enabled"]], "\n", sep = "")
+  cat("  length: ",  x[["length"]], "\n", sep = "")
+}
+
+#' @export
+log_record.handler_list <- function(handler, ...) {
+  text <- paste(..., sep = ":", collapse = ", ")
+  # print(text)
+  handler$add(text)
+}
+
+#' @export
+close.handler_list <- function(x) {
+  invisible(NULL)
+}
+
 
 
 # __ file -----------------------------------------------------------------
