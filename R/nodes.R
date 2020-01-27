@@ -1083,13 +1083,21 @@ db_node <- R6::R6Class(
     print = function(...) {
       super$print()
       cat("  DBI: ", class(self$connection)[1], "\n", sep = "")
-      if (length(self$sql_code))
-        cat("  SQL code:\n   ", crayon::cyan(utils::head(paste0(self$sql_code, collapse = "; \n\n"))), "\n", sep = "") else
-          cat("  R expression:\n   ", crayon::cyan(utils::head(deparse_nicely(self$r_expr))), "\n", sep = "")
+      if (length(self$sql)) {
+        cat("  SQL code:\n   ")
+        self$print_sql()
+      } else {
+        cat("  R expression:\n   ", crayon::cyan(utils::head(deparse_nicely(self$r_expr))), "\n", sep = "")
+      }
     },
-
-    print_sql = function(prefix = "") {
-      cat(prefix, crayon::cyan(paste_sql(self$sql)), sep = "")
+    
+    print_sql = function(head = NULL, prefix = "") {
+      head <- as.integer(head)
+      text <- paste_sql(self$sql)
+      if (length(head)) text <- substr(text, 1, head)
+      text <- crayon::cyan(text)
+      if (length(prefix) && prefix != "") text <- add_prefix(x = text, prefix = prefix)
+      cat(text)
     },
 
     title = function() {
