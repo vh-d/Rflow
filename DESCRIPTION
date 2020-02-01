@@ -1,6 +1,6 @@
 Package: Rflow
 Title: General-purpose workflow system for R
-Version: 0.2.23.9007
+Version: 0.2.23.9008
 Authors@R: 
     person(given = "Václav",
            family = "Hausenblas",
@@ -16,7 +16,6 @@ Imports:
     digest,
     methods,
     R6,
-    RcppTOML,
     stringr
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.0.2
@@ -25,6 +24,7 @@ Suggests:
     igraph,
     knitr,
     openxlsx,
+    RcppTOML,
     reticulate,
     rmarkdown,
     RSQLite,
