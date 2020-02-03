@@ -71,7 +71,8 @@ obj_defs <-
           expression_r({
             N = 10; 
             data.table(id = 1:N, value = rnorm(N))
-          })
+          }),
+        validators = list(validator(expression_r(TRUE)))
       ), 
     
     "DB.table1" = 

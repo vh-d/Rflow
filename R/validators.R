@@ -77,12 +77,12 @@ validator_r.character <- function(x, file = FALSE, ...) {
 
 #' @export
 evaluate.validator_r_expr <- function(x, ...) {
-  eval(x$r_expr, ...)
+  isTRUE(eval(x$r_expr, ...))
 }
 
 #' @export
 evaluate.validator_r_func <- function(x, ...) {
-  x$r_func(...)
+  isTRUE(x$r_func(...))
 }
 
 #' @export
@@ -94,4 +94,23 @@ validator_r_file <- function(x, ...) {
 #' @export
 evaluate.validator_r_file <- function(x, ...) {
   source(x$path, ...)
+}
+
+#' @export
+print.validator_r <- function(x, ...) {
+  cat("<validator> ", x[["name"]], "\n", sep = "")
+}
+
+#' @export
+print.validator_r_func <- function(x, ...) {
+  NextMethod()
+  cat("   type: ", "function", "\n", sep = "")
+}
+
+#' @export
+print.validator_r_expr <- function(x, ...) {
+  NextMethod()
+  cat("   type: ", "expression", "\n", sep = "")
+  cat("   code: ", "\n", sep = "")
+  cat_with_prefix(x[["code"]], prefix = "     ")
 }

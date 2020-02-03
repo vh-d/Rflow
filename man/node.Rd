@@ -75,6 +75,7 @@ Constructing nodes
 \item \href{#method-reset_triggers}{\code{node$reset_triggers()}}
 \item \href{#method-eval}{\code{node$eval()}}
 \item \href{#method-make}{\code{node$make()}}
+\item \href{#method-validate}{\code{node$validate()}}
 \item \href{#method-clone}{\code{node$clone()}}
 }
 }
@@ -145,6 +146,7 @@ Constructing nodes
   .last_changed = NULL,
   .trigger_defchange = NULL,
   vis_params = NULL,
+  validators = NULL,
   logging = FALSE,
   loggers = NULL,
   store = TRUE,
@@ -174,6 +176,7 @@ Constructing nodes
   definition_hash = NULL,
   trigger_condition = NULL,
   vis_params = NULL,
+  validators = NULL,
   ...,
   store = TRUE,
   logging = NULL,
@@ -268,6 +271,14 @@ Constructing nodes
 \subsection{Method \code{make()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$make(force = FALSE, verbose = TRUE, verbose_prefix = "")}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-validate"></a>}}
+\subsection{Method \code{validate()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$validate(verbose = TRUE, verbose_prefix = "")}\if{html}{\out{</div>}}
 }
 
 }

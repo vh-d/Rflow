@@ -273,6 +273,7 @@ node <- R6::R6Class(
         definition_hash = NULL,
         trigger_condition = NULL,
         vis_params = NULL,
+        validators = NULL,
 
         ...,
         store   = TRUE,
@@ -504,7 +505,7 @@ node <- R6::R6Class(
     },
 
     validate = function(verbose = TRUE, verbose_prefix = "") {
-      sapply(self$valitators, evaluate)
+      sapply(self$valitators, evaluate, x = self$get())
     }
   ) ,
 
