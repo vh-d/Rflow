@@ -69,6 +69,8 @@ node <- R6::R6Class(
     logging = NULL,
     loggers = list(),
 
+    validators = NULL,
+
     vis_params = NULL,
 
     vis_params_process = function(params) {
@@ -166,6 +168,8 @@ node <- R6::R6Class(
 
         vis_params = NULL,
 
+        validators = NULL,
+
         logging = FALSE,
         loggers = NULL,
         store   = TRUE,
@@ -188,6 +192,8 @@ node <- R6::R6Class(
         self$set_persistence(persistence)
 
         self$tags    <- as.character(tags)
+
+        self$validators <- validators
 
         self$vis_params <- self$vis_params_process(vis_params)
 
@@ -307,6 +313,15 @@ node <- R6::R6Class(
           self$tags <- as.character(tags)
         }
 
+        # changes in validators
+        if (!is.null(validators)) {
+          if (!identical(self$validators, validators)) {
+            if (verbose) notify_update(self$id, "validators")
+            self$validators <- validators
+            private$.trigger_defchange <- TRUE
+          }
+        }
+
         # changes in user defined trigger
         trigger_condition <- suppressWarnings(as_r_expr(trigger_condition))
         if (!identical(as.character(self$trigger_condition), as.character(trigger_condition))) {
@@ -383,7 +398,7 @@ node <- R6::R6Class(
     # note that the order of checking the triggers is important (short circuit)
     check_triggers = function(verbose = TRUE, verbose_prefix = "") {
       log_record(self, self$id, "Checking triggers")
-      
+
       if (!isFALSE(self$trigger_defchange))         {if (verbose) notify_trigger(self$id, "change in eval. expression", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
       if (!isFALSE(self$trigger_manual))            {if (verbose) notify_trigger(self$id, "manual trigger", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
       if (!isFALSE(self$check_trigger_condition())) {if (verbose) notify_trigger(self$id, "custom trigger condition", verbose_prefix = paste0(verbose_prefix, "\u2514 ")); return(TRUE)}
@@ -410,7 +425,7 @@ node <- R6::R6Class(
     eval = function(verbose = TRUE, verbose_prefix = "") {
 
       log_record(self, self$id, "Call to an mostly empty eval() method.")
-      
+
       # all triggers should be resetted now
       self$reset_triggers()
 
@@ -486,6 +501,10 @@ node <- R6::R6Class(
 
       # return whether dependants should be triggered or not
       return(invisible(trigger_downstream))
+    },
+
+    validate = function(verbose = TRUE, verbose_prefix = "") {
+      sapply(self$valitators, evaluate)
     }
   ) ,
 
@@ -596,7 +615,7 @@ r_node <- R6::R6Class(
 
       if (isTRUE(delayed)) {
         log_record(self, self$id, "Restoring value from cache (immediate)")
-        delayedAssign( 
+        delayedAssign(
           x     = self$name,
           value = readRDS(file.path(self$cache$path, self$cache$file)),
           assign.env = self$r_env
@@ -675,16 +694,16 @@ r_node <- R6::R6Class(
         if (is.null(self$env)) {
           self$r_env <- .GlobalEnv
         } else {
-          r_env <- 
+          r_env <-
             tryCatch(
-              get(self$env, mode = "environment"), 
-              error = function(e) 
+              get(self$env, mode = "environment"),
+              error = function(e)
                 dynGet(self$env, inherits = TRUE)
             )
           if (!is.environment(r_env)) stop(paste(self$env, "is not an R environment object")) # dynGet does not check mode
           self$r_env <- r_env
         }
-        
+
         # try restoring the object from cache
         if (self$cache$enabled)
           if (self$cache_exists()) {
@@ -791,10 +810,10 @@ r_node <- R6::R6Class(
           hash = hash,
           time = Sys.time()
         )
-      
+
       log_record(self, self$id, "hash changed:", changed)
       if (self$persistence$enabled) self$store_state()
-      
+
       return(changed)
     },
 
@@ -1005,12 +1024,12 @@ db_node <- R6::R6Class(
       },
 
     execute_sql = function(verbose = TRUE, verbose_prefix = "") {
-      
+
       log_record(self, self$id, "Executing SQL statement")
       if (verbose) {
         cat(verbose_prefix, crayon::red(self$id), ": Executing SQL statements:\n", sep = "")
       }
-      
+
       sapply(self$sql,
              function(sql_statement) {
                if (verbose) {
@@ -1039,7 +1058,7 @@ db_node <- R6::R6Class(
       # remove target object before rebuilding it
       if (self$auto_remove) self$remove(verbose = verbose, verbose_prefix = verbose_prefix_inc)
 
-      if (self$mode == "SQL") {  
+      if (self$mode == "SQL") {
         self$execute_sql(verbose = verbose, verbose_prefix = verbose_prefix_inc)
       } else {
         if (verbose) {
@@ -1067,7 +1086,7 @@ db_node <- R6::R6Class(
     },
 
     # check that the target object exists in the database
-    exists = function() {   
+    exists = function() {
       log_record(self, self$id, "Checking existence of target DB object.")
       DBI::dbExistsTable(conn = self$connection, name = self$name)
     },
@@ -1090,7 +1109,7 @@ db_node <- R6::R6Class(
         cat("  R expression:\n   ", crayon::cyan(utils::head(deparse_nicely(self$r_expr))), "\n", sep = "")
       }
     },
-    
+
     print_sql = function(head = NULL, prefix = "") {
       head <- as.integer(head)
       text <- paste_sql(self$sql)
@@ -1183,9 +1202,9 @@ db_node <- R6::R6Class(
         if (msg$result == -1L) {
           stop(msg$error1, msg$error2)
         } # else:
-        
+
         log_record(self, "Removing seems succesfull.")
-        
+
         return(invisible(TRUE))
 
       } else {
@@ -1380,7 +1399,7 @@ excel_sheet <- R6::R6Class(
       } else {
         log_record(self, self$id, "hash not changed", changed)
       }
-      
+
       return(changed)
     },
 
