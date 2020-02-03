@@ -165,7 +165,7 @@ make(MYFLOW)
 
 For more examples see:
 
-  - [Intro 1](./examples/intro1/Rflow_intro_1.md)
+  - [Introduction to Rflow](./examples/intro1/Rflow_intro_1.md)
 
 ## Why Rflow? (comparison to other similar tools)
 
