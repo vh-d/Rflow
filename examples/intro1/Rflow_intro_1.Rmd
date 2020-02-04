@@ -71,8 +71,7 @@ obj_defs <-
           expression_r({
             N = 10; 
             data.table(id = 1:N, value = rnorm(N))
-          }),
-        validators = list(validator(expression_r(TRUE)))
+          })
       ), 
     
     "DB.table1" = 
@@ -223,8 +222,16 @@ DBI::dbReadTable(DB, "table3")
 
 # Cleanup
 
-```{r disconnect}
+```{r cleannig up}
+# disconnect database
 DBI::dbDisconnect(DB)
+
+# close logs
 close_log(RF)
+
+# cleanup the file system
+clean_cache(RF)
+clean_persistence(RF)
+unlink(x = params$rflow, recursive = TRUE)
 ```
 
