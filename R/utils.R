@@ -42,9 +42,17 @@ notify_nonexistence <- function(id, verbose_prefix = "") {
   cat(verbose_prefix, crayon::red(id), ": the target does not exist!\n", sep = "")
 }
 
-# Print a nice notifications
 notify_trigger <- function(id, trigger, verbose_prefix = "") {
   cat(verbose_prefix, crayon::red(id), crayon::yellow(" triggered by ", trigger, sep = ""), "\n", sep = "")
+}
+
+notify_invalid <- function(id, verbose_prefix = "", validator_names, validator_signals) {
+  cat(
+    verbose_prefix, 
+    crayon::red(id), crayon::yellow(" did not passed validations! (", 
+                                    paste0(paste0(validator_names, "(", validator_signals, ")"), collapse = ", ") , ")"
+    ), 
+    "\n", sep = "")
 }
 
 

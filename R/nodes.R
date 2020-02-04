@@ -237,6 +237,7 @@ node <- R6::R6Class(
             "desc", "tags",
             "depends",
             "logging",
+            "validators",
             "definition_hash",
             "trigger_condition",
             "vis_params",
@@ -497,6 +498,26 @@ node <- R6::R6Class(
       # eval should return if the object was evaluated/changed etc...
       trigger_downstream <- !isFALSE(self$eval(verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  ")))
 
+      # validate the result
+      validations <- self$validate(verbose = TRUE, verbose_prefix = "")
+      if (length(validations)) {
+        results <- as.data.table(validations)[(!passed)]
+        
+        if (nrow(results)) {
+           notify_invalid(
+             self$id, 
+             validator_names = results[, validator], 
+             validator_signals = results[, signal], 
+             verbose_prefix = paste0(verbose_prefix, "\u2502  ")
+           )
+        }
+        
+        if (nrow(results[signal == "stop"])) {
+          log_record(self, "stopping the make() proccess due to invalid builds.")
+          stop("Stopping the make() process!")
+        }
+      }
+        
       # all triggers should be resetted now
       self$reset_triggers()
 
@@ -505,10 +526,11 @@ node <- R6::R6Class(
     },
 
     validate = function(verbose = TRUE, verbose_prefix = "") {
-      sapply(self$valitators, evaluate, x = self$get())
+      if (length(self$validators))
+        confront(self$validators, self$get())
     }
   ) ,
-
+  
   active = list(
 
     value = function(value) {

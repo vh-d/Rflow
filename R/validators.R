@@ -5,13 +5,41 @@ validator <- function(x, ...) {
   UseMethod("validator", x)
 }
 
+
 #' @export
-evaluate.validator <- function(x, ...) {
+print.validator <- function(x, ...) {
   warning("This an empty method!")
 }
 
-print.validator <- function(x, ...) {
-  warning("This an empty method!")
+
+#' @export
+confront <- function(x, ...) {
+  UseMethod("confront", x)
+}
+
+
+#' @export
+confront.list <- function(x, ...) {
+  structure(
+    lapply(x, confront, ...),
+    class = c("validations", "list")
+  )
+}
+
+#' @importFrom data.table as.data.table
+#' @export
+as.data.table.validations <- function(x, ...) {
+  data.table::rbindlist(x, idcol = "validator", use.names = TRUE, fill = TRUE)
+}
+
+#' @export
+passes <- function(x, ...) {
+  UseMethod("passes", x)
+}
+
+#' @export
+passes.list <- function(x, ...) {
+  lapply(x, passes, ...)
 }
 
 
@@ -35,82 +63,81 @@ validator_r.default <- function(x, ...) {
 }
 
 #' @export
-validator_r.function <- function(x, ...) {
+validator_r.function <- function(x, signal = "info", msg = NA_character_, ...) {
   structure(
     list(
-      r_func = x
-      # code   = deparse_nicely(x)
+      signal = signal,
+      msg    = msg,
+      fun    = x
     ),
-    class = c("validator_r_func", "validator_r", "validator"))
+    class = c("validator_r", "validator"))
 }
+
 
 #' @export
 validator.function   <- validator_r.function
 
+
 #' @export
 validator_r.expression <- function(x, ...) {
-  structure(
-    list(
-      r_expr = x,
-      code   = deparse_nicely(x)
-    ),
-    class = c("validator_r_expr", "validator_r", "validator"))
+  fun <- function(x) {}
+  body(fun) <- x
+  environment(fun) <- parent.frame()
+  validator_r(fun, ...)
 }
+
 
 #' @export
 validator.expression <- validator_r.expression
 
 
+# validator_r.character <- function(x, signal = "info", msg = NULL, file = FALSE, ...) {
+# 
+#   if (isTRUE(file)) return(validator_r_file(x, ...))
+#   # else:
+# 
+#   structure(
+#     list(
+#       signal = signal,
+#       msg    = msg,
+#       r_expr = parse(text = x),
+#       code   = x
+#     ),
+#     class = c("validator_r_expr", "validator_r", "validator"))
+# }
+
+
 #' @export
-validator_r.character <- function(x, file = FALSE, ...) {
-
-  if (isTRUE(file)) return(validator_r_file(x, ...))
-  # else:
-
+confront.validator_r <- function(x, ...) {
   structure(
     list(
-      r_expr = parse(text = x),
-      code   = x
+      passed = isTRUE(x[["fun"]](...)), 
+      signal = x[["signal"]], 
+      msg    = x[["msg"]]
     ),
-    class = c("validator_r_expr", "validator_r", "validator"))
+    class = "validation"
+  )
 }
 
-#' @export
-evaluate.validator_r_expr <- function(x, ...) {
-  isTRUE(eval(x$r_expr, ...))
-}
+# validator_r_file <- function(x, ...) {
+#   struct <- validator_file(x, ...)
+#   class(struct) <- c("validator_r_file", "validator_r", "validator_file", class(struct))
+# }
+# 
+# confront.validator_r_file <- function(x, ...) {
+#   source(x$path, ...)
+# }
 
-#' @export
-evaluate.validator_r_func <- function(x, ...) {
-  isTRUE(x$r_func(...))
-}
-
-#' @export
-validator_r_file <- function(x, ...) {
-  struct <- validator_file(x, ...)
-  class(struct) <- c("validator_r_file", "validator_r", "validator_file", class(struct))
-}
-
-#' @export
-evaluate.validator_r_file <- function(x, ...) {
-  source(x$path, ...)
-}
 
 #' @export
 print.validator_r <- function(x, ...) {
-  cat("<validator> ", x[["name"]], "\n", sep = "")
+  cat("<validator>", x[["name"]],    "\n", sep = "")
+  cat("  signal: ", x[["signal"]],  "\n", sep = "")
+  cat("  message: ", x[["message"]], "\n", sep = "")
 }
 
-#' @export
-print.validator_r_func <- function(x, ...) {
-  NextMethod()
-  cat("   type: ", "function", "\n", sep = "")
-}
 
 #' @export
-print.validator_r_expr <- function(x, ...) {
-  NextMethod()
-  cat("   type: ", "expression", "\n", sep = "")
-  cat("   code: ", "\n", sep = "")
-  cat_with_prefix(x[["code"]], prefix = "     ")
+passes.validation <- function(x, ...) {
+  isTRUE(x[["passed"]])
 }

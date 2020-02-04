@@ -196,7 +196,7 @@ expr2fun <- function(expr, depends, envir = NULL) {
 
   . <- paste0('.RFLOW[["', depends, '"]]$get()')
   . <- lapply(., str2lang)
-  . <- stats::setNames(., depends)
+  names(.) <- depends
   . -> formals(f)
 
   if (is.environment(envir)) environment(f) <- envir
