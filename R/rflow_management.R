@@ -52,7 +52,7 @@ new_rflow <- function(
         )
     }
   }
-  
+
   # setup logging
   loggers <- setup_logging(logging, path = path)
   result[[".logging"]] <- if (length(loggers)) TRUE else FALSE
@@ -76,16 +76,16 @@ setup_logging.logical <- function(logging, path, ...) {
     log_path <- file.path(path, ".rflow", "log")
     if (!dir.exists(log_path)) dir.create(log_path, recursive = TRUE)
     log_file_path <- file.path(log_path, "log.csv")
-    
+
     setup_logging.character(log_file_path)
   }
 }
 
 # character value treated as file name
 setup_logging.character <- function(logging, ...) {
-  
+
   hf <- handler_file(path = logging)
-  
+
   return(
     list(
       default = logger(name = "RFLOW", handlers = list(hf))
@@ -105,7 +105,7 @@ setup_logging.list <- function(logging, ...) {
     logger[[i]] <- logging[[i]]
   }
   names(loggers) <- names(logging)
-  
+
   return(loggers)
 }
 
@@ -342,7 +342,7 @@ node_definitions <- function(...) {
 nodes_from_r_script <- function(file, encoding = "UTF-8", ...) {
 
   tempenv <- new.env()
-  result <- source("../test_nodes_as_r_script.R", local = tempenv, encoding = encoding, ...)
+  result <- source(file = file, local = tempenv, encoding = encoding, ...)
 
   node_defs <-
     if (isTRUE(methods::is(result$value, "node_definitions"))) {
