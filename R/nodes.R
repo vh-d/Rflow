@@ -502,22 +502,22 @@ node <- R6::R6Class(
       validations <- self$validate(verbose = TRUE, verbose_prefix = "")
       if (length(validations)) {
         results <- as.data.table(validations)[(!passed)]
-        
+
         if (nrow(results)) {
            notify_invalid(
-             self$id, 
-             validator_names = results[, validator], 
-             validator_signals = results[, signal], 
+             self$id,
+             validator_names = results[, validator],
+             validator_signals = results[, signal],
              verbose_prefix = paste0(verbose_prefix, "\u2502  ")
            )
         }
-        
+
         if (nrow(results[signal == "stop"])) {
           log_record(self, "stopping the make() proccess due to invalid builds.")
           stop("Stopping the make() process!")
         }
       }
-        
+
       # all triggers should be resetted now
       self$reset_triggers()
 
@@ -530,7 +530,7 @@ node <- R6::R6Class(
         confront(self$validators, self$get())
     }
   ) ,
-  
+
   active = list(
 
     value = function(value) {
@@ -1401,7 +1401,7 @@ excel_sheet <- R6::R6Class(
           return(isTRUE(as.integer(self$sheet) %in% seq_along(openxlsx::getSheetNames(self$path))))
         } else
           return(isTRUE(self$sheet %in% openxlsx::getSheetNames(self$path)))
-      }
+      } else return(FALSE)
     },
 
     check_hash = function() {
