@@ -151,6 +151,10 @@ test_that("All nodes (that left) can be built.", {
   expect_s3_class(RF$RDATA.table3$value, "data.frame")
 })
 
+test_that("Make accepts character vectors.", {
+  res <- make(c("DB.table1", "DB.table2"), RF, verbose = FALSE)
+  expect_false(all(res))
+})
 
 ## ----disconnect----------------------------------------------------------
 DBI::dbDisconnect(DB)

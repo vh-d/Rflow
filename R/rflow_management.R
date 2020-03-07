@@ -652,11 +652,14 @@ connect_nodes.rflow <- function(x, ...) {
 #' @param verbose logical; switch on/off verbose output
 #' @export
 make <- function(x, ...){
-  if (!is.null(x)) {
-    UseMethod("make", x)
-  } else stop(substitute(x), " cannot be NULL!")
+  UseMethod("make", x)
 }
 
+#' @export
+make.NULL <- function(x, ...) {
+  warning("Nothing to do with ", substitute(x), " being NULL")
+  NULL
+}
 
 #' @export
 make.node <- function(x, force = FALSE, verbose = TRUE, verbose_prefix = "") {
@@ -672,11 +675,11 @@ make.character <- function(
   verbose = TRUE,
   verbose_prefix = ""
 ) {
-  if (length(id) < 2) {
-    if (length(id) == 0) return(NULL)
+  if (!length(id)) return(c())
+  if (length(id) == 1) {
     make(rflow[[id]], force = force, verbose = verbose, verbose_prefix = verbose_prefix)
   } else {
-    sapply(id, make.character, force = force, verbose = verbose, verbose_prefix = verbose_prefix)
+    sapply(id, make.character, rflow = rflow, force = force, verbose = verbose, verbose_prefix = verbose_prefix)
   }
 }
 
