@@ -1,3 +1,16 @@
+context("Creating jobs")
+
+test_that("R jobs can be created", {
+  rjob <- job_r({1+1})
+  expect_s3_class(rjob, "job")
+  expect_s3_class(rjob, "job_r")
+  expect_identical(evaluate(rjob), 2)
+
+  rjob <- job_r(function() 1+1)
+  expect_s3_class(rjob, "job")
+  expect_s3_class(rjob, "job_r")
+  expect_identical(evaluate(rjob), 2)
+})
 
 context("Detecting dependencies")
 

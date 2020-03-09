@@ -42,14 +42,6 @@ read.job_file <- function(x, ...) {
 }
 
 
-# job.character <- function(x, ...) {
-#   do.call(paste0(x, "_job"), ...)
-# }
-#
-# job.list <- function(x) {
-#   do.call(job, x$type, x)
-# }
-
 
 # R jobs ------------------------------------------------------------------
 
@@ -83,6 +75,16 @@ job_r.expression <- function(x, ...) {
 }
 
 #' @export
+job_r.function <- function(x, ...) {
+  structure(
+    list(
+      r_fn = x
+    ),
+    class = c("job_r_fn", "job_r", "job")
+  )
+}
+
+#' @export
 job_r.character <- function(x, file = FALSE, ...) {
 
   if (isTRUE(file)) return(job_r_file(x, ...))
@@ -104,11 +106,17 @@ evaluate.job_r_expr <- function(x, ...) {
   eval(x$r_expr, ...)
 }
 
+#' @export
+evaluate.job_r_fn <- function(x, ..., quote = FALSE, envir = parent.frame()) {
+  do.call(x$r_fn, args = list(...), quote = quote, envir = envir)
+}
 
 #' @export
 job_r_file <- function(x, ...) {
-  struct <- job_file(x, ...)
-  class(struct) <- c("job_r_file", "job_r", "job_file", class(struct))
+  job <- job_file(x, ...)
+  class(job) <- unique(c("job_r_file", "job_r", "job_file", class(job)))
+
+  job
 }
 
 #' @export
@@ -126,8 +134,10 @@ job_sql_code <- function(x, mode = "execute", ...) {
 
 #' @export
 job_sql_file <- function(x, mode = "execute", ...) {
-  struct <- job_file(x, mode = mode, ...)
-  class(struct) <- c("job_sql_file", "job_sql", "job_file", class(struct))
+  job <- job_file(x, mode = mode, ...)
+  class(job) <- c("job_sql_file", "job_sql", "job_file", class(job))
+
+  job
 }
 
 
@@ -148,8 +158,10 @@ job_python.character <- function(x, file = FALSE, ...) {
 
 #' @export
 job_python_file <- function(x, ...) {
-  struct <- job_file(x, ...)
-  class(struct) <- c("job_python_file", "job_python", class(struct))
+  job <- job_file(x, ...)
+  class(job) <- c("job_python_file", "job_python", class(job))
+
+  job
 }
 
 
@@ -203,14 +215,6 @@ expr2fun <- function(expr, depends, envir = NULL) {
 
   return(f)
 }
-
-# .RFLOW <- new.env()
-# .RFLOW[["RDATA.tab"]] <- 1
-# .RFLOW[["RDATA.tab2"]] <- 10
-#
-# depends <- c("RDATA.tab", "RDATA.tab2")
-#
-# expr2fun(expression_r({RDATA.tab+RDATA.tab2}), depends, .GlobalEnv)
 
 
 strip_srcrefs <- function(expr) {
