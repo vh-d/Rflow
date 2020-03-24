@@ -12,6 +12,10 @@ evaluate <- function(x, ...) {
   UseMethod("evaluate", x)
 }
 
+#' @export
+evaluate.node <- function(x, ...) {
+  x$eval(...)
+}
 
 #' @export
 evaluate.job <- function(x, ...) {
