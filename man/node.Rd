@@ -4,7 +4,9 @@
 \name{node}
 \alias{node}
 \title{node class}
-\format{\code{\link{R6Class}} object.}
+\format{
+\code{\link{R6Class}} object.
+}
 \usage{
 node$new(id = "node")
 }
@@ -81,6 +83,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-vis_params_process"></a>}}
+\if{latex}{\out{\hypertarget{method-vis_params_process}{}}}
 \subsection{Method \code{vis_params_process()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$vis_params_process(params)}\if{html}{\out{</div>}}
@@ -89,6 +92,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-set_id"></a>}}
+\if{latex}{\out{\hypertarget{method-set_id}{}}}
 \subsection{Method \code{set_id()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$set_id(id, name, env)}\if{html}{\out{</div>}}
@@ -97,6 +101,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-set_persistence"></a>}}
+\if{latex}{\out{\hypertarget{method-set_persistence}{}}}
 \subsection{Method \code{set_persistence()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$set_persistence(persistence)}\if{html}{\out{</div>}}
@@ -105,6 +110,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}
+\if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$print(...)}\if{html}{\out{</div>}}
@@ -113,6 +119,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-label"></a>}}
+\if{latex}{\out{\hypertarget{method-label}{}}}
 \subsection{Method \code{label()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$label()}\if{html}{\out{</div>}}
@@ -121,6 +128,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-title"></a>}}
+\if{latex}{\out{\hypertarget{method-title}{}}}
 \subsection{Method \code{title()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$title()}\if{html}{\out{</div>}}
@@ -129,6 +137,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$new(
@@ -157,6 +166,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-store_state"></a>}}
+\if{latex}{\out{\hypertarget{method-store_state}{}}}
 \subsection{Method \code{store_state()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$store_state(public_fields = NULL, private_fields = NULL)}\if{html}{\out{</div>}}
@@ -165,6 +175,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-update_definition"></a>}}
+\if{latex}{\out{\hypertarget{method-update_definition}{}}}
 \subsection{Method \code{update_definition()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$update_definition(
@@ -188,6 +199,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-set_upstream"></a>}}
+\if{latex}{\out{\hypertarget{method-set_upstream}{}}}
 \subsection{Method \code{set_upstream()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$set_upstream(obj)}\if{html}{\out{</div>}}
@@ -196,6 +208,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-set_downstream"></a>}}
+\if{latex}{\out{\hypertarget{method-set_downstream}{}}}
 \subsection{Method \code{set_downstream()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$set_downstream(obj)}\if{html}{\out{</div>}}
@@ -204,6 +217,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-connect_to"></a>}}
+\if{latex}{\out{\hypertarget{method-connect_to}{}}}
 \subsection{Method \code{connect_to()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$connect_to(id)}\if{html}{\out{</div>}}
@@ -212,6 +226,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-connect"></a>}}
+\if{latex}{\out{\hypertarget{method-connect}{}}}
 \subsection{Method \code{connect()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$connect(verbose = TRUE)}\if{html}{\out{</div>}}
@@ -220,6 +235,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get"></a>}}
+\if{latex}{\out{\hypertarget{method-get}{}}}
 \subsection{Method \code{get()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$get()}\if{html}{\out{</div>}}
@@ -228,6 +244,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-remove"></a>}}
+\if{latex}{\out{\hypertarget{method-remove}{}}}
 \subsection{Method \code{remove()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$remove()}\if{html}{\out{</div>}}
@@ -236,6 +253,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-check_trigger_condition"></a>}}
+\if{latex}{\out{\hypertarget{method-check_trigger_condition}{}}}
 \subsection{Method \code{check_trigger_condition()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$check_trigger_condition()}\if{html}{\out{</div>}}
@@ -244,6 +262,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-check_triggers"></a>}}
+\if{latex}{\out{\hypertarget{method-check_triggers}{}}}
 \subsection{Method \code{check_triggers()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$check_triggers(verbose = TRUE, verbose_prefix = "")}\if{html}{\out{</div>}}
@@ -252,6 +271,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-reset_triggers"></a>}}
+\if{latex}{\out{\hypertarget{method-reset_triggers}{}}}
 \subsection{Method \code{reset_triggers()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$reset_triggers()}\if{html}{\out{</div>}}
@@ -260,6 +280,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-eval"></a>}}
+\if{latex}{\out{\hypertarget{method-eval}{}}}
 \subsection{Method \code{eval()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$eval(verbose = TRUE, verbose_prefix = "")}\if{html}{\out{</div>}}
@@ -268,6 +289,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-make"></a>}}
+\if{latex}{\out{\hypertarget{method-make}{}}}
 \subsection{Method \code{make()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$make(force = FALSE, verbose = TRUE, verbose_prefix = "")}\if{html}{\out{</div>}}
@@ -276,6 +298,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-validate"></a>}}
+\if{latex}{\out{\hypertarget{method-validate}{}}}
 \subsection{Method \code{validate()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$validate(verbose = TRUE, verbose_prefix = "")}\if{html}{\out{</div>}}
@@ -284,6 +307,7 @@ Constructing nodes
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

@@ -7,7 +7,14 @@
 \usage{
 make(x, ...)
 
-\method{make}{rflow}(rflow, tags = NULL, leaves_only = TRUE, force = FALSE, verbose = TRUE)
+\method{make}{rflow}(
+  rflow,
+  tags = NULL,
+  leaves_only = TRUE,
+  force = FALSE,
+  tagsMatchLogic = "all",
+  verbose = TRUE
+)
 }
 \arguments{
 \item{x}{node's id or rflow object}

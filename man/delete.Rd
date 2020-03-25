@@ -2,20 +2,36 @@
 % Please edit documentation in R/rflow_management.R
 \name{delete}
 \alias{delete}
-\title{Remove node}
+\alias{delete.node}
+\title{Remove an object}
 \usage{
 delete(x, ...)
+
+\method{delete}{node}(
+  x,
+  completely = FALSE,
+  cache = FALSE | completely,
+  persistency = FALSE | completely,
+  value = FALSE | completely,
+  ...
+)
 }
 \arguments{
 \item{x}{node object or an id (character)}
 
-\item{rflow}{rflow object}
+\item{...}{}
 
-\item{completely}{logical;}
+\item{completely}{logical; all bellow?}
+
+\item{cache}{logical; remove all cache related to the object?}
+
+\item{persistency}{logical; remove persistency metadata?}
+
+\item{value}{logical; remove target data?}
 }
 \value{
 delete methods can only return TRUE or raise error
 }
 \description{
-Remove node
+Remove an object
 }
