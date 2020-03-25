@@ -10,6 +10,7 @@ visRflow2(
   includeIsolated = TRUE,
   direction = "UD",
   orderBy = "id",
+  tagsMatchLogic = "all",
   ...
 )
 }

@@ -699,8 +699,10 @@ make.rflow <- function(
   tags = NULL,
   leaves_only = TRUE,
   force = FALSE,
+  tagsMatchLogic = "all",
   verbose = TRUE
 ) {
+  # TODO: this is ugly, make it more pipe-able usig get_nodes(), allow queries, etc...
 
   log_record(rflow, "Make", sys_call_formatted())
   if (verbose) cat(rep("\u2500", 3), " Make ", rep("\u2500", 25), "\n\n", sep = "")
@@ -717,10 +719,10 @@ make.rflow <- function(
     query_tags <- tags
     rm(tags)
 
-    nodes_to_make <-
-      if (length(query_tags) == 1)
-        N[stringr::str_detect(tags, query_tags), id] else # query as regexp
-          N[stringr::str_detect(tags, stringr::fixed(paste0("|", query_tags, "|"))), id] # query as a union tag1 | tag2 | ...
+    nodes_to_make <- N[matchtags(pattern = query_tags, logic = tagsMatchLogic, tags = tags), id]
+      # if (length(query_tags) == 1)
+      #   N[stringr::str_detect(tags, query_tags), id] else # query as regexp
+      #     N[stringr::str_detect(tags, stringr::fixed(paste0("|", query_tags, "|"))), id] # query as a union tag1 | tag2 | ...
 
     N <- N[id %in% nodes_to_make]
   }
@@ -743,11 +745,9 @@ make.rflow <- function(
 
 
 
-#' Remove node
+#' Remove an object
 #'
 #' @param x node object or an id (character)
-#' @param rflow rflow object
-#' @param completely logical;
 #'
 #' @return
 #' delete methods can only return TRUE or raise error
@@ -756,8 +756,18 @@ delete <- function(x, ...) {
   UseMethod("delete", x)
 }
 
+#' @param cache 
+#' @param persistency 
+#' @param value 
+#' @param ... 
+#' @param completely logical; all bellow?
+#' @param cache logical; remove all cache related to the object?
+#' @param persistency logical; remove persistency metadata?
+#' @param value logical; remove target data?
+#'
 #' @export
 #' @method delete node
+#' @rdname delete
 delete.node <- function(x, completely = FALSE, cache = FALSE | completely, persistency = FALSE | completely, value = FALSE | completely, ...) {
 
   if (isTRUE(cache)) clean_cache(x)

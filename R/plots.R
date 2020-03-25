@@ -7,7 +7,7 @@ disc_scale <- function(
 
 
 
-visData <- function(rflow, tags = NULL, includeIsolated = TRUE) {
+visData <- function(rflow, tags = NULL, includeIsolated = TRUE, tagsMatchLogic = "all") {
 
   if (!requireNamespace("data.table", quietly = TRUE)) stop("data.table package required to plot graphs")
 
@@ -24,7 +24,8 @@ visData <- function(rflow, tags = NULL, includeIsolated = TRUE) {
   if (length(tags)) {
     query_tags <- tags
     rm(tags)
-    dtNODES <- dtNODES[stringr::str_detect(tags, stringr::fixed(paste0("|", query_tags, "|")))]
+    # dtNODES <- dtNODES[stringr::str_detect(tags, stringr::fixed(paste0("|", query_tags, "|")))]
+    dtNODES <- dtNODES[matchtags(pattern = query_tags, logic = tagsMatchLogic, tags = tags)]
   }
 
   # drop isolated/lonely nodes if needed
@@ -68,14 +69,15 @@ visData <- function(rflow, tags = NULL, includeIsolated = TRUE) {
 #' @param tags vector of tags for filtering nodes
 #' @param includeIsolated logical; Switch to filter isolated/lonely nodes.
 #' @param direction see visNetwork docs on hierarchical graphs
+#' @param tagsMatchLogic one of: any/all/none
 #' @param ... args passed to visNetwork
 #'
 #' @export
-plot.rflow <- function(x, tags = NULL, includeIsolated = TRUE, direction = "LR", ...) {
+plot.rflow <- function(x, tags = NULL, includeIsolated = TRUE, direction = "LR", tagsMatchLogic = "all", ...) {
 
   if (!requireNamespace("visNetwork", quietly = TRUE)) stop("visNetwork package required to plot graphs")
 
-  l <- visData(rflow = x, tags = tags, includeIsolated = includeIsolated)
+  l <- visData(rflow = x, tags = tags, includeIsolated = includeIsolated, tagsMatchLogic = tagsMatchLogic)
 
   visNetwork::visNetwork(
     nodes = l$dtNODES,
@@ -149,11 +151,11 @@ plot.rflow <- function(x, tags = NULL, includeIsolated = TRUE, direction = "LR",
 #' @return
 #' A visNetwork plot.
 #' @export
-visRflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD", orderBy = "id", ...) {
+visRflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD", orderBy = "id", tagsMatchLogic = "all", ...) {
 
   if (!requireNamespace("visNetwork", quietly = TRUE)) stop("visNetwork package required to plot graphs")
 
-  l <- visData(rflow = rflow, tags = tags, includeIsolated = includeIsolated)
+  l <- visData(rflow = rflow, tags = tags, includeIsolated = includeIsolated, tagsMatchLogic = tagsMatchLogic)
 
   nodes <- l$dtNODES
   edges <- l$dtEDGES
@@ -234,11 +236,11 @@ visRflow <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD
 #' @return
 #' A visNetwork plot.
 #' @export
-visRflow2 <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD", orderBy = "id", ...) {
+visRflow2 <- function(rflow, tags = NULL, includeIsolated = TRUE, direction = "UD", orderBy = "id", tagsMatchLogic = "all", ...) {
 
   if (!requireNamespace("visNetwork", quietly = TRUE)) stop("visNetwork package required to plot graphs")
 
-  l <- visData(rflow = rflow, tags = tags, includeIsolated = includeIsolated)
+  l <- visData(rflow = rflow, tags = tags, includeIsolated = includeIsolated, tagsMatchLogic = tagsMatchLogic)
 
   nodes  <- l$dtNODES
   edges  <- l$dtEDGES
