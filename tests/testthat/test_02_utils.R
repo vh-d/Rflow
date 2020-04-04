@@ -44,6 +44,27 @@ test_that("expression_r strips attributes from expressions", {
   expect_equal(hashes[1], hashes[2])
 })
 
+
+test_that("substitute... works as expected", {
+
+  g <- function(x = 1, ...) {
+    Rflow::substitute...()
+  }
+
+  result <- g(x = 2, a = 1 + 1)
+
+  expect_length(result, 1)
+  expect_type(result, "list")
+  expect_type(result[[1]], "language")
+  expect_named(result, "a")
+
+  gg <- function(x = 1) {
+    Rflow::substitute...()
+  }
+
+  expect_error(gg())
+})
+
 # rexp <- expression({1+1})
 # rexp_tidy <- as_r_expr(rexp)
 # str(rexp[[1]])

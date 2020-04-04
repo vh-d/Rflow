@@ -48,10 +48,10 @@ notify_trigger <- function(id, trigger, verbose_prefix = "") {
 
 notify_invalid <- function(id, verbose_prefix = "", validator_names, validator_signals) {
   cat(
-    verbose_prefix, 
-    crayon::red(id), crayon::yellow(" did not passed validations! (", 
+    verbose_prefix,
+    crayon::red(id), crayon::yellow(" did not passed validations! (",
                                     paste0(paste0(validator_names, "(", validator_signals, ")"), collapse = ", ") , ")"
-    ), 
+    ),
     "\n", sep = "")
 }
 
@@ -117,3 +117,45 @@ firstnotnull <- function(...) {
   if (any(!i)) return(list(...)[[min(which(!i))]]) else NULL
 }
 
+
+methods_for <- function(x, all = TRUE) {
+
+  if (isTRUE(all)) {
+    classes <- unique(c(class(x), typeof(x)))
+  } else classes <- class(x)[1]
+
+  res <- character()
+  for (i in seq_along(classes)) {
+    res <- c(res, methods(class = classes[i]))
+  }
+
+  unique(res)
+}
+
+
+#' Substitute ... for a list of un-evaluated expressions
+#'
+#' @return a list of all arguments matched by ...
+#' @export
+substitute... <- function() {
+  pcall <- sys.call(which = -1)
+  pargs <- names(formals(sys.function(-1)))
+  if (!"..." %in% pargs) stop("The parent function does not have ... in its formals.")
+  dotsnames <- setdiff(names(pcall)[-1], c("", setdiff(pargs, "...")))
+  dots <- as.list(pcall)[dotsnames]
+
+  return(dots)
+}
+#
+# g <- function(x = 1, ...) {
+#   # print(sys.call())
+#   substitute...()
+# }
+#
+# f <- function() {
+#   result <- g(a = 1+1)
+#
+#   result
+# }
+#
+# f()
