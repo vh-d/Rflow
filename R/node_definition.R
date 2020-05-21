@@ -51,21 +51,11 @@ process_obj_defs <- function(obj_defs) {
   obj_defs
 }
 
-# process_obj_defs <- function(obj_defs) {
-#   # list_names <- names(obj_defs)
-#   obj_names <- names(obj_defs)
-#   has_names <- which(!is.na(obj_names))
-#   env_names <- env_name_from_id(names(obj_defs))
-#   
-#   node_envs  <- sapply(obj_defs[has_names], function(x) if (length(x$env)) x$env else NA_character_)
-#   node_names <- sapply(obj_defs[has_names], function(x) if (length(x$name)) x$name else NA_character_)
-#   
-#   env_names[.(id = names(node_envs), env = node_envs), on = "id"][, .(isTRUE(env == i.env)), by = .(id)]
-# }
 
-
-#' @export
 env_name_from_id <- function(id) {
+  
+  if (!identical(base::make.names(id), id)) stop(id, "is not a valid id!")
+    
   strm <- stringr::str_match(string = id, pattern = "^([0-9a-zA-Z_]+?\\.)?([0-9a-zA-Z]+?[0-9a-zA-Z._]*?)$")
   strm[, 2] <- stringr::str_replace(strm[, 2], "\\.$", "")
   

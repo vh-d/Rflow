@@ -65,6 +65,21 @@ test_that("substitute... works as expected", {
   expect_error(gg())
 })
 
+test_that("ID can be split into env and name", {
+
+  id1 <- Rflow::env_name_from_id("RDATA.id1")
+  expect_identical(id1$id,  "RDATA.id1")
+  expect_identical(id1$env, "RDATA")
+  expect_identical(id1$name, "id1")
+  
+  id2 <- Rflow::env_name_from_id("RDATA.id2.a")
+  expect_identical(id2$id,  "RDATA.id2.a")
+  expect_identical(id2$env, "RDATA")
+  expect_identical(id2$name, "id2.a")
+
+  expect_error(Rflow::env_name_from_id("RDATA.id3-a"), "valid")
+
+})
 # rexp <- expression({1+1})
 # rexp_tidy <- as_r_expr(rexp)
 # str(rexp[[1]])
