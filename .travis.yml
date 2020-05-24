@@ -14,9 +14,7 @@ r_packages:
   - crayon
   - data.table
   - DBI
-  - JuliaCall
   - methods
-  - reticulate
   - R6
   - RSQLite
   - stringr
@@ -24,9 +22,3 @@ r_packages:
 after_success:
   - Rscript -e 'library(covr); codecov()'
 
-addons:
-  apt:
-    packages:
-      - python3
-      - python3-numpy
-      - python3-pandas
