@@ -1,12 +1,12 @@
 context("Help functions")
 
 test_that("IDs can be decomposed into env + name pairs", {
-  tmp <- Rflow::env_name_from_id("Env1.node1")
+  tmp <- Rflow:::env_name_from_id("Env1.node1")
   expect_equal(tmp$env,  "Env1")
   expect_equal(tmp$name, "node1")
 
-  # expect_equal(Rflow::env_name_from_id("node2"),      data.table(env = NA_character_, name = "node2"))
-  # expect_equal(Rflow::env_name_from_id(c("DB1.tab_1", "DB1.tab_2")),
+  # expect_equal(Rflow:::env_name_from_id("node2"),      data.table(env = NA_character_, name = "node2"))
+  # expect_equal(Rflow:::env_name_from_id(c("DB1.tab_1", "DB1.tab_2")),
   #              data.table(env = c("DB1", "DB1"), name = c("tab_1", "tab_2")))
 })
 
@@ -67,17 +67,17 @@ test_that("substitute... works as expected", {
 
 test_that("ID can be split into env and name", {
 
-  id1 <- Rflow::env_name_from_id("RDATA.id1")
+  id1 <- Rflow:::env_name_from_id("RDATA.id1")
   expect_identical(id1$id,  "RDATA.id1")
   expect_identical(id1$env, "RDATA")
   expect_identical(id1$name, "id1")
-  
-  id2 <- Rflow::env_name_from_id("RDATA.id2.a")
+
+  id2 <- Rflow:::env_name_from_id("RDATA.id2.a")
   expect_identical(id2$id,  "RDATA.id2.a")
   expect_identical(id2$env, "RDATA")
   expect_identical(id2$name, "id2.a")
 
-  expect_error(Rflow::env_name_from_id("RDATA.id3-a"), "valid")
+  expect_error(Rflow:::env_name_from_id("RDATA.id3-a"), "valid")
 
 })
 # rexp <- expression({1+1})
