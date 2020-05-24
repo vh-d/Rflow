@@ -11,6 +11,15 @@ warnings_are_errors: false
 
 r_packages:
   - covr
+  - crayon
+  - data.table
+  - DBI
+  - JuliaCall
+  - methods
+  - reticulate
+  - R6
+  - RSQLite
+  - stringr
 
 after_success:
   - Rscript -e 'library(covr); codecov()'
