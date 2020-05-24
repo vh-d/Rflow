@@ -1761,3 +1761,114 @@ csv_node <- R6::R6Class(
   )
 )
 
+
+# py_node -----------------------------------------------------------------
+
+#' @export
+py_node <- R6::R6Class(
+  classname = "py_node",
+  inherit = node,
+
+  private = list(
+    .vis_params_default = list(
+      shape = "square"
+    )
+  ),
+
+  public = list(
+
+    cache = list(enabled = FALSE),
+
+    cache_setup = function(cache) {
+
+      log_record(self, self$id, "Setting up cache")
+
+      self$cache <-
+        if (is.list(cache) && length(cache$path)) {
+          if (dir.exists(cache$path)) {
+            list(
+              enabled = TRUE,
+              path    = cache$path,
+              file    = filename_from_id(self$id, ext = "pickle")
+            )
+          } else stop("Cannot setup a cache file: ", cache$path, " does not exist.")
+        } else if (is.character(cache)) {
+          if (dir.exists(cache)) {
+            list(
+              enabled = TRUE,
+              path    = cache,
+              file    = filename_from_id(self$id, ext = "pickle")
+            )
+          } else stop(cache, " does not exist.")
+        } else {
+          list(
+            enabled = FALSE
+          )
+        }
+
+      invisible(TRUE)
+    },
+
+    cache_exists = function() {
+      file.exists(file.path(self$cache$path, self$cache$file))
+    },
+
+    cache_write = function() {
+      log_record(self, self$id, "Writing cache")
+      reticulate::py_save_object(object = self$getref(), filename = file.path(self$cache$path, self$cache$file))
+    },
+
+    cache_restore = function(delayed = getOption("RFLOW_DELAYED_CACHE_LOAD", default = TRUE)) {
+      # if (isTRUE(delayed)) warning("Delayed loading of Python objects is not supported currently.")
+      log_record(self, self$id, "Restoring value from cache (delayed)")
+      py <- reticulate::py
+      py[[self$name]] <- reticulate::py_load_object(file.path(file.path(self$cache$path, self$cache$file)))
+    },
+
+    exists = function() {
+      isTRUE(self$name %in% names(reticulate::py))
+    },
+
+    getref = function() {
+      reticulate::py_eval(self$name, convert = FALSE)
+    },
+
+    get = function() {
+      if (self$exists()) reticulate::py[[self$name]] else stop(self$id, " does not exists!")
+    },
+
+    remove = function(verbose = TRUE, verbose_prefix = "") {
+      if (self$exists()) {
+        if (verbose) notify_removal(self$id, verbose_prefix = verbose_prefix)
+        reticulate::py_run_string(sprintf("del(%s)", self$name))
+        return(invisible(TRUE))
+      } else {
+        if (verbose) notify_nonexistence(self$id, verbose_prefix = verbose_prefix)
+        return(invisible(FALSE))
+      }
+
+    }
+  )
+)
+
+#' @export
+julia_node <- R6::R6Class(
+  classname = "julia_node",
+  inherit = node,
+
+  private = list(
+    .vis_params_default = list(
+      shape = "square"
+    )
+  ),
+
+  public = list(
+    exists = function() {
+      JuliaCall::julia_exists(self$name)
+    },
+
+    get = function() {
+      JuliaCall::julia_eval(self$name, need_return = "R")
+    }
+  )
+)
