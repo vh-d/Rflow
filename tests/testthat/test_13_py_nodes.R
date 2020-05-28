@@ -32,8 +32,8 @@ test_that("py_nodes can be fetched", {
 
 
 test_that("py_nodes can be cached and restored from cache", {
-  pynode1 <- Rflow::py_node$new(env = "PY", name = "pyvalue1")
-  reticulate::py_run_string("pyvalue1 = [x for x in range(1, 5)]")
+  pynode1 <- Rflow::py_node$new(env = "PY", name = "pyvalue1", py_code = "pyvalue1 = [x for x in range(1, 5)]")
+  pynode1$eval(verbose = FALSE)
   pynode1$cache_setup(tempdir())
   pynode1$cache_write()
   expect_true(pynode1$remove(verbose = FALSE))

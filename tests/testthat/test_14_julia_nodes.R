@@ -27,13 +27,12 @@ test_that("julia_nodes can be fetched", {
 
 
 test_that("julia_nodes can be cached and restored from cache", {
-  node1 <- Rflow::julia_node$new(env = "julia", name = "value1")
-  JuliaCall::julia_command("value1 = 1:10", show_value = FALSE)
+  node1 <- Rflow::julia_node$new(env = "julia", name = "value1", julia_code = "value1 = 1:10")
+  node1$eval(verbose = FALSE)
   node1$cache_setup(tempdir())
   node1$cache_write()
-  # expect_true(node1$remove(verbose = FALSE))
-  # expect_false(node1$exists())
+  JuliaCall::julia_command("value1 = 1", show_value = FALSE)
+  expect_identical(node1$get(), 1L)
   node1$cache_restore()
-  expect_true(node1$exists())
   expect_identical(node1$get(), 1:10)
 })
