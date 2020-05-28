@@ -2171,7 +2171,7 @@ julia_node <- R6::R6Class(
       }
 
       log_record(self, self$id, "Evaluation started")
-      JuliaCall::julia_command(self$julia_code, local = FALSE, convert = FALSE)
+      JuliaCall::julia_command(self$julia_code, show_value = FALSE)
       private$.last_evaluated <- Sys.time()
 
       log_record(self, self$id, "Evaluation finished")
