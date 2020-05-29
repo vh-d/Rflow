@@ -167,6 +167,15 @@ For more examples see:
 
   - [Introduction to Rflow](./examples/intro1/Rflow_intro_1.md)
 
+## Details
+
+### Non-deterministic jobs
+
+In case a building a node uses a non-deterministic functions (e.g. when
+it depends on random numbers, system time, etc…) we can use
+`trigger_condition = TRUE` property to override all the other triggers
+and to always build the node.
+
 ## Why Rflow? (comparison to other similar tools)
 
 Rflow overlaps with several other tools in this domain.
@@ -205,8 +214,7 @@ preprocessing data from various formats and sources.
 management framework for Python.
 
 [Apache Airflow](https://airflow.apache.org/) is a very general and
-sophisticated platform written in
-Python.
+sophisticated platform written in Python.
 
 <!-- ## TODO: -->
 
