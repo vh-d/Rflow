@@ -11,8 +11,8 @@
 *TLDR*:
 
 A library for creating and executing DAGs, everything is stored
-(persistent) so you can restart worflows where it failed, support for R,
-SQL, (Python and Julia on the roadmap).
+(persistent) so you can restart workflows where it failed, support for
+R, SQL, Python and Julia.
 
 *Long version*:
 
@@ -22,8 +22,8 @@ objects with dependencies and does the heavy lifting for you. It is
 suitable for various purposes: from managing several simple automation
 scripts to building powerfull ETL pipelines.
 
-Rflow makes your data pipelines better organized and managable (worflow
-can be visualized, objects may have documentation and tags).
+Rflow makes your data pipelines better organized and manageable
+(workflow can be visualized, objects may have documentation and tags).
 
 It saves your time as your objects are rebuild only when its needed
 (also objects are persistent over sessions).
