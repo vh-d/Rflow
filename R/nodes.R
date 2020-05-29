@@ -158,9 +158,12 @@ node <- R6::R6Class(
         desc    = NULL,
         tags    = NULL,
         depends = NULL,
-        trigger_defchange  = NULL,
+
+        trigger_defchange = NULL,
         trigger_condition = NULL,
+
         definition_hash = NULL,
+
         persistence = list(enabled = FALSE),
         .last_evaluated = NULL,
         .last_changed   = NULL,
@@ -263,7 +266,7 @@ node <- R6::R6Class(
       )
     },
 
-    # allows to change properties of existing objects/instances
+    # allows to change properties of existing nodes (after they are initialized, e.g. from persistence
     update_definition =
       function(
         id      = NULL,
