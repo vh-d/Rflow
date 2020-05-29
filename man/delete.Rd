@@ -19,8 +19,6 @@ delete(x, ...)
 \arguments{
 \item{x}{node object or an id (character)}
 
-\item{...}{}
-
 \item{completely}{logical; all bellow?}
 
 \item{cache}{logical; remove all cache related to the object?}

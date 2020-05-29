@@ -604,16 +604,14 @@ r_node <- R6::R6Class(
           if (dir.exists(cache$path)) {
             list(
               enabled = TRUE,
-              path    = cache$path,
-              file    = filename_from_id(self$id)
+              path    = cache$path
             )
           } else stop("Cannot setup a cache file: ", cache$path, " does not exist.")
         } else if (is.character(cache)) {
           if (dir.exists(cache)) {
             list(
               enabled = TRUE,
-              path    = cache,
-              file    = filename_from_id(self$id)
+              path    = cache
             )
           } else stop(cache, " does not exist.")
         } else {
@@ -626,12 +624,12 @@ r_node <- R6::R6Class(
     },
 
     cache_exists = function() {
-      file.exists(file.path(self$cache$path, self$cache$file))
+      file.exists(file.path(self$cache$path, filename_from_id(self$id, value_hash = self$hash$hash))) # TODO: precompute ID hash
     },
 
     cache_write = function() {
       log_record(self, self$id, "Writing cache")
-      saveRDS(object = self$get(), file = file.path(self$cache$path, self$cache$file))
+      saveRDS(object = self$get(), file = file.path(self$cache$path, filename_from_id(self$id, value_hash = self$hash$hash)))
     },
 
     cache_restore = function(delayed = getOption("RFLOW_DELAYED_CACHE_LOAD", default = TRUE)) {
@@ -640,14 +638,14 @@ r_node <- R6::R6Class(
         log_record(self, self$id, "Restoring value from cache (immediate)")
         delayedAssign(
           x     = self$name,
-          value = readRDS(file.path(self$cache$path, self$cache$file)),
+          value = readRDS(file.path(self$cache$path, filename_from_id(self$id, value_hash = self$hash$hash))),
           assign.env = self$r_env
         )
       } else {
         log_record(self, self$id, "Restoring value from cache (delayed)")
         assign(
           x     = self$name,
-          value = readRDS(file.path(self$cache$path, self$cache$file)),
+          value = readRDS(file.path(self$cache$path, filename_from_id(self$id, value_hash = self$hash$hash))),
           pos   = self$r_env
         )
       }
@@ -733,7 +731,7 @@ r_node <- R6::R6Class(
             tryCatch(
               {
                 self$cache_restore()
-                self$check_hash()
+                # self$check_hash()
               },
               error = function(e) {
                 warning("Cache for ", self$id, " could not be recovered.\n")
@@ -1815,7 +1813,7 @@ py_node <- R6::R6Class(
             tryCatch(
               {
                 self$cache_restore()
-                self$check_hash()
+                # self$check_hash()
               },
               error = function(e) {
                 warning("Cache for ", self$id, " could not be recovered.\n")
@@ -1862,19 +1860,19 @@ py_node <- R6::R6Class(
     },
 
     cache_exists = function() {
-      file.exists(file.path(self$cache$path, self$cache$file))
+      file.exists(file.path(self$cache$path, filename_from_id(self$id, value_hash = self$hash$hash, ext = "pickle")))
     },
 
     cache_write = function() {
       log_record(self, self$id, "Writing cache")
-      reticulate::py_save_object(object = self$getref(), filename = file.path(self$cache$path, self$cache$file))
+      reticulate::py_save_object(object = self$getref(), filename = file.path(self$cache$path, filename_from_id(self$id, value_hash = self$hash$hash, ext = "pickle")))
     },
 
     cache_restore = function(delayed = getOption("RFLOW_DELAYED_CACHE_LOAD", default = TRUE)) {
       # if (isTRUE(delayed)) warning("Delayed loading of Python objects is not supported currently.")
       log_record(self, self$id, "Restoring value from cache (delayed)")
       py <- reticulate::py
-      py[[self$name]] <- reticulate::py_load_object(file.path(file.path(self$cache$path, self$cache$file)))
+      py[[self$name]] <- reticulate::py_load_object(file.path(file.path(self$cache$path, filename_from_id(self$id, value_hash = self$hash$hash, ext = "pickle"))))
     },
 
     store_state = function(public_fields = NULL, private_fields = NULL) {
@@ -2073,7 +2071,7 @@ julia_node <- R6::R6Class(
             tryCatch(
               {
                 self$cache_restore()
-                self$check_hash()
+                # self$check_hash()
               },
               error = function(e) {
                 warning("Cache for ", self$id, " could not be recovered.\n")
@@ -2120,18 +2118,20 @@ julia_node <- R6::R6Class(
     },
 
     cache_exists = function() {
-      file.exists(file.path(self$cache$path, self$cache$file))
+      file.exists(file.path(self$cache$path, filename_from_id(self$id, value_hash = self$hash$hash, ext = "jld")))
     },
 
     cache_write = function() {
       log_record(self, self$id, "Writing cache")
-      JuliaCall::julia_command(sprintf('save("%s", "%s", %s)', file.path(self$cache$path, self$cache$file), self$name, self$name))
+      jc <- sprintf('save("%s", "%s", %s)', file.path(self$cache$path, filename_from_id(self$id, value_hash = self$hash$hash, ext = "jld")), self$name, self$name)
+      JuliaCall::julia_command(jc, show_value = FALSE)
     },
 
     cache_restore = function(delayed = getOption("RFLOW_DELAYED_CACHE_LOAD", default = TRUE)) {
       # if (isTRUE(delayed)) warning("Delayed loading of julia objects is not supported currently.")
       log_record(self, self$id, "Restoring value from cache (delayed)")
-      JuliaCall::julia_command(sprintf('%s = JLD.load("%s", "%s")', self$name, file.path(self$cache$path, self$cache$file), self$name), show_value = FALSE)
+      jc <- sprintf('%s = JLD.load("%s", "%s")', self$name, file.path(self$cache$path, filename_from_id(self$id, value_hash = self$hash$hash, ext = "jld")), self$name)
+      JuliaCall::julia_command(jc, show_value = FALSE)
     },
 
     store_state = function(public_fields = NULL, private_fields = NULL) {

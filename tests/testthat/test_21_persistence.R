@@ -26,7 +26,6 @@ test_that("r_node can be initiated with caching", {
   expect_true(node3$cache$enabled)
   expect_equal(node3$cache$path, tmp_rflow_dir)
   expect_error(node3$cache_write(), info = "cache cannot be written without existing value")
-  # expect_true(file.exists(file.path(node3$cache$path, node3$cache$file)))
 })
 
 
