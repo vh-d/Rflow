@@ -39,15 +39,15 @@ test_that("nodes can be connected", {
 test_that("node definitions are processed correctly", {
   expect_equal("FOO", Rflow:::env_name_from_id("FOO.bar")[, env[1]])
   expect_equal("bar", Rflow:::env_name_from_id("FOO.bar")[, name[1]])
-  
+
   obj <- list(
     env  = "FOO",
     name = "bar"
   )
-  
+
   obj_process <- process_obj_defs(list(obj))
   expect_equal(obj_process, list("FOO.bar" = obj))
-  
+
   obj2 <- list(
     id = "FOO.bar"
   )
@@ -58,11 +58,11 @@ test_that("node definitions are processed correctly", {
 test_that("logging setup works as expected", {
   hl <- handler_list()
   lg <- logger(handlers = list(hl))
-  
+
   log_record(lg, "Logger initiated")
   logoutput <- as.list(lg[["handlers"]][[1]])
   expect_length(logoutput, 1)
-  
+
   rf1 <- Rflow::new_rflow(logging = lg)
   logoutput <- as.list(lg[["handlers"]][[1]])
   expect_length(logoutput, 2)
@@ -71,5 +71,5 @@ test_that("logging setup works as expected", {
   logoutput <- as.list(lg[["handlers"]][[1]])
   expect_length(logoutput, 3)
   expect_true(any(grepl("testing message", logoutput, fixed = TRUE)))
-  
+
 })

@@ -203,7 +203,7 @@ clean_cache.node <- function(x, ...) {
   }
 
   # warn if nonexistent and return
-  fp <- file.path(x$cache$path, x$cache$file)
+  fp <- file.path(x$cache$path, filename_from_id(x$id, value_hash = x$hash))
   if (file.exists(fp)) {
     as.logical(
       1-unlink(fp)
@@ -756,10 +756,10 @@ delete <- function(x, ...) {
   UseMethod("delete", x)
 }
 
-#' @param cache 
-#' @param persistency 
-#' @param value 
-#' @param ... 
+#' @param cache
+#' @param persistency
+#' @param value
+#' @param ...
 #' @param completely logical; all bellow?
 #' @param cache logical; remove all cache related to the object?
 #' @param persistency logical; remove persistency metadata?

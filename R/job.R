@@ -2,6 +2,11 @@
 # Generic job class -------------------------------------------------------
 
 
+#' jobs
+#' * can be run = must evaluate() method
+#' * can have dependencies (nodes)
+#' * running them leads to consequences (nodes) that can be verified
+#'
 #' @export
 job <- function(x, ...) {
   UseMethod("job", x)
@@ -156,7 +161,14 @@ job_python <- function(x, ...) {
 
 #' @export
 job_python.character <- function(x, file = FALSE, ...) {
-  warning("Python is not supported yet")
+  job <-
+    structure(
+      list(
+        src = x
+      ),
+      class = c("job_python_code", "job"))
+
+  job
 }
 
 
@@ -170,23 +182,15 @@ job_python_file <- function(x, ...) {
 
 
 #' @export
-evaluate.job_python <- function(x, ...) {
-  result <- NULL
+evaluate.job_python_code <- function(x, ...) {
+  stopifnot(reticulate::py_available())
   reticulate::py_run_string(x$src)
-  try(result <- py$result)
-
-  return(result)
 }
 
 
 #' @export
 evaluate.job_python_file <- function(x, ...) {
-  # reticulate::source_python('add.py')
-  result <- NULL
   reticulate::py_run_file(x$fp)
-  try(result <- py$result)
-
-  return(result)
 }
 
 

@@ -29,8 +29,8 @@ as_node.node <- function(x) {
 #' Compose an id value from env and name
 #'
 #' @param obj object definition
-#' 
-#' @return Node's id as a character value constructed from env + name fields. 
+#'
+#' @return Node's id as a character value constructed from env + name fields.
 #' @export
 compose_id <- function(x) {
   paste0(x$env, ".", x$name)
@@ -39,7 +39,7 @@ compose_id <- function(x) {
 
 #' Get node's id
 #'
-#' @param obj 
+#' @param obj
 #'
 #' @return Node's id as a character scalar
 #' @export
@@ -184,8 +184,17 @@ eval_node.character <- function(x, rflow) {
   rflow[[x]]$eval()
 }
 
-filename_from_id <- function(id, hash = NULL) {
-  paste0(id, "_", if (length(hash)) hash else digest::digest(id, algo = "md5", serialize = FALSE), ".rds")
+filename_from_id <- function(id, id_hash = NULL, value_hash = NULL, ext = "rds") {
+  if (!length(id_hash))
+    id_hash <- digest::digest(id, algo = "md5", serialize = FALSE)
+
+  value_hash <-
+    if (is.null(value_hash)) "" else {
+      if (length(value_hash) > 1) stop("Hash not length of 1: ", paste0(value_hash, collapse = ", "))
+      paste0("-", value_hash)
+    }
+
+  paste0(id, "_", id_hash, value_hash, ".", ext)
 }
 
 
@@ -219,7 +228,7 @@ depends.node <- function(x, inverse = FALSE, results = character(), ...) {
           results,
           x[[direction]],
           unlist(sapply(x[[direction]], depends, inverse = inverse))
-        ), 
+        ),
         class = c("node_list", "list")
       )
     )
@@ -240,6 +249,6 @@ print.node_list <- function(x, ...) {
 as.list.node_list <- function(x) {
   y <- x
   class(y) = "list"
-  
+
   y
 }

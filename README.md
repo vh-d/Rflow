@@ -11,8 +11,8 @@
 *TLDR*:
 
 A library for creating and executing DAGs, everything is stored
-(persistent) so you can restart worflows where it failed, support for R,
-SQL, (Python and Julia on the roadmap).
+(persistent) so you can restart workflows where it failed, support for
+R, SQL, Python and Julia.
 
 *Long version*:
 
@@ -22,8 +22,8 @@ objects with dependencies and does the heavy lifting for you. It is
 suitable for various purposes: from managing several simple automation
 scripts to building powerfull ETL pipelines.
 
-Rflow makes your data pipelines better organized and managable (worflow
-can be visualized, objects may have documentation and tags).
+Rflow makes your data pipelines better organized and manageable
+(workflow can be visualized, objects may have documentation and tags).
 
 It saves your time as your objects are rebuild only when its needed
 (also objects are persistent over sessions).
@@ -167,6 +167,15 @@ For more examples see:
 
   - [Introduction to Rflow](./examples/intro1/Rflow_intro_1.md)
 
+## Details
+
+### Non-deterministic jobs
+
+In case a building a node uses a non-deterministic functions (e.g. when
+it depends on random numbers, system time, etc…) we can use
+`trigger_condition = TRUE` property to override all the other triggers
+and to always build the node.
+
 ## Why Rflow? (comparison to other similar tools)
 
 Rflow overlaps with several other tools in this domain.
@@ -205,8 +214,7 @@ preprocessing data from various formats and sources.
 management framework for Python.
 
 [Apache Airflow](https://airflow.apache.org/) is a very general and
-sophisticated platform written in
-Python.
+sophisticated platform written in Python.
 
 <!-- ## TODO: -->
 
