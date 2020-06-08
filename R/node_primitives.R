@@ -92,12 +92,13 @@ set_id.node <- function(x, id_new, ...) {
 #' @return
 #' List of all node object from given rflow
 #' @export
-get_nodes <- function(x) {
-  UseMethod("get_nodes", x)
+nodes <- function(x) {
+  UseMethod("nodes", x)
 }
 
+
 #' @export
-get_nodes.rflow <- function(x) {
+nodes.rflow <- function(x) {
   mget(get_id(x), envir = x)
 }
 

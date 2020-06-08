@@ -4,6 +4,9 @@ format_tags <- function(tags = NULL) {
   paste0("|", paste0(tags, collapse = "|"), "|")
 }
 
+
+basic_node_attr_names <- c("id", "name", "env", "desc", "sql_code", "r_expr", "node_type")
+  
 #' @export
 basic_node_attributes <- function(x) {
     data.table(
@@ -22,24 +25,28 @@ basic_node_attributes <- function(x) {
     )
 }
 
-#' list all nodes of an Rflow object
-#'
-#' @param rflow rflow object
+
 #' @export
-nodes <- function(x) {
-  UseMethod("nodes", x)
+as.data.table.rflow <- function(x, what = c("nodes", "edges")) {
+  what <- match.arg(what)
+
+  switch(what,
+    "nodes" = as_data_table_nodes(x),
+    "edges" = as_data_table_edges(x)
+  )
 }
 
-#' @export
-nodes.rflow <- function(rflow) {
 
-  coln <- c("id", "name", "env", "desc", "sql_code", "r_expr", "node_type")
 
-  node_objs <- get_nodes(rflow)
+
+
+as_data_table_nodes <- function(rflow) {
+
+  node_objs <- nodes(rflow)
   
   # for empty rflow return empty data.table
   if (!length(node_objs)) {
-    return(setnames(data.table(matrix(character(), 1, length(coln))), coln)[0])
+    return(setnames(data.table(matrix(character(), 1, length(basic_node_attr_names))), basic_node_attr_names)[0])
   } # else:
 
   dtNODES <-
@@ -53,17 +60,11 @@ nodes.rflow <- function(rflow) {
     )
 
   dtNODES
-
 }
 
 
 #' @export
-edges <- function(x) {
-  UseMethod("edges", x)
-}
-
-#' @export
-edges.rflow <- function(x) {
+as_data_table_edges <- function(x) {
 
   rbindlist(
     c(

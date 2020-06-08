@@ -8,7 +8,7 @@
 make(x, ...)
 
 \method{make}{rflow}(
-  rflow,
+  x,
   tags = NULL,
   leaves_only = TRUE,
   force = FALSE,
@@ -18,8 +18,6 @@ make(x, ...)
 }
 \arguments{
 \item{x}{node's id or rflow object}
-
-\item{rflow}{rflow object}
 
 \item{tags}{filter nodes by tags}
 

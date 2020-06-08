@@ -669,22 +669,20 @@ make.node <- function(x, force = FALSE, verbose = TRUE, verbose_prefix = "") {
 # recurrent procedure
 #' @export
 make.character <- function(
-  id,
+  x,
   rflow,
   force = FALSE,
   verbose = TRUE,
   verbose_prefix = ""
 ) {
-  if (!length(id)) return(c())
-  if (length(id) == 1) {
-    make(rflow[[id]], force = force, verbose = verbose, verbose_prefix = verbose_prefix)
+  if (!length(x)) return(c())
+  if (length(x) == 1) {
+    make(rflow[[x]], force = force, verbose = verbose, verbose_prefix = verbose_prefix)
   } else {
-    sapply(id, make.character, rflow = rflow, force = force, verbose = verbose, verbose_prefix = verbose_prefix)
+    sapply(x, make.character, rflow = rflow, force = force, verbose = verbose, verbose_prefix = verbose_prefix)
   }
 }
 
-#' @param rflow rflow object
-#'
 #' @param tags filter nodes by tags
 #' @param leaves_only logical; Option to run make only from ending nodes. Avoids redundant visits on intermediate nodes.
 #' @param force logical; force eval()?
@@ -695,20 +693,20 @@ make.character <- function(
 #' @rdname make
 #' @export
 make.rflow <- function(
-  rflow,
+  x,
   tags = NULL,
   leaves_only = TRUE,
   force = FALSE,
   tagsMatchLogic = "all",
   verbose = TRUE
 ) {
-  # TODO: this is ugly, make it more pipe-able usig get_nodes(), allow queries, etc...
+  # TODO: this is ugly, make it more pipe-able usig nodes(), allow queries, etc...
 
-  log_record(rflow, "Make", sys_call_formatted())
+  log_record(x, "Make", sys_call_formatted())
   if (verbose) cat(rep("\u2500", 3), " Make ", rep("\u2500", 25), "\n\n", sep = "")
 
-  E <- edges(rflow)
-  N <- nodes(rflow)
+  E <- as.data.table.rflow(x, "edges")
+  N <- as.data.table.rflow(x, "nodes")
 
   # exit if there's nothing to be done
   if (!nrow(N)) return(invisible(NULL))
@@ -717,12 +715,9 @@ make.rflow <- function(
 
   if (length(tags)) {
     query_tags <- tags
-    rm(tags)
+    rm(tags) # prevent confusion with tags column in N data.table
 
     nodes_to_make <- N[matchtags(pattern = query_tags, logic = tagsMatchLogic, tags = tags), id]
-      # if (length(query_tags) == 1)
-      #   N[stringr::str_detect(tags, query_tags), id] else # query as regexp
-      #     N[stringr::str_detect(tags, stringr::fixed(paste0("|", query_tags, "|"))), id] # query as a union tag1 | tag2 | ...
 
     N <- N[id %in% nodes_to_make]
   }
@@ -735,7 +730,7 @@ make.rflow <- function(
   res <- sapply(
     X       = nodes_to_make,
     FUN     = make,
-    rflow   = rflow,
+    rflow   = x,
     force   = force,
     verbose = verbose
   )
@@ -743,6 +738,11 @@ make.rflow <- function(
   return(invisible(res))
 }
 
+
+#' @export
+make.list <- function(x, ...) {
+  sapply(X = x, FUN = make, ...)
+}
 
 
 #' Remove an object

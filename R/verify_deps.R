@@ -1,4 +1,4 @@
-# ns <- nodes(RF)$id
+# ns <- as_data_table_nodes(RF)$id
 # expr <-RF$DB1.tab1$r_expr)
 #
 # stringr::str_extract(string = expr, pattern = stringr::fixed(ns))
@@ -39,7 +39,7 @@ verify_dependencies.node <- function(x, method = c("ast", "grep"), maxdepth = 20
   found  <- if (length(x$r_expr))
     switch(
       method,
-      grep = detect_deps(x$r_expr, node_ids = nodes(parent.env(x))$id),
+      grep = detect_deps(x$r_expr, node_ids = as_data_table_nodes(parent.env(x))$id),
       ast = detect_nodes(x$r_expr, rflow = parent.env(x), depthmax = maxdepth, verbose = verbose)
     ) else character()
 
@@ -62,7 +62,7 @@ verify_dependencies.node <- function(x, method = c("ast", "grep"), maxdepth = 20
 
 #' @export
 verify_dependencies.rflow <- function(x, ...) {
-  sapply(get_nodes(x), verify_dependencies.node, ...)
+  sapply(nodes(x), verify_dependencies.node, ...)
 }
 
 

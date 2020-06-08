@@ -1,4 +1,34 @@
 
+#' Filter with expressions
+#'
+#' @param x a vector of data (typically a list of similar data objects)
+#' @param expr expression passed to with()
+#' @param ... passed to with()
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' @rdname lapplyWith
+FilterWith <- function(x, ...) {
+  ind <- as.logical(unlist(lapply(X = x, FUN = with, ...)))
+  x[which(ind)]
+}
+
+
+#' @export
+#' @rdname lapplyWith
+lapplyWith <- function(x, ...) {
+  lapply(X = x, FUN = with, ...)
+}
+
+#' @export
+#' @rdname lapplyWith
+sapplyWith <- function(x, ...) {
+  sapply(X = x, FUN = with, ...)
+}
+
+
 #' @title `%in%` equivalent for R6 objects
 #'
 #' @description Help function for matching R6 objects
