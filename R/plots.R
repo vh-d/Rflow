@@ -11,8 +11,8 @@ visData <- function(rflow, tags = NULL, includeIsolated = TRUE, tagsMatchLogic =
 
   if (!requireNamespace("data.table", quietly = TRUE)) stop("data.table package required to plot graphs")
 
-  dtEDGES <- edges.rflow(rflow)
-  dtNODES <- nodes.rflow(rflow)
+  dtEDGES <- as_data_table_edges(rflow)
+  dtNODES <- as_data_table_nodes(rflow)
 
   if (!nrow(dtNODES)) {
     warning("Nothing to plot...")
