@@ -9,28 +9,29 @@
 #' @return Object of \code{\link{R6Class}} with basic functionality for rflows.
 #' @format \code{\link{R6Class}} object.
 #' @field id character; unique id
-#' @field env character; name of a environemnt (container or group of objects)
+#' @field env character; name of a environment (container or group of objects)
 #' @field name character; object's name
 #' @field desc character; description
-#' @field depends character; vector of uppstream nodes (other nodes this node is depending on)
+#' @field depends character; vector of upstream nodes (other nodes this node is depending on)
 #'
 #' @details
 #' Nodes may represent different types of data targets (R objects, files, database tables), or jobs.
 #' Interconnected nodes together function as basic building elements of directed acyclic graph (DAG).
 #'
-#' Nodes are implemented using R6 classes. There are various flavours of the basic node class (r_node, db_node, file_node) that have their specific requirements and features
+#' Nodes are implemented using R6 classes. There are various flavors of the basic node class (r_node, db_node, file_node) that have their specific requirements and features
 #'
 #'
 #' Constructing nodes
 #' * from stored state
-#' * from lists (comming from TOML, YAML...)
+#' * from lists (coming from TOML, YAML...)
 #'
 #' @usage
 #' node$new(id = "node")
 #' @section Methods:
 #' \describe{
 #'   \item{\code{$make()} or \code{make(node)}}{This method is used to build/make targets. It recursively solves dependencies by building all targets for nodes declared or detected as a dependency.}
-#'   \item{\code{$eval()}}{Compared to `make()`, `eval()` only runs the code/job associated with the node alone. It does not try to ensure all the dependencies are ready. `eval()` is usually used internally by `make()`.}
+#'   \item{\code{$eval()}}{Compared to `make()`, `eval()` only runs the code/job associated with the node alone. It does not try to ensure all the dependencies are ready. }
+#'   \item{\code{$process()}}{`process()` is usually used internally by `eval()` and should not be called directly}
 #'   \item{\code{$value}}{Returns target's value. Targets such as database tables or csv files are automatically convert into R values.}
 #'   \item{\code{$exists()}}{Checks whether the target exists or not.}
 #' }
@@ -429,19 +430,32 @@ node <- R6::R6Class(
     # main evaluation function
     eval = function(verbose = TRUE, verbose_prefix = "") {
 
-      log_record(self, self$id, "Call to an mostly empty eval() method.")
+      log_record(self, self$id, "Evaluation started")
+      self$process(verbose = verbose, verbose_prefix = verbose_prefix)
+      private$.last_evaluated <- Sys.time()
+      log_record(self, self$id, "Evaluation finished")
 
-      # all triggers should be resetted now
+      haschanged <- self$changed(verbose = verbose, verbose_prefix = verbose_prefix)
+
+      # all triggers should be reset now
       self$reset_triggers()
 
       # make changes persistent
       if (self$persistence$enabled) self$store_state()
 
       # by default return no change (but descendant classes with some actual logic in eval() should implement detection of changes or return TRUE by default)
-      return(FALSE)
+      return(haschanged)
     },
 
-    # generic make function that recursivelly solves all dependencies
+    process = function(verbose = TRUE, verbose_prefix = "") {
+      log_record(self, self$id, "Call to an empty eval() method.")
+    },
+
+    changed = function(verbose = TRUE, verbose_prefix = "") {
+      FALSE # by default signal no change
+    },
+
+    # generic make function that recursively solves all dependencies
     # it is the workhorse of the Rflow framework
     # in most cases, this is not supposed to be overloaded in custom subclasses
     make = function(force = FALSE, verbose = TRUE, verbose_prefix = "") {
@@ -779,7 +793,8 @@ r_node <- R6::R6Class(
         return(invisible(TRUE))
       },
 
-    eval = function(verbose = TRUE, verbose_prefix = "") {
+    process = function(verbose = TRUE, verbose_prefix = "") {
+
       if (verbose) {
         cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
         cat_with_prefix(
@@ -793,29 +808,22 @@ r_node <- R6::R6Class(
       # for referencing other objects in rflow
       .RFLOW <- parent.env(self)
 
-      log_record(self, self$id, "Evaluation started")
       assign(self$name, eval(self$r_expr), pos = self$r_env)
-      private$.last_evaluated <- Sys.time()
+    },
 
-      log_record(self, self$id, "Evaluation finished")
+    changed = function(verbose = TRUE, verbose_prefix = "") {
 
       # checking hash before signalling change to parent
-      changed <- self$check_hash()
+      haschanged <- self$check_hash()
 
-      if (changed) log_record(self, self$id, "Value has changed")
+      if (haschanged) log_record(self, self$id, "Value has changed")
       if (verbose) {
-        cat(verbose_prefix, crayon::red(self$id), ": done", if (changed) crayon::yellow(" (value has changed)"), ".\n", sep = "")
+        cat(verbose_prefix, crayon::red(self$id), ": done", if (haschanged) crayon::yellow(" (value has changed)"), ".\n", sep = "")
       }
 
-      if (self$cache$enabled && (changed || !isTRUE(self$cache_exists()))) self$cache_write()
+      if (self$cache$enabled && (haschanged || !isTRUE(self$cache_exists()))) self$cache_write()
 
-      # all triggers should be resetted now
-      self$reset_triggers()
-
-      # make changes persistent
-      if (self$persistence$enabled) self$store_state()
-
-      return(changed)
+      return(haschanged)
     },
 
     exists = function() {
@@ -1071,7 +1079,7 @@ db_node <- R6::R6Class(
       )
     },
 
-    eval = function(verbose = TRUE, verbose_prefix = "") {
+    process = function(verbose = TRUE, verbose_prefix = "") {
       verbose_prefix_inc <- paste0(verbose_prefix, "  ")
 
       exists_check <- self$exists()
@@ -1097,15 +1105,10 @@ db_node <- R6::R6Class(
         }
         eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
       }
+    },
 
-      private$.last_evaluated <- Sys.time()
-
-      # all triggers should be resetted now
-      self$reset_triggers()
-
-      # make changes persistent
-      if (self$persistence$enabled) self$store_state()
-
+    changed = function(verbose = TRUE, verbose_prefix = "") {
+      # currently no way to check... maybe give the user an option to run some custom query?
       return(TRUE)
     },
 
@@ -1599,7 +1602,7 @@ file_node <- R6::R6Class(
       return(changed)
     },
 
-    eval = function(verbose = TRUE, verbose_prefix = "") {
+    process = function(verbose = TRUE, verbose_prefix = "") {
       if (verbose) {
         cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
         cat_with_prefix(
@@ -1614,19 +1617,10 @@ file_node <- R6::R6Class(
       .RFLOW <- parent.env(self)
 
       eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
+    },
 
-      # checking hash before signalling change to parent
-      changed <- self$check_hash()
-
-      private$.last_evaluated <- Sys.time()
-
-      # all triggers should be resetted now
-      self$reset_triggers()
-
-      # make changes persistent
-      if (self$persistence$enabled) self$store_state()
-
-      return(changed)
+    changed = function(verbose = TRUE, verbose_prefix = "") {
+      self$check_hash()
     },
 
     exists = function() {
@@ -1905,38 +1899,30 @@ py_node <- R6::R6Class(
         return(invisible(TRUE))
       },
 
-    eval = function(verbose = TRUE, verbose_prefix = "") {
+    process = function(verbose = TRUE, verbose_prefix = "") {
       if (verbose) {
-        cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
+        cat(verbose_prefix, crayon::red(self$id), ": Evaluating a Python code:\n", sep = "")
         cat_with_prefix(
           self$py_code,
           prefix = verbose_prefix
         )
       }
 
-      log_record(self, self$id, "Evaluation started")
       reticulate::py_run_string(self$py_code, local = FALSE, convert = FALSE)
-      private$.last_evaluated <- Sys.time()
+    },
 
-      log_record(self, self$id, "Evaluation finished")
-
+    changed = function(verbose = TRUE, verbose_prefix = "") {
       # checking hash before signalling change to parent
-      changed <- self$check_hash()
+      haschanged <- self$check_hash()
 
-      if (changed) log_record(self, self$id, "Value has changed")
+      if (haschanged) log_record(self, self$id, "Value has changed")
       if (verbose) {
-        cat(verbose_prefix, crayon::red(self$id), ": done", if (changed) crayon::yellow(" (value has changed)"), ".\n", sep = "")
+        cat(verbose_prefix, crayon::red(self$id), ": done", if (haschanged) crayon::yellow(" (value has changed)"), ".\n", sep = "")
       }
 
-      if (self$cache$enabled && (changed || !isTRUE(self$cache_exists()))) self$cache_write()
+      if (self$cache$enabled && (haschanged || !isTRUE(self$cache_exists()))) self$cache_write()
 
-      # all triggers should be resetted now
-      self$reset_triggers()
-
-      # make changes persistent
-      if (self$persistence$enabled) self$store_state()
-
-      return(changed)
+      return(haschanged)
     },
 
     exists = function() {
@@ -2164,21 +2150,19 @@ julia_node <- R6::R6Class(
         return(invisible(TRUE))
       },
 
-    eval = function(verbose = TRUE, verbose_prefix = "") {
+    process = function(verbose = TRUE, verbose_prefix = "") {
       if (verbose) {
-        cat(verbose_prefix, crayon::red(self$id), ": Evaluating R expression:\n", sep = "")
+        cat(verbose_prefix, crayon::red(self$id), ": Evaluating Julia code:\n", sep = "")
         cat_with_prefix(
           self$julia_code,
           prefix = verbose_prefix
         )
       }
 
-      log_record(self, self$id, "Evaluation started")
       JuliaCall::julia_command(self$julia_code, show_value = FALSE)
-      private$.last_evaluated <- Sys.time()
+    },
 
-      log_record(self, self$id, "Evaluation finished")
-
+    changed = function(verbose = TRUE, verbose_prefix = "") {
       # checking hash before signalling change to parent
       changed <- self$check_hash()
 
@@ -2188,12 +2172,6 @@ julia_node <- R6::R6Class(
       }
 
       if (self$cache$enabled && (changed || !isTRUE(self$cache_exists()))) self$cache_write()
-
-      # all triggers should be resetted now
-      self$reset_triggers()
-
-      # make changes persistent
-      if (self$persistence$enabled) self$store_state()
 
       return(changed)
     },

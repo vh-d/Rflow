@@ -20,19 +20,20 @@ Node is a basic building block of an rflow DAG.
 Nodes may represent different types of data targets (R objects, files, database tables), or jobs.
 Interconnected nodes together function as basic building elements of directed acyclic graph (DAG).
 
-Nodes are implemented using R6 classes. There are various flavours of the basic node class (r_node, db_node, file_node) that have their specific requirements and features
+Nodes are implemented using R6 classes. There are various flavors of the basic node class (r_node, db_node, file_node) that have their specific requirements and features
 
 Constructing nodes
 \itemize{
 \item from stored state
-\item from lists (comming from TOML, YAML...)
+\item from lists (coming from TOML, YAML...)
 }
 }
 \section{Methods}{
 
 \describe{
 \item{\code{$make()} or \code{make(node)}}{This method is used to build/make targets. It recursively solves dependencies by building all targets for nodes declared or detected as a dependency.}
-\item{\code{$eval()}}{Compared to \code{make()}, \code{eval()} only runs the code/job associated with the node alone. It does not try to ensure all the dependencies are ready. \code{eval()} is usually used internally by \code{make()}.}
+\item{\code{$eval()}}{Compared to \code{make()}, \code{eval()} only runs the code/job associated with the node alone. It does not try to ensure all the dependencies are ready. }
+\item{\code{$process()}}{\code{process()} is usually used internally by \code{eval()} and should not be called directly}
 \item{\code{$value}}{Returns target's value. Targets such as database tables or csv files are automatically convert into R values.}
 \item{\code{$exists()}}{Checks whether the target exists or not.}
 }
@@ -44,13 +45,13 @@ Constructing nodes
 \describe{
 \item{\code{id}}{character; unique id}
 
-\item{\code{env}}{character; name of a environemnt (container or group of objects)}
+\item{\code{env}}{character; name of a environment (container or group of objects)}
 
 \item{\code{name}}{character; object's name}
 
 \item{\code{desc}}{character; description}
 
-\item{\code{depends}}{character; vector of uppstream nodes (other nodes this node is depending on)}
+\item{\code{depends}}{character; vector of upstream nodes (other nodes this node is depending on)}
 }
 \if{html}{\out{</div>}}
 }
@@ -76,6 +77,8 @@ Constructing nodes
 \item \href{#method-check_triggers}{\code{node$check_triggers()}}
 \item \href{#method-reset_triggers}{\code{node$reset_triggers()}}
 \item \href{#method-eval}{\code{node$eval()}}
+\item \href{#method-process}{\code{node$process()}}
+\item \href{#method-changed}{\code{node$changed()}}
 \item \href{#method-make}{\code{node$make()}}
 \item \href{#method-validate}{\code{node$validate()}}
 \item \href{#method-clone}{\code{node$clone()}}
@@ -284,6 +287,24 @@ Constructing nodes
 \subsection{Method \code{eval()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$eval(verbose = TRUE, verbose_prefix = "")}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-process"></a>}}
+\if{latex}{\out{\hypertarget{method-process}{}}}
+\subsection{Method \code{process()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$process(verbose = TRUE, verbose_prefix = "")}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-changed"></a>}}
+\if{latex}{\out{\hypertarget{method-changed}{}}}
+\subsection{Method \code{changed()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$changed(verbose = TRUE, verbose_prefix = "")}\if{html}{\out{</div>}}
 }
 
 }
