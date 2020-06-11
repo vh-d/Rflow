@@ -42,7 +42,7 @@ Make/build target or multiple targets
 \details{
 There are multiple ways (S3 methods) to choose targets for building. See examples.
 
-tags parameter can be used to filter nodes in two modes depending on length of the argument. A character vector of lenght > 1 results in union of matches. A scalar character value is applied as a regular expression.
+The tags parameter can be used to filter nodes in two modes depending on length of the argument. A character vector of lenght > 1 results in union of matches. A scalar character value is applied as a regular expression.
 }
 \examples{
 make(RF$mynode)

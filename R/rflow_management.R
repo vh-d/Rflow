@@ -681,7 +681,9 @@ make.NULL <- function(x, ...) {
 #' @rdname make
 #' @method make node
 #' @examples
+#' \dontrun{
 #' make(RF$mynode)
+#' }
 #' @export
 make.node <- function(x, force = FALSE, verbose = TRUE, verbose_prefix = "") {
   x$make(force = force, verbose = verbose, verbose_prefix = verbose_prefix)
@@ -691,7 +693,9 @@ make.node <- function(x, force = FALSE, verbose = TRUE, verbose_prefix = "") {
 #' @rdname make
 #' @method make character
 #' @examples
+#' \dontrun{
 #' make(c("mynode", "othernode"), RF)
+#' }
 #' @export
 make.character <- function(
   x,
@@ -715,7 +719,9 @@ make.character <- function(
 #' @details
 #' The tags parameter can be used to filter nodes in two modes depending on length of the argument. A character vector of lenght > 1 results in union of matches. A scalar character value is applied as a regular expression.
 #' @examples
+#' \dontrun{
 #' make(RF, tags = "DB")
+#' }
 #' @method make rflow
 #' @rdname make
 #' @export
@@ -769,7 +775,9 @@ make.rflow <- function(
 #' @method make list
 #' @rdname make
 #' @examples
+#' \dontrun{
 #' nodes(RF) %>% FilterWith("DB" %in% tags & .last_evaluted < Sys.date()) %>% make()
+#' }
 #' @export
 make.list <- function(x, ...) {
   sapply(X = x, FUN = make, ...)
