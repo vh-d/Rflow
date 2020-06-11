@@ -145,6 +145,19 @@ check_rflow_dag <- function(rflow) {
   igraph::is_dag(G)
 }
 
+
+# a temporary tool for cleaning old cache files
+cache_files <- function(x) {
+  dtFILES <- file.info(list.files(x$.cache$path, full.names = TRUE))
+  setDT(dtFILES, keep.rownames = TRUE)
+  dtFILES[, rn := sub(basename(rn), pattern = ".rds$", replacement = "")]
+  dtFILES[, c("id", "id_hash", "value_hash") := tstrsplit(rn, "[-_]")]
+  setcolorder(dtFILES, c("id", "id_hash", "value_hash"))
+  dtFILES[, rn := NULL]
+  dtFILES[]
+}
+
+
 #' Remove all nodes from an rflow object
 #'
 #' @param rflow
