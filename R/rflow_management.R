@@ -650,6 +650,10 @@ connect_nodes.rflow <- function(x, ...) {
 #' @param x node's id or rflow object
 #' @param force logical; force eval()
 #' @param verbose logical; switch on/off verbose output
+#'
+#' @details
+#' There are multiple ways (S3 methods) to choose targets for building. See examples.
+#' @rdname make
 #' @export
 make <- function(x, ...){
   UseMethod("make", x)
@@ -661,12 +665,20 @@ make.NULL <- function(x, ...) {
   NULL
 }
 
+#' @rdname make
+#' @method make node
+#' @examples
+#' make(RF$mynode)
 #' @export
 make.node <- function(x, force = FALSE, verbose = TRUE, verbose_prefix = "") {
   x$make(force = force, verbose = verbose, verbose_prefix = verbose_prefix)
 }
 
 # recurrent procedure
+#' @rdname make
+#' @method make character
+#' @examples
+#' make(c("mynode", "othernode"), RF)
 #' @export
 make.character <- function(
   x,
@@ -688,7 +700,9 @@ make.character <- function(
 #' @param force logical; force eval()?
 #' @param verbose logical; Print verbose output?
 #' @details
-#' tags parameter can be used to filter nodes in two modes depending on length of the argument. A character vector of lenght > 1 results in union of matches. A scalar character value is applied as a regular expression.
+#' The tags parameter can be used to filter nodes in two modes depending on length of the argument. A character vector of lenght > 1 results in union of matches. A scalar character value is applied as a regular expression.
+#' @examples
+#' make(RF, tags = "DB")
 #' @method make rflow
 #' @rdname make
 #' @export
@@ -739,6 +753,10 @@ make.rflow <- function(
 }
 
 
+#' @method make list
+#' @rdname make
+#' @examples
+#' nodes(RF) %>% FilterWith("DB" %in% tags & .last_evaluted < Sys.date()) %>% make()
 #' @export
 make.list <- function(x, ...) {
   sapply(X = x, FUN = make, ...)
