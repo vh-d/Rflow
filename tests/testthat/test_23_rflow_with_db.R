@@ -125,6 +125,22 @@ test_that("Nodes can be added to the an rflow", {
 })
 
 
+test_that("Simple graph queries can be performed", {
+
+  set1 <- get_id(depends(RF$RDATA.table3, inverse = TRUE))
+  set2 <- c("DB.table3", "DB.table1", "DB.table2", "RDATA.table1", "RDATA.table2")
+  expect_setequal(set1, set2)
+
+  set1 <- get_id(depends(RF$RDATA.table3, inverse = FALSE))
+  expect_length(set1, 0)
+
+  set1 <- get_id(depends(RF$DB.table3, inverse = FALSE))
+  set2 <- c("RDATA.table3")
+  expect_setequal(set1, set2)
+
+})
+
+
 not_passed <- sum(!verify_dependencies(RF))
 test_that("Dependency test passes", {
   expect_identical(not_passed, 0L)
