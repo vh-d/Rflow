@@ -36,6 +36,7 @@ Constructing nodes
 \item{\code{$process()}}{\code{process()} is usually used internally by \code{eval()} and should not be called directly}
 \item{\code{$value}}{Returns target's value. Targets such as database tables or csv files are automatically convert into R values.}
 \item{\code{$exists()}}{Checks whether the target exists or not.}
+\item{\code{$time_to_eval()}}{Returns a record(s) of time to evaluate.}
 }
 }
 
@@ -81,6 +82,7 @@ Constructing nodes
 \item \href{#method-changed}{\code{node$changed()}}
 \item \href{#method-make}{\code{node$make()}}
 \item \href{#method-validate}{\code{node$validate()}}
+\item \href{#method-time_to_eval}{\code{node$time_to_eval()}}
 \item \href{#method-clone}{\code{node$clone()}}
 }
 }
@@ -323,6 +325,15 @@ Constructing nodes
 \subsection{Method \code{validate()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{node$validate(verbose = TRUE, verbose_prefix = "")}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-time_to_eval"></a>}}
+\if{latex}{\out{\hypertarget{method-time_to_eval}{}}}
+\subsection{Method \code{time_to_eval()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{node$time_to_eval(what = getOption("RFLOW_TIME_TO_EVAL", "LAST"))}\if{html}{\out{</div>}}
 }
 
 }

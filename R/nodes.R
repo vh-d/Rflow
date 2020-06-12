@@ -34,6 +34,7 @@
 #'   \item{\code{$process()}}{`process()` is usually used internally by `eval()` and should not be called directly}
 #'   \item{\code{$value}}{Returns target's value. Targets such as database tables or csv files are automatically convert into R values.}
 #'   \item{\code{$exists()}}{Checks whether the target exists or not.}
+#'   \item{\code{$time_to_eval()}}{Returns a record(s) of time to evaluate.}
 #' }
 node <- R6::R6Class(
 
@@ -42,6 +43,7 @@ node <- R6::R6Class(
   private = list(
     .last_evaluated = NULL, # datetime when target value was last evaluated/made
     .last_changed   = NULL, # datetime when target value changed the last time (it might be evaluated without any change)
+    .time_to_eval = list(),
     .trigger_defchange  = FALSE,
 
     .vis_params_default = list(
@@ -253,6 +255,7 @@ node <- R6::R6Class(
         unique(
           c(
             ".last_evaluated", ".last_changed",
+            ".time_to_eval",
             ".trigger_defchange",
             private_fields)
           )
@@ -431,8 +434,12 @@ node <- R6::R6Class(
     eval = function(verbose = TRUE, verbose_prefix = "") {
 
       log_record(self, self$id, "Evaluation started")
+
+      time_start <- Sys.time()
       self$process(verbose = verbose, verbose_prefix = verbose_prefix)
       private$.last_evaluated <- Sys.time()
+      private$.time_to_eval[[length(private$.time_to_eval) + 1]] <- private$.last_evaluated - time_start
+
       log_record(self, self$id, "Evaluation finished")
 
       haschanged <- self$changed(verbose = verbose, verbose_prefix = verbose_prefix)
@@ -545,8 +552,19 @@ node <- R6::R6Class(
     validate = function(verbose = TRUE, verbose_prefix = "") {
       if (length(self$validators))
         confront(self$validators, self$get())
+    },
+
+    time_to_eval = function(what = getOption("RFLOW_TIME_TO_EVAL", "LAST")) {
+      switch(
+        what,
+        "LAST" = unlist(tail(private$.time_to_eval, 1)),
+        "ALL"  = unlist(private$.time_to_eval),
+        "MEAN" = mean(unlist(private$.time_to_eval)),
+        NULL   = unlist(tail(private$.time_to_eval, 1))
+      )
     }
-  ) ,
+
+  ),
 
   active = list(
 
