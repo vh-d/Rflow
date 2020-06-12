@@ -45,8 +45,16 @@ There are multiple ways (S3 methods) to choose targets for building. See example
 The tags parameter can be used to filter nodes in two modes depending on length of the argument. A character vector of lenght > 1 results in union of matches. A scalar character value is applied as a regular expression.
 }
 \examples{
+\dontrun{
 make(RF$mynode)
+}
+\dontrun{
 make(c("mynode", "othernode"), RF)
+}
+\dontrun{
 make(RF, tags = "DB")
+}
+\dontrun{
 nodes(RF) \%>\% FilterWith("DB" \%in\% tags & .last_evaluted < Sys.date()) \%>\% make()
+}
 }
