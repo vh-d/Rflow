@@ -67,23 +67,6 @@ get_id.node_list <- function(x) {
   sapply(x, get_id)
 }
 
-# @param x
-# @param id_old
-# @param id_new
-# @param ...
-#
-# @usage change_id.rflow(obj, id_old, id_new, ...)
-# @export
-set_id <- function(x, ...) {
-  UseMethod("change_id", x)
-}
-
-# @export
-set_id.node <- function(x, id_new, ...) {
-  x$set_id(id_new)
-}
-
-
 
 #' Returns a list with all node objects
 #'

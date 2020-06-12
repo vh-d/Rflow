@@ -564,17 +564,6 @@ add_node.list <- function(
 }
 
 
-# @export
-set_id.rflow <- function(x, id_old, id_new, ...) {
-  rflow <- x
-
-  rflow[[id_new]] <- rflow[[id_old]] # new reference
-  rm(id_old, pos = rflow)
-
-  set_id(rflow[[id_new]], id_new)
-}
-
-
 #' batch init objects
 #'
 #' @param objs list of nodes' definitions
