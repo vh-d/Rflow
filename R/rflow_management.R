@@ -825,7 +825,7 @@ delete.character <- function(x, rflow, completely = FALSE, ...) {
 #' @export
 #' @method delete rflow
 delete.rflow <- function(x, id, completely = FALSE, ...) {
-  delete.node(rflow[[id]], completely = completely, ...)
+  delete.node(x[[id]], completely = completely, ...)
 }
 
 
