@@ -10,6 +10,19 @@ test_that("R jobs can be created", {
   expect_s3_class(rjob, "job")
   expect_s3_class(rjob, "job_r")
   expect_identical(evaluate(rjob), 2)
+
+  rjob <- job_r("1+1")
+  expect_s3_class(rjob, "job")
+  expect_s3_class(rjob, "job_r")
+  expect_identical(evaluate(rjob), 2)
+
+  rjob <- job_r_file("../jobs/rjob1.R")
+  expect_s3_class(rjob, "job")
+  expect_s3_class(rjob, "job_r")
+  expect_s3_class(rjob, "job_file")
+  expect_s3_class(rjob, "job_r_file")
+  expect_equal(evaluate(rjob), 10L)
+
 })
 
 context("Detecting dependencies")

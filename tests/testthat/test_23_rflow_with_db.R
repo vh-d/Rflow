@@ -16,6 +16,9 @@ RDATA <- new.env(parent = .GlobalEnv)
 DB <-  DBI::dbConnect(RSQLite::SQLite(), ":memory:")
 RF <- new_rflow(logging = logger(handlers = list(handler_list())))
 
+
+# node defs ---------------------------------------------------------------
+
 node_defs <-
   list(
 
@@ -104,6 +107,9 @@ WHERE
     )
   )
 
+
+# processing definitons ---------------------------------------------------------
+
 node_defs <- process_obj_defs(node_defs)
 
 test_that("Nodes' definitions can be processed", {
@@ -111,6 +117,9 @@ test_that("Nodes' definitions can be processed", {
   expect_true(all(names(node_defs) != ""))
 })
 
+
+
+# add nodes to rflow ------------------------------------------------------
 
 added <-
   add_nodes(
@@ -137,6 +146,17 @@ test_that("Graphs can be tested for loops", {
 })
 
 
+test_that("Missing dependencies can be discovered", {
+  RF[["RDATA.table3"]]$depends <- NULL
+  expect_warning(not_passed <- sum(!verify_dependencies(RF)), regexp = "depend")
+  expect_identical(not_passed, 1L)
+
+  RF[["RDATA.table3"]]$depends <- "DB.table3"
+  expect_silent(not_passed <- sum(!verify_dependencies(RF)))
+  expect_identical(not_passed, 0L)
+})
+
+
 test_that("Simple graph queries can be performed", {
 
   set1 <- get_id(depends(RF$RDATA.table3, inverse = TRUE))
@@ -150,12 +170,6 @@ test_that("Simple graph queries can be performed", {
   set2 <- c("RDATA.table3")
   expect_setequal(set1, set2)
 
-})
-
-
-not_passed <- sum(!verify_dependencies(RF))
-test_that("Dependency test passes", {
-  expect_identical(not_passed, 0L)
 })
 
 
@@ -182,6 +196,17 @@ test_that("All nodes (that left) can be built.", {
 test_that("Make accepts character vectors.", {
   res <- make(c("DB.table1", "DB.table2"), RF, verbose = FALSE)
   expect_false(all(res))
+})
+
+test_that("Nodes can be deleted from an Rflow", {
+  delete(RF[["RDATA.table3"]])
+  expect_null(RF[["RDATA.table3"]])
+
+  delete("RDATA.table2", RF)
+  expect_null(RF[["RDATA.table2"]])
+
+  delete(RF, "RDATA.table1")
+  expect_null(RF[["RDATA.table1"]])
 })
 
 ## ----disconnect----------------------------------------------------------

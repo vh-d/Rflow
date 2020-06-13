@@ -35,7 +35,7 @@ print.job <- function(x, ...) {
 job_file <- function(x, ...) {
 
   struct <- list(
-    fp   = x,
+    path = x,
     hash = hash_file(x)
   )
 
@@ -130,7 +130,7 @@ job_r_file <- function(x, ...) {
 
 #' @export
 evaluate.job_r_file <- function(x, ...) {
-  source(x$path, ...)
+  source(x$path, ...)$value
 }
 
 
