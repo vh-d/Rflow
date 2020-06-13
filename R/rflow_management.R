@@ -131,7 +131,7 @@ print.rflow <- function(x, ...) {
 #' @export
 #'
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' is_dag(MYRFLOW)
 #' }
 is_dag.rflow <- function(x) {
