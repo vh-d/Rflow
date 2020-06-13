@@ -16,7 +16,7 @@ TRUE is the Rflow is a DAG
 Checks a graph as represented by Rflow is a acyclic (DAG)
 }
 \examples{
-\donotrun{
+\dontrun{
 is_dag(MYRFLOW)
 }
 }
