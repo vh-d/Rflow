@@ -144,7 +144,7 @@ is_dag.rflow <- function(x) {
   to_drop <- E[, setdiff(from, to)]
   while (nrow(E) > 0 & length(to_drop)) {
     E <- E[!.(to = to_drop), on = "to"][!.(from = to_drop), on = "from"]
-    to_drop <- E[, setdiff(from, to)];print(to_drop)
+    to_drop <- E[, setdiff(from, to)]
   }
 
   stopifnot(nrow(E) >= 0) # bug!
