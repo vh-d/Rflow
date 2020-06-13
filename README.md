@@ -33,16 +33,39 @@ It saves your time as your objects are rebuild only when its needed
 
 ## Usecases
 
-1.  We have a complex suite of scripts that prepare data from various
-    sources for analysis or publication. We need to update our output
-    whenever some of the inputs changes or when some of the scripts are
-    changed.
+1.  You have a complex suite of scripts that prepare data from various
+    sources for analysis or publication. You need to update our output
+    repeatedly – e.g. whenever some of the inputs changes or when some
+    of the scripts are changed. You want to organize the tasks and
+    inspect the workflow visually.
 
-2.  We want to get data from a database, transform them in R and then
-    upload them back to the database (or other place).
+2.  You need to use R as an ETL tool: to get data from a database,
+    transform them using R/SQL/Python/Julia and then to upload them back
+    to the database (or other place).
 
-3.  We have complex long-running computations that need to be run only
-    when some of the inputs/parameters change.
+3.  You have complex long-running computations that need to be run only
+    when some of the inputs/parameters change. You need to skip the
+    parts that we computed the last time with the same inputs.
+
+## Features
+
+What’s working:
+
+  - Languages supported (to be used in tasks): R, SQL, Python, Julia
+  - Objects supported: R objects, Python objects, Julia objects, DB/SQL
+    tables, files, spreadsheets
+  - Bottom-up approach (you choose the final outputs you need, and Rflow
+    resolves dependencies)
+  - Persistence
+  - Logging
+  - Plotting and workflow visualization
+
+What’s on the roadmap:
+
+  - Other type of objects: tests, RMarkdowns, xmls
+  - Error handling
+  - Recovery
+  - GUI
 
 ## Getting started
 
@@ -85,10 +108,11 @@ Currently, we have these types of nodes implemented:
     classes inherit from)
   - `r_node`: node representing R objects
   - `db_node`: node representing database tables and views
-  - `accdb_node`: node representing tables in 32-bit Access database
   - `file_node`: for representing files on disk
   - `csv_node`: descendant of `file_node` for representing csv files
   - `excel_sheet`: for excel sheets (read-only)
+  - `julia_node`:
+  - `python_node`:
 
 ## Examples
 
@@ -215,6 +239,10 @@ management framework for Python.
 
 [Apache Airflow](https://airflow.apache.org/) is a very general and
 sophisticated platform written in Python.
+
+<!-- * data is dependent on tasks, tasks are dependent on data, ... -->
+
+<!-- * data is dependent on tasks, tasks are dependent on data, ... -->
 
 <!-- ## TODO: -->
 
