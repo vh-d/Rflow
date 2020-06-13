@@ -125,6 +125,18 @@ test_that("Nodes can be added to the an rflow", {
 })
 
 
+test_that("Graphs can be tested for loops", {
+  expect_true(is_dag.rflow(RF))
+
+  orig_dependencies <- RF[["RDATA.table1"]]$depends
+  RF[["RDATA.table1"]]$depends <- c(orig_dependencies, "RDATA.table3")
+  expect_false(is_dag.rflow(RF))
+
+  RF[["RDATA.table1"]]$depends <- orig_dependencies
+  expect_true(is_dag.rflow(RF))
+})
+
+
 test_that("Simple graph queries can be performed", {
 
   set1 <- get_id(depends(RF$RDATA.table3, inverse = TRUE))

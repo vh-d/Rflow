@@ -123,27 +123,35 @@ print.rflow <- function(x, ...) {
       sep = "")
 }
 
-#' convert DAG to an igraph object
-#' @param x rflow object
+#' Checks a graph as represented by Rflow is a acyclic (DAG)
+#'
+#' @param x an Rflow object
+#'
+#' @return TRUE is the Rflow is a DAG
 #' @export
-as_igraph <- function(x, ...) {
-  UseMethod("as.igraph", x)
+#'
+#' @examples
+#' \donotrun{
+#' is_dag(MYRFLOW)
+#' }
+is_dag.rflow <- function(x) {
+  # get edges
+  E <- as_data_table_edges(x)
+
+  setkey(E, from, to)
+
+  # delete nodes with a dependency until nothing or a loop remains
+  to_drop <- E[, setdiff(from, to)]
+  while (nrow(E) > 0 & length(to_drop)) {
+    E <- E[!.(to = to_drop), on = "to"][!.(from = to_drop), on = "from"]
+    to_drop <- E[, setdiff(from, to)];print(to_drop)
+  }
+
+  stopifnot(nrow(E) >= 0) # bug!
+
+  return(nrow(E) == 0)
 }
 
-#' @export
-as_igraph.rflow <- function(rflow) {
-  if (!requireNamespace("igraph")) stop("igraph package required")
-
-  E <- edges(rflow)
-  G <- igraph::graph_from_data_frame(E)
-
-  G
-}
-
-check_rflow_dag <- function(rflow) {
-  G <- as_igraph.rflow(rflow)
-  igraph::is_dag(G)
-}
 
 
 # a temporary tool for cleaning old cache files
