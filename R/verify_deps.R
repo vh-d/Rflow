@@ -81,14 +81,15 @@ detect_nodes <- function(x, rflow, found = c(), space = "", depth = 0L, depthmax
 
   # folling convention of referencing Rflow objects
   .RFLOW = rflow
-
-  # (poor) protection against recursion
+  
+  # (poor) protection against infinite recursion
   if (depth > depthmax) return()
-
+  
   # these objects whould be recursively iterated
   if (any(class(x) %in% c("<-", "{", "(", "call", "language", "expression"))) {
     if (verbose) cat(space, class(x), ":\n")
-
+    
+    # catch .RFLOW references
     if (
       isTRUE(is.call(x))
       && isTRUE(as.character(x[[1]]) %in% c("[[", "$"))
@@ -100,6 +101,16 @@ detect_nodes <- function(x, rflow, found = c(), space = "", depth = 0L, depthmax
         if (depth == 0L) return(unique(unlist(c(found, as.character(x[[3]]))))) else return(c(found, as.character(x[[3]])))
     }
 
+    # catch .DATA() and .NODES() references
+    if (
+      isTRUE(is.call(x))
+      && isTRUE(length(x) > 1)
+      && (identical(as.character(x[[1]]), ".DATA") || identical(as.character(x[[1]]), ".NODE"))
+    ) {
+      if (depth == 0L) return(unique(unlist(c(found, as.character(x[[2]]))))) else return(c(found, as.character(x[[2]])))
+    }
+
+    # otherwise
     if (depth == 0L)
       return(unique(unlist(c(found, sapply(x, detect_nodes, rflow = rflow, found = found, space = paste0("   ", space), depth = depth + 1))))) else
         return(c(found, sapply(x, detect_nodes, rflow = rflow, found = found, space = paste0("   ", space), depth = depth + 1)))

@@ -43,7 +43,7 @@ node_defs <-
             DBI::dbWriteTable(
               conn = self$connection,
               name = self$name,
-              value = .RFLOW[["RDATA.table1"]]$get(),
+              value = .DATA("RDATA.table1"),
               overwrite = TRUE
             )
           })
@@ -60,7 +60,7 @@ node_defs <-
             DBI::dbWriteTable(
               conn = self$connection,
               name = self$name,
-              value = .RFLOW[["RDATA.table2"]]$get(),
+              value = .DATA("RDATA.table2"),
               overwrite = TRUE
             )
           })
@@ -102,7 +102,7 @@ WHERE
     "RDATA.table3" = list(
       depends = c("DB.table3"),
       r_expr = expression_r({
-        .RFLOW[["DB.table3"]]$value
+        .DATA("DB.table3")
       })
     )
   )

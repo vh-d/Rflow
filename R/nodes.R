@@ -825,7 +825,15 @@ r_node <- R6::R6Class(
 
       # for referencing other objects in rflow
       .RFLOW <- parent.env(self)
-
+      
+      .DATA <- function(x) {
+        .RFLOW[[x]]$value
+      }
+      
+      .NODES <- function(x) {
+        .RFLOW[[x]]
+      }
+      
       assign(self$name, eval(self$r_expr), pos = self$r_env)
     },
 
@@ -1105,6 +1113,14 @@ db_node <- R6::R6Class(
       # for referencing other objects in rflow
       .RFLOW <- parent.env(self)
 
+      .DATA <- function(x) {
+        .RFLOW[[x]]$value
+      }
+      
+      .NODES <- function(x) {
+        .RFLOW[[x]]
+      }
+      
       # remove target object before rebuilding it
       if (self$auto_remove) self$remove(verbose = verbose, verbose_prefix = verbose_prefix_inc)
 
@@ -1634,6 +1650,14 @@ file_node <- R6::R6Class(
       # for referencing other objects in rflow
       .RFLOW <- parent.env(self)
 
+      .DATA <- function(x) {
+        .RFLOW[[x]]$value
+      }
+      
+      .NODES <- function(x) {
+        .RFLOW[[x]]
+      }
+      
       eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
     },
 

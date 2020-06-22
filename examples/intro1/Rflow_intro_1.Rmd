@@ -85,7 +85,7 @@ obj_defs <-
             DBI::dbWriteTable(
               conn = self$connection, 
               name = self$name, 
-              value = .RFLOW[["RDATA.table1"]]$get(), 
+              value = .DATA("RDATA.table1"), 
               overwrite = TRUE
             )
           })
