@@ -51,9 +51,10 @@ It saves your time as your objects are rebuild only when its needed
 
 What’s working:
 
-  - Languages supported (to be used in tasks): R, SQL, Python, Julia
+  - Languages supported (to be used in tasks): R, SQL, Python, Julia,
+    RMarkdown
   - Objects supported: R objects, Python objects, Julia objects, DB/SQL
-    tables, files, spreadsheets
+    tables, files, spreadsheets, R Markdown
   - Bottom-up approach (you choose the final outputs you need, and Rflow
     resolves dependencies)
   - Persistence
@@ -91,13 +92,13 @@ devtools::install_github("vh-d/Rflow")
 
 ## How it works
 
-**Rflow** reprent directed acyclic graphs connecting nodes through
+An **rflow** represent a directed acyclic graph connecting nodes through
 dependency relations. There are three building blocks of rflows:
 
   - **nodes** (aka targets) represent your data objects such as R
     values, db tables, spreadsheets, files, etc…
-  - **environments** serves as containters for nodes. For example a
-    database is a container for database tables, R environemnt is a
+  - **environments** serves as containers for nodes. For example a
+    database is a container for database tables, R environment is a
     container for R objects, etc…
   - **jobs** represents dependency connection between nodes. It carries
     the recipe how to build a target object.
@@ -111,8 +112,9 @@ Currently, we have these types of nodes implemented:
   - `file_node`: for representing files on disk
   - `csv_node`: descendant of `file_node` for representing csv files
   - `excel_sheet`: for excel sheets (read-only)
-  - `julia_node`:
-  - `python_node`:
+  - `julia_node`: node representing a Julia object
+  - `python_node`: node representing a Python object
+  - `rmd_node`: node representing Rmarkdown targets
 
 ## Examples
 
@@ -136,7 +138,7 @@ objs <-
       "
     ),
     
-    "mytable_summary" = list(
+    "RENV.mytable_summary" = list(
       type = "r_node", # you can skip this when defining R nodes
       desc = "Summary statistics of DB.mytable",
       depends = "DB.mytable", # dependencies have to be declared (this can be tested/automated)
@@ -147,7 +149,7 @@ objs <-
       })
     ),
     
-    "R_OUT" = list(
+    "RENV.main" = list(
       desc = "Main output",
       depends = "DB.mytable",
       r_expr = expression_r({
@@ -192,6 +194,18 @@ For more examples see:
   - [Introduction to Rflow](./examples/intro1/Rflow_intro_1.md)
 
 ## Details
+
+### Queries on nodes
+
+Nodes are (R6) objects with properties and methods. You can make queries
+to find/filter nodes based on its properties such as tags, time of last
+build, etc…
+
+``` r
+nodes(RF) %>% # list all nodes in the rflow
+  FilterWith("slow" %in% tags) %>% # expressions ("slow" %in% tags) is evaluated within each node, results in list of nodes with positive results
+  names()
+```
 
 ### Non-deterministic jobs
 
