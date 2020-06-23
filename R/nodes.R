@@ -1818,6 +1818,94 @@ csv_node <- R6::R6Class(
 )
 
 
+
+# rmd_node ---------------------------------------------------------
+
+#' @export
+rmd_node <- R6::R6Class(
+
+  classname = "rmd_node",
+  inherit   = file_node,
+
+  public = list(
+    
+    path_rmd = NULL,
+
+    initialize =
+      function(
+        ...,
+        path_rmd  = NULL,
+        store     = TRUE
+      ) {
+        super$initialize(..., store = FALSE)
+        log_record(self, self$id, "rmd_file class initialization")
+
+        if (!length(path_rmd)) stop(self$id, " failed to initialize. Path to Rmarkdown file is required.")
+        if (!file.exists(path_rmd)) warning(self$id, " file does not exist!")
+        
+        self$path_rmd <- path_rmd
+
+        if (self$persistence$enabled && store) self$store_state()
+
+        return(invisible(TRUE))
+      },
+
+    store_state = function(public_fields = NULL, private_fields = NULL) {
+      super$store_state(
+        public_fields  = unique(c(public_fields, "path_rmd")),
+        private_fields = private_fields
+      )
+    }, 
+    
+    update_definition =
+      function(
+        ...,
+        path_rmd = NULL,
+        store   = TRUE,
+        verbose = TRUE
+      ) {
+        super$update_definition(..., verbose = verbose, store = FALSE)
+        
+        if (!identical(self$path_rmd, path_rmd)) {
+          if (verbose) notify_update(self$id, "file path of the Rmarkdown document")
+          self$path_rmd <- path_rmd
+          private$.trigger_defchange <- TRUE
+        }
+        
+        if (self$persistence$enabled && store) self$store_state()
+        
+        return(invisible(TRUE)) 
+      },
+    
+    process = function(verbose = TRUE, verbose_prefix = "") {
+      
+      if (!requireNamespace("knitr")) stop("knitr package required for compiling Rmarkdown documents!")
+      
+      if (verbose) {
+        cat(verbose_prefix, crayon::red(self$id), ": Knitting an Rmarkdown file: ", self$path_rmd, "\n", sep = "")
+      }
+      
+      # for referencing other objects in rflow
+      .RFLOW <- parent.env(self)
+      
+      .DATA <- function(x) {
+        .RFLOW[[x]]$value
+      }
+      
+      .NODES <- function(x) {
+        .RFLOW[[x]]
+      }
+      
+      knitr::knit(
+        input  = self$path_rmd, 
+        output = self$path
+      )
+    }
+    
+  )
+)
+
+
 # py_node -----------------------------------------------------------------
 
 #' @export
