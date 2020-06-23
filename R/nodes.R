@@ -1782,7 +1782,26 @@ csv_node <- R6::R6Class(
         private_fields = private_fields
       )
     },
+    
+    update_definition =
+      function(
+        ...,
+        read_args = NULL,
+        store   = TRUE,
+        verbose = TRUE
+      ) {
+        super$update_definition(..., verbose = verbose, store = FALSE)
 
+        if (!identical(self$read_args, read_args)) {
+          if (verbose) notify_update(self$id, "parameters for reading")
+          self$read_args <- read_args
+        }
+        
+        if (self$persistence$enabled && store) self$store_state()
+        
+        return(invisible(TRUE)) 
+      },
+    
     get = function(...) {
       if (self$exists()) {
         log_record(self, "Reading from csv file.")
