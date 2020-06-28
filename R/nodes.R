@@ -1832,21 +1832,41 @@ rmd_node <- R6::R6Class(
   public = list(
     
     path_rmd = NULL,
+    knit_args = NULL,
+    output_format = NULL,
 
     initialize =
       function(
         ...,
         path_rmd  = NULL,
+        knit_args = NULL,
+        output_format= NULL,
         store     = TRUE
       ) {
+        if (!requireNamespace("rmarkdown")) stop("rmarkdown package is required to evaluate rmd_node.")
+        
         super$initialize(..., store = FALSE)
         log_record(self, self$id, "rmd_file class initialization")
 
         if (!length(path_rmd)) stop(self$id, " failed to initialize. Path to Rmarkdown file is required.")
         if (!file.exists(path_rmd)) warning(self$id, " file does not exist!")
         
+        # do some basic checks on path_rmd
+        if (!is.character(path_rmd)) stop(self$id, ": path_rmd should be a character")
+        
+        dn <- dirname(path_rmd)
+        if (!dir.exists(dn)) {
+          warning(self$id, ": directory ", dn, " does not exist.")
+        }
         self$path_rmd <- path_rmd
-
+        
+        if (!is.null(knit_args)) {
+          if (!is.list(knit_args)) warning(self$id, " knit_args should be a named list of arguments to knitr().")
+          self$knit_args <- as.list(knit_args)
+        }
+        
+        self$output_format <- output_format
+        
         if (self$persistence$enabled && store) self$store_state()
 
         return(invisible(TRUE))
@@ -1854,7 +1874,7 @@ rmd_node <- R6::R6Class(
 
     store_state = function(public_fields = NULL, private_fields = NULL) {
       super$store_state(
-        public_fields  = unique(c(public_fields, "path_rmd")),
+        public_fields  = unique(c(public_fields, "path_rmd", "knit_args", "output_format")),
         private_fields = private_fields
       )
     }, 
@@ -1863,6 +1883,8 @@ rmd_node <- R6::R6Class(
       function(
         ...,
         path_rmd = NULL,
+        knit_args = NULL,
+        output_format = NULL,
         store   = TRUE,
         verbose = TRUE
       ) {
@@ -1870,7 +1892,25 @@ rmd_node <- R6::R6Class(
         
         if (!identical(self$path_rmd, path_rmd)) {
           if (verbose) notify_update(self$id, "file path of the Rmarkdown document")
+          # do some basic checks on path_rmd
+          if (!is.character(path_rmd)) stop(self$id, ": path_rmd should be a character")
+          
+          dn <- dirname(path_rmd)
+          if (!dir.exists(dn)) {
+            warning(self$id, ": directory ", dn, " does not exist.")
+          }
           self$path_rmd <- path_rmd
+          private$.trigger_defchange <- TRUE
+        }
+        
+        if (!identical(self$knit_args, as.list(knit_args))) {
+          if (!is.list(knit_args)) warning(self$id, " knit_args should be a named list of arguments to knitr().")
+          self$knit_args <- as.list(knit_args)
+          private$.trigger_defchange <- TRUE
+        }
+        
+        if (!identical(self$output_format, output_format)) {
+          self$output_format <- output_format
           private$.trigger_defchange <- TRUE
         }
         
@@ -1898,9 +1938,11 @@ rmd_node <- R6::R6Class(
         .RFLOW[[x]]
       }
       
-      knitr::knit(
+      # knitr::knit(
+      rmarkdown::render(
         input  = self$path_rmd, 
-        output = self$path
+        output_file = basename(self$path),
+        output_dir  = dirname(self$path),
       )
     }
     

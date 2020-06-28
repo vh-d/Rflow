@@ -1,6 +1,6 @@
 Package: Rflow
 Title: General-purpose workflow system for R
-Version: 0.3.2.9006
+Version: 0.3.2.9007
 Authors@R: 
     person(given = "Václav",
            family = "Hausenblas",
@@ -18,7 +18,7 @@ Imports:
     R6,
     stringr
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Suggests: 
     DBI,
     igraph,
