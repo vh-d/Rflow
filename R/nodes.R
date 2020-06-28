@@ -171,6 +171,7 @@ node <- R6::R6Class(
         .last_evaluated = NULL,
         .last_changed   = NULL,
         .trigger_defchange = NULL,
+        .time_to_eval = NULL,
 
         vis_params = NULL,
 
@@ -216,9 +217,10 @@ node <- R6::R6Class(
 
         private$.last_evaluated <- if (length(.last_evaluated)) .last_evaluated else as.POSIXct(NA)
         private$.last_changed   <- if (length(.last_changed))   .last_changed else as.POSIXct(NA)
+        private$.time_to_eval  <- .time_to_eval
 
-        # other_args <- list(...)
-        # if (length(other_args)) warning("Ignoring ", paste(names(other_args), collapse = ", "), " properties.\n")
+        other_args <- list(...)
+        if (length(other_args)) warning("These unknown properties are ignored: ", paste(names(other_args), collapse = ", "), "\n")
 
         # this should be always at the very end
         # storing is not neccesary when e.g. update_definition() is called from ancestor's method

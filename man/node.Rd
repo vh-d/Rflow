@@ -159,6 +159,7 @@ Constructing nodes
   .last_evaluated = NULL,
   .last_changed = NULL,
   .trigger_defchange = NULL,
+  .time_to_eval = NULL,
   vis_params = NULL,
   validators = NULL,
   logging = FALSE,
