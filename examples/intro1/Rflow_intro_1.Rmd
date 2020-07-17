@@ -135,7 +135,14 @@ WHERE
   N = 20
   data.table(id = 1:N, value = rnorm(N))
 }"
-    )
+    ),
+
+"OUTPUT.publish_rmd" = list(
+  type = "rmd_node",
+  depends = c("DB.table2"),
+  path     = file.path(params$rflow, "tmp.md"),
+  path_rmd = file.path(params$rflow, "tmp.rmd")
+)
   )
 ```
 
