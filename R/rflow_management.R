@@ -730,7 +730,6 @@ make.rflow <- function(
   tagsMatchLogic = "all",
   verbose = TRUE
 ) {
-  # TODO: this is ugly, make it more pipe-able usig nodes(), allow queries, etc...
 
   log_record(x, "Make", sys_call_formatted())
   if (verbose) cat(rep("\u2500", 3), " Make ", rep("\u2500", 25), "\n\n", sep = "")

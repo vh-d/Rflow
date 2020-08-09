@@ -487,7 +487,7 @@ node <- R6::R6Class(
       log_record(self, "Resolving upstream nodes")
       upstream_changed_ids <- character()
       for (y in self[["upstream"]]) {
-        # upsream can trigger me if it has changed since my last eval
+        # upstream can trigger me if it has changed since my last eval
         trigger_upstream_changed <- y$make(force = force, verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  ")) # TODO: this might be redundant if do the next line anyawy
         trigger_upstream_newer   <- y$last_changed > self$last_evaluated
 

@@ -10,14 +10,14 @@ excel_sheet <- R6::R6Class(
     path   = NULL,
     sheet  = NULL,
     hash   = NULL,
-    read_args = NULL, # TODO!
+    read_args = NULL,
 
     initialize =
       function(
         ...,
         path      = NULL,
         sheet     = 1L, # not in file_node
-        read_args = NULL, # TODO!
+        read_args = NULL,
         hash      = NULL,
         type      = NULL,
         store     = TRUE
@@ -165,7 +165,7 @@ excel_sheet <- R6::R6Class(
         self$check_hash()
         time_changed  <- self$hash$time
         time_modified <- file.mtime(self$path)
-        return(min(time_changed, time_modified, na.rm = TRUE)) # TODO: na.rm = ?
+        return(min(time_changed, time_modified, na.rm = TRUE))
       } else {
         stop("Can't set `$last_changed")
       }

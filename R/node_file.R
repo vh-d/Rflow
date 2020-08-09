@@ -89,7 +89,7 @@ file_node <- R6::R6Class(
     },
 
     check_hash = function() {
-      if (!self$exists()) return(NA) # TODO: or NULL?
+      if (!self$exists()) return(NA)
 
       hash <- digest::digest(object = self$path, file = TRUE, algo = "md5")
       changed <- !isTRUE(self$hash$hash == hash)
@@ -123,12 +123,12 @@ file_node <- R6::R6Class(
       .DATA <- function(x) {
         .RFLOW[[x]]$value
       }
-      
+
       .NODES <- function(x) {
         .RFLOW[[x]]
       }
-      
-      eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
+
+      eval(self$r_expr)
     },
 
     changed = function(verbose = TRUE, verbose_prefix = "") {
@@ -209,7 +209,7 @@ file_node <- R6::R6Class(
         self$check_hash()
         time_changed  <- self$hash$time
         time_modified <- file.mtime(self$path)
-        private$.last_changed <- min(time_changed, time_modified, na.rm = TRUE) # TODO: na.rm = ?
+        private$.last_changed <- min(time_changed, time_modified, na.rm = TRUE)
         return(private$.last_changed)
       } else {
         stop("Can't set `$last_changed")

@@ -184,7 +184,7 @@ julia_node <- R6::R6Class(
     },
 
     check_hash = function() {
-      if (!self$exists()) return(NA) # TODO: or NULL?
+      if (!self$exists()) return(NA)
 
       log_record(self, self$id, "Computing hash")
       hash <- JuliaCall::julia_eval(sprintf("string(hash(repr(%s)))", self$name), need_return = "R")

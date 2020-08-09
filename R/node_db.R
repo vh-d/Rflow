@@ -208,7 +208,7 @@ db_node <- R6::R6Class(
             prefix = verbose_prefix_inc
           )
         }
-        eval(self$r_expr) # TODO: explicitly specify some other envir for evaluation?
+        eval(self$r_expr)
       }
     },
 

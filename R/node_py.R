@@ -171,7 +171,7 @@ py_node <- R6::R6Class(
     },
 
     check_hash = function() {
-      if (!self$exists()) return(NA) # TODO: or NULL?
+      if (!self$exists()) return(NA)
 
       log_record(self, self$id, "Computing hash")
       hash <- reticulate::py_eval(sprintf("hash(repr(%s))", self$name))
