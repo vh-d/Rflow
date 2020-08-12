@@ -10,9 +10,16 @@
 \usage{
 make(x, ...)
 
-\method{make}{node}(x, force = FALSE, verbose = TRUE, verbose_prefix = "")
+\method{make}{node}(x, force = FALSE, verbose = TRUE, verbose_prefix = "", .visited = NULL)
 
-\method{make}{character}(x, rflow, force = FALSE, verbose = TRUE, verbose_prefix = "")
+\method{make}{character}(
+  x,
+  rflow,
+  force = FALSE,
+  verbose = TRUE,
+  verbose_prefix = "",
+  .visited = NULL
+)
 
 \method{make}{rflow}(
   x,
@@ -20,10 +27,11 @@ make(x, ...)
   leaves_only = TRUE,
   force = FALSE,
   tagsMatchLogic = "all",
-  verbose = TRUE
+  verbose = TRUE,
+  .visited = NULL
 )
 
-\method{make}{list}(x, ...)
+\method{make}{list}(x, ..., .visited = NULL)
 }
 \arguments{
 \item{x}{node's id or rflow object}
