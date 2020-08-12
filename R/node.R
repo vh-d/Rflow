@@ -467,36 +467,46 @@ node <- R6::R6Class(
     # generic make function that recursively solves all dependencies
     # it is the workhorse of the Rflow framework
     # in most cases, this is not supposed to be overloaded in custom subclasses
-    make = function(force = FALSE, verbose = TRUE, verbose_prefix = "") {
+    make = function(force = FALSE, verbose = TRUE, verbose_prefix = "", .visited = as.environment(list(ids = character()))) {
 
       log_record(self, "Solving make")
       if (verbose) {
         cat(verbose_prefix, "\u250C Solving node ", crayon::red(crayon::bold(self$id)), "\n", sep = "")
       }
 
-      # solve/make upstream nodes first
+      # resolve/make upstream nodes ------------------
       if (length(self$upstream) != length(self$depends)) {
         log_record(self, "Connections to upstream nodes does not match dependencies.")
         self$connect() # check that it's connected to upstream
       }
 
       # do not evaluate unless triggered
-      results <- FALSE
+      trigger_from_upstream <- FALSE
 
       # collect triggers from upstream
       log_record(self, "Resolving upstream nodes")
       upstream_changed_ids <- character()
       for (y in self[["upstream"]]) {
-        # upstream can trigger me if it has changed since my last eval
-        trigger_upstream_changed <- y$make(force = force, verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  ")) # TODO: this might be redundant if do the next line anyawy
-        trigger_upstream_newer   <- y$last_changed > self$last_evaluated
+
+        # skip nodes that were already visited
+        if (!isTRUE(y$id %in% .visited$ids)) {
+          # upstream can trigger me if it has changed since my last eval
+          y_changed <- y$make(force = force, verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  "), .visited = .visited) # TODO: this might be redundant if do the next line anyawy
+        } else {
+          if (verbose) {
+            cat(verbose_prefix, "\u250C ", crayon::red(crayon::bold(y$id)), ": skipping", "\n", sep = "")
+          }
+          y_changed <- NULL
+        }
+
+        y_newer <- isTRUE(y_changed) || !isFALSE(y$last_changed > self$last_evaluated)
 
         # increment list of changed nodes in upstream
         # there is another trigger for cases when self$last_evaluated in NULL/NA, therefore isTRUE() should be safe and is better for logging
-        if (!isFALSE(trigger_upstream_newer) || isTRUE(trigger_upstream_changed))
+        if (!isFALSE(y_newer) || isTRUE(y_changed))
           upstream_changed_ids <- c(upstream_changed_ids, y$id)
 
-        results <- results || trigger_upstream_newer || trigger_upstream_changed # TODO: can trigger_upstream_newer ever be different from trigger_upstream_changed?
+        trigger_from_upstream <- trigger_from_upstream || y_newer # TODO: can trigger_upstream_newer ever be different from trigger_upstream_changed?
       }
 
       triggered <-
@@ -508,7 +518,7 @@ node <- R6::R6Class(
           log_record(self, "Triggered by missing datetime of last evaluation")
           if (verbose) notify_trigger(self$id, trigger = "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u2514 "))
           TRUE
-        } else if (!isFALSE(results)) {
+        } else if (!isFALSE(trigger_from_upstream)) {
           log_record(self, paste0("Triggered by changes of upstream nodes' values(", paste0(upstream_changed_ids, collapse = ", "), ")"))
           if (verbose) notify_trigger(self$id, trigger = paste0("changes in upstream nodes (", paste0(upstream_changed_ids, collapse = ", "), ")"), verbose_prefix = paste0(verbose_prefix, "\u2514 "))
           TRUE
@@ -517,6 +527,7 @@ node <- R6::R6Class(
         } else {
           log_record(self, "Not triggered")
           if (verbose) cat(verbose_prefix, "\u2514 ", crayon::silver(self$id, " not triggered.", sep = ""), "\n", sep = "")
+          .visited$ids <- unique(c(.visited$ids, self$id))
           return(invisible(FALSE))
         }
 
@@ -546,6 +557,8 @@ node <- R6::R6Class(
 
       # all triggers should be resetted now
       self$reset_triggers()
+
+      .visited$ids <- unique(c(.visited$ids, self$id))
 
       # return whether dependants should be triggered or not
       return(invisible(trigger_downstream))
@@ -743,12 +756,12 @@ eval_node.character <- function(x, rflow) {
 
 
 env_name_from_id <- function(id) {
-  
+
   if (!identical(base::make.names(id), id)) stop(id, "is not a valid id!")
-    
+
   strm <- stringr::str_match(string = id, pattern = "^([0-9a-zA-Z_]+?\\.)?([0-9a-zA-Z]+?[0-9a-zA-Z._]*?)$")
   strm[, 2] <- stringr::str_replace(strm[, 2], "\\.$", "")
-  
+
   data.table(
     id   = strm[, 1],
     env  = strm[, 2],
@@ -765,46 +778,46 @@ process_obj_defs <- function(obj_defs) {
 
   for (obj_ind in seq_along(obj_defs)) {
     obj_name <- names(obj_defs[obj_ind])
-    
+
     has_id_outside  <- length(obj_name) && obj_name != ""
     has_env_inside  <- length(obj_defs[[obj_ind]]$env)
     has_name_inside <- length(obj_defs[[obj_ind]]$name)
     has_id_inside   <- length(obj_defs[[obj_ind]]$id)
-    
+
     if (!(has_id_outside || (has_env_inside & has_name_inside) || has_id_inside)) stop("Either named list or id or env + name have to be specified")
-      
+
     if (has_id_outside | has_id_inside) {
       obj_id_inside  <- names(obj_defs[obj_ind])
       obj_id_outside <- obj_defs[[obj_ind]][["id"]]
-      
+
       obj_id <- unique(c(obj_id_outside, obj_id_inside))
-      
+
       if (length(obj_id) > 1) {
         warning(stringr::str_interp("id '${obj_id_inside}' does not match with object/file name '${obj_id_outside}'. Choosing '${obj_id_inside}' as an id."))
         obj_id <- obj_id_inside
       }
-      
+
       node_env  <- env_name_from_id(obj_id)[["env"]][1]
       node_name <- env_name_from_id(obj_id)[["name"]][1]
-      
+
       # node_id   <- env_names[id == "obj_id", id]
       if (!has_env_inside)
-        obj_defs[[obj_ind]]$env  <- node_env  else 
-          if (obj_defs[[obj_ind]]$env  != node_env)  
+        obj_defs[[obj_ind]]$env  <- node_env  else
+          if (obj_defs[[obj_ind]]$env  != node_env)
             stop(stringr::str_interp("${obj_id}: env '${obj_defs[[obj_ind]]$env}' does not match"))
-      
-      if (!has_env_inside) 
-        obj_defs[[obj_ind]]$name <- node_name else 
-          if (obj_defs[[obj_ind]]$name != node_name) 
+
+      if (!has_env_inside)
+        obj_defs[[obj_ind]]$name <- node_name else
+          if (obj_defs[[obj_ind]]$name != node_name)
             stop(stringr::str_interp("${obj_id}: name '${obj_defs[[obj_ind]]$name}' does not match"))
     } else {
       obj_id <- compose_id(obj_defs[[obj_ind]])
     }
-    
+
     full_names <- names(obj_defs)
     full_names[obj_ind] <- obj_id
     names(obj_defs) <- full_names
   }
-  
+
   obj_defs
 }

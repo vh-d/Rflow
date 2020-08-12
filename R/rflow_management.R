@@ -682,8 +682,8 @@ make.NULL <- function(x, ...) {
 #' make(RF$mynode)
 #' }
 #' @export
-make.node <- function(x, force = FALSE, verbose = TRUE, verbose_prefix = "") {
-  x$make(force = force, verbose = verbose, verbose_prefix = verbose_prefix)
+make.node <- function(x, force = FALSE, verbose = TRUE, verbose_prefix = "", .visited = as.environment(list(ids = character()))) {
+  x$make(force = force, verbose = verbose, verbose_prefix = verbose_prefix, .visited = .visited)
 }
 
 # recurrent procedure
@@ -699,13 +699,15 @@ make.character <- function(
   rflow,
   force = FALSE,
   verbose = TRUE,
-  verbose_prefix = ""
+  verbose_prefix = "",
+  .visited = as.environment(list(ids = character()))
 ) {
+
   if (!length(x)) return(c())
   if (length(x) == 1) {
-    make(rflow[[x]], force = force, verbose = verbose, verbose_prefix = verbose_prefix)
+    make(rflow[[x]], force = force, verbose = verbose, verbose_prefix = verbose_prefix, .visited = .visited)
   } else {
-    sapply(x, make.character, rflow = rflow, force = force, verbose = verbose, verbose_prefix = verbose_prefix)
+    sapply(x, make.character, rflow = rflow, force = force, verbose = verbose, verbose_prefix = verbose_prefix, .visited = .visited)
   }
 }
 
@@ -728,7 +730,8 @@ make.rflow <- function(
   leaves_only = TRUE,
   force = FALSE,
   tagsMatchLogic = "all",
-  verbose = TRUE
+  verbose = TRUE,
+  .visited = as.environment(list(ids = character()))
 ) {
 
   log_record(x, "Make", sys_call_formatted())
@@ -761,7 +764,8 @@ make.rflow <- function(
     FUN     = make,
     rflow   = x,
     force   = force,
-    verbose = verbose
+    verbose = verbose,
+    .visited=.visited
   )
 
   return(invisible(res))
@@ -775,7 +779,7 @@ make.rflow <- function(
 #' nodes(RF) %>% FilterWith("DB" %in% tags & .last_evaluted < Sys.date()) %>% make()
 #' }
 #' @export
-make.list <- function(x, ...) {
+make.list <- function(x, ..., .visited = as.environment(list(ids = character()))) {
   sapply(X = x, FUN = make, ...)
 }
 
