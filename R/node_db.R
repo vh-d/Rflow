@@ -187,11 +187,11 @@ db_node <- R6::R6Class(
       .DATA <- function(x) {
         .RFLOW[[x]]$value
       }
-      
+
       .NODES <- function(x) {
         .RFLOW[[x]]
       }
-      
+
       # remove target object before rebuilding it
       if (self$auto_remove) self$remove(verbose = verbose, verbose_prefix = verbose_prefix_inc)
 

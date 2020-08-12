@@ -216,15 +216,15 @@ r_node <- R6::R6Class(
 
       # for referencing other objects in rflow
       .RFLOW <- parent.env(self)
-      
+
       .DATA <- function(x) {
         .RFLOW[[x]]$value
       }
-      
+
       .NODES <- function(x) {
         .RFLOW[[x]]
       }
-      
+
       assign(self$name, eval(self$r_expr), pos = self$r_env)
     },
 
