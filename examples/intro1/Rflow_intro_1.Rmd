@@ -149,7 +149,7 @@ WHERE
 Nodes' definitions can now be preprocessed and added to the workflow.
 
 ```{r add nodes}
-obj_defs <- process_obj_defs(obj_defs)
+obj_defs <- Rflow::process_obj_defs(obj_defs)
 
 add_nodes(
   objs        = obj_defs,
@@ -239,6 +239,6 @@ close_log(RF)
 # cleanup the file system
 clean_cache(RF)
 clean_persistence(RF)
-unlink(x = params$rflow, recursive = TRUE)
+unlink(x = file.path(params$rflow, ".rflow"), recursive = TRUE)
 ```
 
