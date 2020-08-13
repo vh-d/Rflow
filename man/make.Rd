@@ -10,7 +10,13 @@
 \usage{
 make(x, ...)
 
-\method{make}{node}(x, force = FALSE, verbose = TRUE, verbose_prefix = "", .visited = NULL)
+\method{make}{node}(
+  x,
+  force = FALSE,
+  verbose = TRUE,
+  verbose_prefix = "",
+  .visited = as.environment(list(ids = character()))
+)
 
 \method{make}{character}(
   x,
@@ -18,7 +24,8 @@ make(x, ...)
   force = FALSE,
   verbose = TRUE,
   verbose_prefix = "",
-  .visited = NULL
+  .visited = as.environment(list(ids = character())),
+  onError = getOption("RFLOW_ON_ERRORS", default = "skip")
 )
 
 \method{make}{rflow}(
@@ -28,10 +35,11 @@ make(x, ...)
   force = FALSE,
   tagsMatchLogic = "all",
   verbose = TRUE,
-  .visited = NULL
+  onError = getOption("RFLOW_ON_ERRORS", default = "skip"),
+  .visited = as.environment(list(ids = character()))
 )
 
-\method{make}{list}(x, ..., .visited = NULL)
+\method{make}{list}(x, ..., .visited = as.environment(list(ids = character())))
 }
 \arguments{
 \item{x}{node's id or rflow object}

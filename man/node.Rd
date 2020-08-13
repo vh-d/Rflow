@@ -316,7 +316,12 @@ Constructing nodes
 \if{latex}{\out{\hypertarget{method-make}{}}}
 \subsection{Method \code{make()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{node$make(force = FALSE, verbose = TRUE, verbose_prefix = "", .visited = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{node$make(
+  force = FALSE,
+  verbose = TRUE,
+  verbose_prefix = "",
+  .visited = as.environment(list(ids = character()))
+)}\if{html}{\out{</div>}}
 }
 
 }
