@@ -700,14 +700,19 @@ make.character <- function(
   force = FALSE,
   verbose = TRUE,
   verbose_prefix = "",
-  .visited = as.environment(list(ids = character()))
+  .visited = as.environment(list(ids = character())),
+  onError = getOption("RFLOW_ON_ERRORS", default = "skip")
 ) {
 
   if (!length(x)) return(c())
   if (length(x) == 1) {
     make(rflow[[x]], force = force, verbose = verbose, verbose_prefix = verbose_prefix, .visited = .visited)
   } else {
-    sapply(x, make.character, rflow = rflow, force = force, verbose = verbose, verbose_prefix = verbose_prefix, .visited = .visited)
+    if (isTRUE(onError == "skip")) {
+      sapply(x, function(i) try(make.character(x = i, rflow = rflow, force = force, verbose = verbose, verbose_prefix = verbose_prefix, .visited = .visited)))
+    } else {
+      sapply(x, make.character(rflow = rflow, force = force, verbose = verbose, verbose_prefix = verbose_prefix, .visited = .visited))
+    }
   }
 }
 
@@ -731,6 +736,7 @@ make.rflow <- function(
   force = FALSE,
   tagsMatchLogic = "all",
   verbose = TRUE,
+  onError = getOption("RFLOW_ON_ERRORS", default = "skip"), 
   .visited = as.environment(list(ids = character()))
 ) {
 
@@ -759,15 +765,30 @@ make.rflow <- function(
   }
 
   # RUN
-  res <- sapply(
-    X       = nodes_to_make,
-    FUN     = make,
-    rflow   = x,
-    force   = force,
-    verbose = verbose,
-    .visited=.visited
-  )
-
+  if (isTRUE(onError == "skip")) {
+    res <- sapply(
+      X       = nodes_to_make,
+      FUN     = function(i) try(
+        make(
+          x        = i,
+          rflow    = x,
+          force    = force,
+          verbose  = verbose,
+          .visited = .visited
+        )
+      )
+    )
+  } else {
+    res <- sapply(
+      X        = nodes_to_make,
+      FUN      = make,
+      rflow    = x,
+      force    = force,
+      verbose  = verbose,
+      .visited = .visited
+    )
+  }
+  
   return(invisible(res))
 }
 
