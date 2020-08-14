@@ -60,7 +60,7 @@ node_defs <-
             DBI::dbWriteTable(
               conn = self$connection,
               name = self$name,
-              value = .DATA("RDATA.table2"),
+              value = .DATA(self$depends[1]),
               overwrite = TRUE
             )
           })
