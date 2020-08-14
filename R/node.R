@@ -173,6 +173,9 @@ node <- R6::R6Class(
         .trigger_defchange = NULL,
         .time_to_eval = NULL,
 
+        cache     = NULL, # this will be ignored, it's here to catch the arguments if the subclass nodes do not use it
+        mode      = NULL, # this will be ignored, it's here to catch the arguments if the subclass nodes do not use it
+        
         vis_params = NULL,
 
         validators = NULL,
@@ -494,7 +497,7 @@ node <- R6::R6Class(
           y_changed <- y$make(force = force, verbose = verbose, verbose_prefix = paste0(verbose_prefix, "\u2502  "), .visited = .visited) # TODO: this might be redundant if do the next line anyawy
         } else {
           if (verbose) {
-            cat(verbose_prefix, "\u250C ", crayon::red(crayon::bold(y$id)), ": skipping", "\n", sep = "")
+            cat(verbose_prefix, "\u251C ", crayon::red(crayon::bold(y$id)), ": skipping", "\n", sep = "")
           }
           y_changed <- NULL
         }
@@ -512,15 +515,15 @@ node <- R6::R6Class(
       triggered <-
         if (isTRUE(force)) { # forced evaluation
           log_record(self, "Triggered by manual trigger")
-          if (verbose) notify_trigger(self$id, trigger = "manual trigger",                verbose_prefix = paste0(verbose_prefix, "\u2514 "))
+          if (verbose) notify_trigger(self$id, trigger = "manual trigger",                verbose_prefix = paste0(verbose_prefix, "\u251C "))
           TRUE
         } else if (!length(self$last_evaluated) || is.na(self$last_evaluated)) {
           log_record(self, "Triggered by missing datetime of last evaluation")
-          if (verbose) notify_trigger(self$id, trigger = "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u2514 "))
+          if (verbose) notify_trigger(self$id, trigger = "unknown datetime of last eval", verbose_prefix = paste0(verbose_prefix, "\u251C "))
           TRUE
         } else if (!isFALSE(trigger_from_upstream)) {
           log_record(self, paste0("Triggered by changes of upstream nodes' values(", paste0(upstream_changed_ids, collapse = ", "), ")"))
-          if (verbose) notify_trigger(self$id, trigger = paste0("changes in upstream nodes (", paste0(upstream_changed_ids, collapse = ", "), ")"), verbose_prefix = paste0(verbose_prefix, "\u2514 "))
+          if (verbose) notify_trigger(self$id, trigger = paste0("changes in upstream nodes (", paste0(upstream_changed_ids, collapse = ", "), ")"), verbose_prefix = paste0(verbose_prefix, "\u251C "))
           TRUE
         } else if (!isFALSE(self$check_triggers(verbose = verbose, verbose_prefix = verbose_prefix))) {
           TRUE
@@ -557,6 +560,7 @@ node <- R6::R6Class(
 
       # all triggers should be resetted now
       self$reset_triggers()
+      if (verbose) cat(verbose_prefix, "\u2514 ", crayon::silver(self$id, " finished.", sep = ""), "\n", sep = "")
 
       .visited$ids <- unique(c(.visited$ids, self$id))
 

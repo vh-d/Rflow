@@ -160,6 +160,8 @@ Constructing nodes
   .last_changed = NULL,
   .trigger_defchange = NULL,
   .time_to_eval = NULL,
+  cache = NULL,
+  mode = NULL,
   vis_params = NULL,
   validators = NULL,
   logging = FALSE,
