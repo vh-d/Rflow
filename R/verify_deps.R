@@ -84,6 +84,7 @@ detect_nodes <- function(x, rflow, found = c(), space = "", depth = 0L, depthmax
   
   # (poor) protection against infinite recursion
   if (depth > depthmax) return()
+  if (verbose) cat(space, "depth: ", depth, ":\n")
   
   # these objects whould be recursively iterated
   if (any(class(x) %in% c("<-", "{", "(", "call", "language", "expression"))) {
@@ -97,8 +98,11 @@ detect_nodes <- function(x, rflow, found = c(), space = "", depth = 0L, depthmax
       && isTRUE(exists(as.character(x[[2]])))
     ) {
       xv <- get(as.character(x[[2]]))
-      if (is.environment(xv) && identical(xv, rflow))
-        if (depth == 0L) return(unique(unlist(c(found, as.character(x[[3]]))))) else return(c(found, as.character(x[[3]])))
+      if (is.environment(xv) && identical(xv, rflow)) {
+        node_name <- as.character(x[[3]])
+        if (verbose) cat(space, "node: ", node_name, ":\n")
+        if (depth == 0L) return(unique(unlist(c(found, node_name)))) else return(c(found, node_name))
+      }
     }
 
     # catch .DATA() and .NODES() references
@@ -107,7 +111,9 @@ detect_nodes <- function(x, rflow, found = c(), space = "", depth = 0L, depthmax
       && isTRUE(length(x) > 1)
       && (identical(as.character(x[[1]]), ".DATA") || identical(as.character(x[[1]]), ".NODE"))
     ) {
-      if (depth == 0L) return(unique(unlist(c(found, as.character(x[[2]]))))) else return(c(found, as.character(x[[2]])))
+      node_name <- as.character(x[[2]])
+      if (verbose) cat(space, "node: ", node_name, ":\n")
+      if (depth == 0L) return(unique(unlist(c(found, node_name)))) else return(c(found, node_name))
     }
 
     # otherwise
@@ -126,7 +132,7 @@ detect_nodes <- function(x, rflow, found = c(), space = "", depth = 0L, depthmax
         return(c(found, sapply(x, detect_nodes, rflow = rflow, found = found, space = paste0("   ", space), depth = depth + 1)))
   }
 
-  # existing obejcts can be subjet to further exploration
+  # existing obejects can be subjet to further exploration
   if (is.name(x)) {
     xname <- as.character(x)
     if (verbose) cat(space, xname, ":\n")
