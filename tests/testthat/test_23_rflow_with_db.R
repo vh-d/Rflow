@@ -148,12 +148,17 @@ test_that("Graphs can be tested for loops", {
 
 test_that("Missing dependencies can be discovered", {
   RF[["RDATA.table3"]]$depends <- NULL
-  expect_warning(not_passed <- sum(!verify_dependencies(RF)), regexp = "depend")
+
+  checks <- verify_dependencies(RF)
+  not_passed <- sum(!sapply(checks, isTRUE))
   expect_identical(not_passed, 1L)
+  expect_identical(checks[["RDATA.table3"]]$lacks, "DB.table3")
 
   RF[["RDATA.table3"]]$depends <- "DB.table3"
-  expect_silent(not_passed <- sum(!verify_dependencies(RF)))
+  checks <- verify_dependencies(RF)
+  not_passed <- sum(!sapply(checks, isTRUE))
   expect_identical(not_passed, 0L)
+  expect_true(checks[["RDATA.table3"]])
 })
 
 

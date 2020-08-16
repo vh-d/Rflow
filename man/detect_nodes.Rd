@@ -7,11 +7,13 @@
 detect_nodes(
   x,
   rflow,
+  noderef = NULL,
   found = c(),
   space = "",
   depth = 0L,
   depthmax = 20L,
-  verbose = FALSE
+  verbose = FALSE,
+  debugging = FALSE
 )
 }
 \arguments{
