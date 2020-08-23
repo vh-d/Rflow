@@ -53,14 +53,14 @@ node <- R6::R6Class(
 
   public    = list(
     id         = NULL, # unique withing an rflow
-    env        = NULL, # name of container (real such as R env or datebase schema, or abstract such as group of files)
+    env        = NULL, # name of container (real such as R env or database schema, or abstract such as group of files)
     name       = NULL, # name is unique withing its env
-    desc       = NULL, # brief describtion of the object
+    desc       = NULL, # brief description of the object
 
     tags       = NULL, # character vector of tags
 
     depends    = NULL, # character vector of dependencies (upstream nodes)
-    upstream   = NULL, # vector of references to depencies
+    upstream   = NULL, # vector of references to dependencies
     downstream = NULL, # vector of references to dependants
 
     definition_hash = NULL,
