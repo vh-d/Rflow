@@ -310,10 +310,8 @@ node <- R6::R6Class(
 
         # changes in dependencies
         depends_char <- if (is.character(depends)) depends else names(depends) # TODO: remove this? the idea was that the argument can be a named list() where every entry/dependency with specified with some specific criterias
-        if (!setequal(self$depends, depends_char)) {
-
+        if (!identical(self$depends, depends_char)) {
           if (verbose) notify_update(self$id, "dependencies")
-
           self$depends <- depends_char
           private$.trigger_defchange <- TRUE
         }
