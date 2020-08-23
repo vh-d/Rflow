@@ -110,7 +110,12 @@ db_node <- R6::R6Class(
         }
 
         self$connection <- solve_connection(connection)
-        self$read_args  <- read_args
+
+        if (!identical(self$read_args, read_args)) {
+          if (verbose) notify_update(self$id, "read options")
+          self$read_args <- read_args
+          # private$.trigger_defchange <- TRUE # TODO: this should trigger dependent nodes
+        }
 
         if (length(auto_remove) && !identical(self$auto_remove, auto_remove)) {
           self$auto_remove <- auto_remove

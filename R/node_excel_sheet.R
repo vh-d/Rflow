@@ -49,6 +49,7 @@ excel_sheet <- R6::R6Class(
         ...,
         path    = NULL,
         sheet   = 1L, # not in file_node
+        read_args = NULL,
         store   = TRUE,
         verbose = TRUE
       ) {
@@ -64,6 +65,12 @@ excel_sheet <- R6::R6Class(
           if (verbose) notify_update(self$id, "sheet name/index")
           self$sheet <- sheet
           private$.trigger_defchange <- TRUE
+        }
+
+        if (!identical(self$read_args, read_args)) {
+          if (verbose) notify_update(self$id, "read options")
+          self$read_args <- read_args
+          # private$.trigger_defchange <- TRUE  # TODO: this should trigger dependent nodes
         }
 
         if (self$persistence$enabled && store) self$store_state()
