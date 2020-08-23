@@ -175,7 +175,7 @@ node <- R6::R6Class(
 
         cache     = NULL, # this will be ignored, it's here to catch the arguments if the subclass nodes do not use it
         mode      = NULL, # this will be ignored, it's here to catch the arguments if the subclass nodes do not use it
-        
+
         vis_params = NULL,
 
         validators = NULL,
@@ -276,7 +276,7 @@ node <- R6::R6Class(
     },
 
     # allows to change properties of existing nodes (after they are initialized, e.g. from persistence
-    update_definition =
+     update_definition =
       function(
         id      = NULL,
         type    = NULL,
@@ -290,7 +290,7 @@ node <- R6::R6Class(
 
         ...,
         store   = TRUE,
-        logging = NULL,
+        logging = FALSE,
         loggers = NULL,
         verbose = TRUE
       ) {
@@ -319,7 +319,10 @@ node <- R6::R6Class(
         }
 
         # changes in description
-        if (!is.null(desc)) self$desc <- desc
+        if (!identical(as.character(self$desc), as.character(desc))) {
+          if (verbose) notify_update(self$id, "desc")
+          self$desc <- as.character(desc)
+        }
 
         # changes in tags
         if (!identical(as.character(self$tags), as.character(tags))) {
@@ -328,12 +331,10 @@ node <- R6::R6Class(
         }
 
         # changes in validators
-        if (!is.null(validators)) {
-          if (!identical(self$validators, validators)) {
-            if (verbose) notify_update(self$id, "validators")
-            self$validators <- validators
-            private$.trigger_defchange <- TRUE
-          }
+        if (!identical(self$validators, validators)) {
+          if (verbose) notify_update(self$id, "validators")
+          self$validators <- validators
+          private$.trigger_defchange <- TRUE
         }
 
         # changes in user defined trigger
@@ -343,7 +344,7 @@ node <- R6::R6Class(
           self$trigger_condition <- trigger_condition
         }
 
-        # currently all the remaingn arguments are ifnored, TODO ?
+        # currently all the remaigning arguments are ignored, TODO ?
         # other_args <- list(...)
         # if (length(other_args)) warning("Not updating ", paste(names(other_args), collapse = ", "), " properties.\n")
 
