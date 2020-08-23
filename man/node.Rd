@@ -198,7 +198,7 @@ Constructing nodes
   validators = NULL,
   ...,
   store = TRUE,
-  logging = NULL,
+  logging = FALSE,
   loggers = NULL,
   verbose = TRUE
 )}\if{html}{\out{</div>}}
