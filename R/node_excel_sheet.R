@@ -34,6 +34,8 @@ excel_sheet <- R6::R6Class(
         }
 
         self$sheet <- if (length(sheet)) sheet else 1L
+        
+        self$read_args <- read_args
 
         if (length(hash)) {
           self$hash <- hash
