@@ -41,7 +41,7 @@ DB <-  DBI::dbConnect(RSQLite::SQLite(), ":memory:")
 ## Defining workflow
 
 ```{r DAG}
-RF <- new_rflow(path = params$rflow)
+RF <- rflow(path = params$rflow)
 ```
 
 Rflows are initiated using `new_rflow` function. The `path` argument tells Rflow where to store cache and other necessary files. 

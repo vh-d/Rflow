@@ -13,7 +13,7 @@
 #' \dontrun{
 #' RF <- new_rflow()
 #' }
-new_rflow <- function(
+rflow <- function(
   path        = NULL,
   cache       = TRUE,
   persistence = TRUE,
@@ -61,6 +61,12 @@ new_rflow <- function(
 
   return(result)
 }
+
+# for backward compatibility
+#' @export
+#' @rdname
+new_rflow <- rflow
+
 
 setup_logging <- function(logging, ...) {
   UseMethod("setup_logging", logging)
@@ -736,7 +742,7 @@ make.rflow <- function(
   force = FALSE,
   tagsMatchLogic = "all",
   verbose = TRUE,
-  onError = getOption("RFLOW_ON_ERRORS", default = "skip"), 
+  onError = getOption("RFLOW_ON_ERRORS", default = "skip"),
   .visited = as.environment(list(ids = character()))
 ) {
 
@@ -788,7 +794,7 @@ make.rflow <- function(
       .visited = .visited
     )
   }
-  
+
   return(invisible(res))
 }
 

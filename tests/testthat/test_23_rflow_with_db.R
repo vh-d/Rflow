@@ -13,8 +13,8 @@ params <- list(rflow = td)
 RDATA <- new.env(parent = .GlobalEnv)
 
 # establish SQLite connection / environment
-DB <-  DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-RF <- new_rflow(logging = logger(handlers = list(handler_list())))
+DB <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+RF <- rflow(logging = logger(handlers = list(handler_list())))
 
 
 # node defs ---------------------------------------------------------------
