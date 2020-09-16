@@ -1,3 +1,23 @@
+# Rflow 0.3.3
+**2020-06-13**
+
+## Changes to the API
+
+* Support for RMarkdown documents (see `rmd_node`).
+* New option to skip errors when evaluationg jobs. Use either `onError="skip"` argument of `make()` or RFLOW_ON_ERRORS global option.
+* new_rflow() is deprecated for rflow()
+* New .DATA() and .NODES() for referencing values of other nodes or node objects inside R jobs. 
+* Improved automatic checking of dependencies between nodes. `.RFLOW[[depends[n]]]` is now recognized and does not throw warnings.
+* *igraph* package is no longer a dependency.
+
+
+## Bug fixes
+
+* Argument `read_args` in excel_sheet nodes are now functional.
+* Changes in `read_args` are now persistent.
+* Updating node definitions to NULL (or just leaving the default value) is now handled correctly.
+* csv_node nodes' definitions can be updated 
+
 # Rflow 0.3.2
 **2020-06-13**
 
