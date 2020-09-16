@@ -1,3 +1,29 @@
+cache_config <- function(x, ...) {
+  UseMethod("cache_config", x)
+} 
+
+cache_config.default <- function(x, ...) {
+  list(enabled = FALSE)
+}
+
+cache_config.character <- function(x, ...) {
+  if (!length(x)) return(cache_config.default(x))
+  if (!dir.exists(x)) dir.create(x, recursive = TRUE)
+  
+  list(
+    enabled = TRUE,
+    path = x
+  )
+}
+
+cache_config.logical <- function(x, path, ...) {
+  if (!length(x)) return(cache_config.default(x))
+  list(
+    enabled = x,
+    path = path
+  )
+}
+
 
 #' Initialize a new DAG
 #'
@@ -15,44 +41,23 @@
 #' }
 rflow <- function(
   path        = NULL,
-  cache       = TRUE,
-  persistence = TRUE,
+  config      = path,
+  cache       = file.path(path, ".rflow", "cache"),
+  persistence = file.path(path, ".rflow", "persistence"),
   logging     = if (length(path)) TRUE else FALSE
 ) {
   result <- new.env()
   class(result) <- c("rflow", class(result))
-
-  result[[".persistence"]] <- list(enabled = FALSE)
-  result[[".cache"]]       <- list(enabled = FALSE)
+  result[[".persistence"]] <- cache_config(persistence, path = path)
+  result[[".cache"]]       <- cache_config(cache, path = path)
   result[[".logging"]]     <- FALSE
   result[[".loggers"]]     <- list()
 
-  if (length(path)) {
-    result[[".def_path"]] <- path
-
-    if (isTRUE(persistence)) {
-      persistence_path <- file.path(path, ".rflow", "persistence")
-      if (!dir.exists(persistence_path)) dir.create(persistence_path, recursive = TRUE)
-
-      result[[".persistence"]] <-
-        list(
-          enabled = TRUE,
-          path    = persistence_path
-        )
-    }
-
-    if (isTRUE(cache)) {
-      cache_path <- file.path(path, ".rflow", "cache")
-      if (!dir.exists(cache_path)) dir.create(cache_path, recursive = TRUE)
-
-      result[[".cache"]] <-
-        list(
-          enabled = TRUE,
-          path    = cache_path
-        )
-    }
+  if (length(config)) {
+    if (!dir.exists(config)) stop("Path '", config, "' does not exist!")
+    result[[".def_path"]] <- config
   }
-
+  
   # setup logging
   loggers <- setup_logging(logging, path = path)
   result[[".logging"]] <- if (length(loggers)) TRUE else FALSE

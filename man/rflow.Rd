@@ -6,8 +6,9 @@
 \usage{
 rflow(
   path = NULL,
-  cache = TRUE,
-  persistence = TRUE,
+  config = path,
+  cache = file.path(path, ".rflow", "cache"),
+  persistence = file.path(path, ".rflow", "persistence"),
   logging = if (length(path)) TRUE else FALSE
 )
 }
