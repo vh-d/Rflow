@@ -3,6 +3,9 @@
 
 <a href="https://travis-ci.org/vh-d/Rflow"><img src="https://travis-ci.org/vh-d/Rflow.svg?branch=master" alt="Travis"></a>
 <a href="https://codecov.io/github/vh-d/Rflow?branch=master"><img src="https://codecov.io/github/vh-d/Rflow/coverage.svg?branch=master" alt="Codecov"></a>
+[![Project Status: Active – The project has reached a stable, usable
+state and is being actively
+developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
 # Rflow
 
@@ -51,31 +54,29 @@ It saves your time as your objects are rebuild only when its needed
 
 What’s working:
 
-  - Languages supported (to be used in tasks): R, SQL, Python, Julia,
+-   Languages supported (to be used in tasks): R, SQL, Python, Julia,
     RMarkdown
-  - Objects supported: R objects, Python objects, Julia objects, DB/SQL
+-   Objects supported: R objects, Python objects, Julia objects, DB/SQL
     tables, files, spreadsheets, R Markdown
-  - Bottom-up approach (you choose the final outputs you need, and Rflow
+-   Bottom-up approach (you choose the final outputs you need, and Rflow
     resolves dependencies)
-  - Persistence
-  - Logging
-  - Plotting and workflow visualization
+-   Persistence
+-   Logging
+-   Plotting and workflow visualization
 
 What’s on the roadmap:
 
-  - Other type of objects: tests, RMarkdowns, xmls
-  - Error handling
-  - Recovery
-  - GUI
+-   Other type of objects: tests, RMarkdowns, xmls
+-   Error handling
+-   Recovery
+-   GUI
 
 ## Getting started
 
 ### Prerequisites
 
-  - `R` (\>= 3.5.3 tested)
-  - `devtools` package
-
-<!-- end list -->
+-   `R` (\>= 3.5.3 tested)
+-   `devtools` package
 
 ``` r
 install.packages("devtools")
@@ -95,26 +96,26 @@ devtools::install_github("vh-d/Rflow")
 An **rflow** represent a directed acyclic graph connecting nodes through
 dependency relations. There are three building blocks of rflows:
 
-  - **nodes** (aka targets) represent your data objects such as R
+-   **nodes** (aka targets) represent your data objects such as R
     values, db tables, spreadsheets, files, etc…
-  - **environments** serves as containers for nodes. For example a
+-   **environments** serves as containers for nodes. For example a
     database is a container for database tables, R environment is a
     container for R objects, etc…
-  - **jobs** represents dependency connection between nodes. It carries
+-   **jobs** represents dependency connection between nodes. It carries
     the recipe how to build a target object.
 
 Currently, we have these types of nodes implemented:
 
-  - `node`: a generic node class (really just a parent class other
+-   `node`: a generic node class (really just a parent class other
     classes inherit from)
-  - `r_node`: node representing R objects
-  - `db_node`: node representing database tables and views
-  - `file_node`: for representing files on disk
-  - `csv_node`: descendant of `file_node` for representing csv files
-  - `excel_sheet`: for excel sheets (read-only)
-  - `julia_node`: node representing a Julia object
-  - `python_node`: node representing a Python object
-  - `rmd_node`: node representing Rmarkdown targets
+-   `r_node`: node representing R objects
+-   `db_node`: node representing database tables and views
+-   `file_node`: for representing files on disk
+-   `csv_node`: descendant of `file_node` for representing csv files
+-   `excel_sheet`: for excel sheets (read-only)
+-   `julia_node`: node representing a Julia object
+-   `python_node`: node representing a Python object
+-   `rmd_node`: node representing Rmarkdown targets
 
 ## Examples
 
@@ -191,7 +192,7 @@ make(MYFLOW)
 
 For more examples see:
 
-  - [Introduction to Rflow](./examples/intro1/Rflow_intro_1.md)
+-   [Introduction to Rflow](./examples/intro1/Rflow_intro_1.md)
 
 ## Details
 
@@ -255,21 +256,12 @@ management framework for Python.
 sophisticated platform written in Python.
 
 <!-- * data is dependent on tasks, tasks are dependent on data, ... -->
-
 <!-- * data is dependent on tasks, tasks are dependent on data, ... -->
-
 <!-- ## TODO: -->
-
 <!-- * Add more nuanced `verbose` options -->
-
 <!-- * Add proper logging for rflow object -->
-
 <!-- * Allow deleting properties / setting some to NULL -->
-
 <!--   * currently, if a property is deleted update() method ignores it -->
-
 <!-- * Make all public properties active (mutation would trigger persistence storage) -->
-
 <!-- * Make methods initializing and updating properties more generic. -->
-
 <!-- * Improve test coverage -->

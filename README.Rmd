@@ -6,6 +6,7 @@ output: github_document
 
 <a href="https://travis-ci.org/vh-d/Rflow"><img src="https://travis-ci.org/vh-d/Rflow.svg?branch=master" alt="Travis"></a>
 <a href="https://codecov.io/github/vh-d/Rflow?branch=master"><img src="https://codecov.io/github/vh-d/Rflow/coverage.svg?branch=master" alt="Codecov"></a>
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
 
 ```{r setup, include = FALSE}
